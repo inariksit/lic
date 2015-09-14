@@ -1,0 +1,465 @@
+\chapter{Introduction to CG}
+
+\paragraph{This used to be my course paper for Grammar Formalisms.}
+
+Constraint Grammar (CG) is a tool for disambiguating text which has various
+possible analyses for each word. It was first introduced by
+\cite{karlsson1995constraint}, and has been used for many tasks in
+computational linguistics, such as POS tagging, surface syntax and
+machine translation \cite{bick2011}. It disambiguates output by
+morphological analyser by using
+constraint rules which can select or remove a potential analysis
+(called `reading') for a
+target word, depending on the context words around it. Together these rules disambiguate the whole text.
+
+In the example below, I show possible tags for the sentence ``the bear
+sleeps'':
+
+
+\begin{verbatim}
+"<the>"
+        det def
+"<bear>"
+        noun sg
+        verb pres
+        verb inf
+"<sleeps>"
+        noun pl
+        verb pres p3 sg
+\end{verbatim}
+
+\noindent We can disambiguate this sentence with two rules:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item \texttt{REMOVE verb IF (-1 det)}
+  `Remove verb after determiner'
+\item  \texttt{REMOVE noun IF (-1 noun)}
+  `Remove noun after noun'
+\end{enumerate}
+
+\noindent Rule 1 matches the word \emph{bear}: it is tagged as verb and is
+preceded by a determiner. The rule removes both verb readings from
+\emph{bear}, leaving it with an unambiguous analysis \texttt{noun sg}.
+Rule 2 is applied to the word \emph{sleeps}, and it removes the noun
+reading. The finished analysis is shown below:
+
+
+\begin{verbatim}
+"<the>"
+        det def
+"<bear>"
+        noun sg
+"<sleeps>"
+        verb pres p3 sg
+\end{verbatim}
+
+It is also possible to use syntactic tags and (mostly rudimentary) phrase
+structure in the analyses. In that
+case, after disambiguating \emph{bear} by part of speech (noun), it
+remains to disambiguate whether it is a subject, object, adverbial or
+any of the possible syntactic roles. An example disambiguation could
+look like the following:
+
+
+\begin{verbatim}
+"<the>"
+        det def           <BEGIN-NP @Det
+"<bear>"
+        noun sg           @Subj END-NP>
+"<sleeps>"
+        verb pres p3 sg   @Pred
+
+\end{verbatim}
+
+With the introduction of CG-3, it is also possible to add dependency
+relations: number the words in the sentence and for each set a parent,
+such as \texttt{"<the>" det def  \textbf{IND=1 PARENT=2}}. However, these features
+are recent and not used in many of the grammars written in the
+community. In this paper, I will illustrate my examples with the most
+basic operations, that is, disambiguating morphological tags.
+
+
+\section{Properties of Constraint
+Grammar}\label{properties-of-constraint-grammar}
+
+All theories and implementations of CG agree that is a \emph{reductionist}
+system with \emph{shallow} syntax. There are different takes on how
+\emph{deterministic} the rules are: the state-of-the-art CG parser VISL CG-3
+executes the rules strictly based on the order they appear, but there
+are other implementations that apply their own heuristics, or remove the
+ordering in total, such as in finite-state or logic-based
+implementations. In the following, I will address the three features and relate CG to
+other formalisms, in terms of the feature in question.
+
+\subsection*{Reductionist vs.~licencing}\label{reductionist-vs.licencing}
+
+CG is a reductionist system: it starts from a set of alternative
+analyses, and eliminates the impossible or improbable ones using
+constraint rules. The remaining analyses are assumed to be correct; that
+is, everything that is not explicitly eliminated, is allowed. This can
+be contrasted with a licencing system, where constructions must
+be explicitly allowed, otherwise they are illegal. An empty
+reductionist grammar will accept any string, whereas an empty
+licencing grammar will accept no string.
+
+\subsection*{Shallow vs.~deep structure}\label{shallow-vs.deep-structure}
+
+CG is shallow for various reasons. The rules do not usually handle very
+long-distance dependencies; they operate on a unit of a few words, and
+don't abstract away from surface features such as word order.
+More importantly, CG doesn't introduce a full tree structure to the
+whole sentence. Some local subtrees can be detected, but mostly
+for the purposes of helping the disambiguation.
+%Even though it is possible to introduce, most CG grammars don't build any tree structure, aside or at least not one that encompasses the whole sentence.
+%; the rules only operate on surface strings and morphological analyses. 
+Another criterion to describe CG as shallow is that a grammar doesn't
+perform well for defining the set of grammatical sequences: there is
+no enforcement of well-formedness, such as gender agreement.
+The notion of rejection is not clear: if agreement was enforced
+by enumerating only legal combinations (``select \texttt{det utr} if
++1 is \texttt{n utr}''), the grammar would just refuse to disambiguate
+an ungrammatical sequence and leave all tags intact---in that case,
+its performance would not differ from a grammar that simply doesn't have many rules.
+On the other hand, if we redefine \emph{grammatical sequences} to concern POS
+tags, the question becomes trivial: this is the whole purpose of CG,
+to construct appropriate tag sequences.
+
+% One can write a grammar that covers
+% enough to be truly useful as a POS-tagger, but nevertheless, it would
+% not reject the Swedish string ``en bord''. For practical purposes, the
+% rules  don't need to be as fine-grained as to reject agreement
+% errors. The example has a noun preceded by a determiner, albeit of a
+% wrong gender, and the grammar would most likely do a fine job in disambiguating
+% \emph{en} as a determiner instead of a juniper, but it would not raise
+% an alarm that \emph{bord} requires a neutrum determiner. 
+% The whole notion of rejection is not clear: if agreement was enforced,
+% the grammar would just refuse to disambiguate an ungrammatical
+% sequence and leave all tags intact, but in that case, its performance
+% would not differ from a grammar that simply doesn't have many rules. 
+% CG-3 introduces an optional feature which actually requires such
+% agreement\footnote{This feature is used mostly to disambiguate
+%   analyses; for instance, if a certain adjective is underspecified for
+%   gender but its head noun is specified, then we can pick the right
+%   gender for the adjective.}, but still, majority of the grammars
+% written during the 20 years of CG are not CG-3 and don't have such
+% feature; if one wanted to enforce agreement pre-CG-3, they'd need to
+% write each combination by hand.
+
+
+% Of course, the latter point can be made of any reductionist system, not only CG.
+
+CG has a more lightweight task than e.g.~a phrase structure grammar: a
+successful disambiguation can depend on just a local context, in a
+window of 1-3 words left or right. To demonstrate the the difference,
+let us take the same the example sentence \emph{the bear sleeps}, and a
+context-free grammar with the following productions:
+
+
+\begin{verbatim}
+S   -> NP VP
+VP  -> V NP
+NP  -> Det N
+Det -> "the"
+N   -> "bear" | "sleeps"
+V   -> "bear" | "sleeps"
+\end{verbatim}
+
+There is no way to reach \texttt{S} if \emph{bear} is analysed as
+\texttt{V} and \emph{sleeps} as \texttt{N}; thus we get the individual
+words disambiguated thanks to the parser, which introduces a structure
+to the whole sentence. If one of the words was out of vocabulary, say
+\emph{the bear warbles}, there would be no analysis for \emph{the} or
+\emph{bear} either. In CG, an unrecognised verb would be no problem at
+all in disambiguating the previous words.
+
+
+Contrasting with phrase-structure or dependency grammars, the rules in
+CG are often on a lower level of abstraction. 
+The rule that tells to remove verb reading after a determiner
+doesn't tell us about the structure of noun phrase; we need a second
+rule to remove a verb after a determiner and an adjective (``the happy
+bear sleeps''), and a third rule to remove verb after a possessive
+pronoun (``my bear sleeps''). A phenomenon that is expressed with one
+big rule in a deep formalism such as HPSG or categorial grammar, is
+split into many low-level rules.
+
+On the other hand, these features can provide
+flexibility that is hard to mimic by a deeper formalism.
+For instance, rules can target individual words
+% (select \texttt{noun} if the word form is \emph{bear})
+or other properties that are not generalisable to a whole word class,
+such as verbs that express cognitive processes.
+Introducing a subset of verbs, even if they are used only in one rule,
+is very cheap and doesn't create a complicated inheritance hierarchy
+of different verb types.
+We can introduce a similar granularity in other systems, for instance,
+a GF grammar which would include the functions \texttt{MkVP} for
+whichever verbs and \texttt{CogVP} for cognitive verbs:
+
+
+\begin{verbatim}
+MkVP  : V2    -> NP -> VP ;
+CogVP : CogV2 -> NP -> VP ;
+\end{verbatim}
+
+In order to parse as much text as without the subcategorisation, the
+grammar writer would have to add \texttt{CogV*} counterparts all
+functions that exist for \texttt{V*}, which duplicates code; or add
+coercion functions from  \texttt{CogV*} to \texttt{V*}, which increases ambiguity.
+In case of multiple parses, likely the one with more information
+would be preferred, but the CG solution gives more flexibility. If a
+rule which matches \texttt{CogV} is introduced before (more on
+ordering in the following section) a rule which matches \texttt{V}, it
+is applied before, and vice versa. This allows for very fine control,
+for example combining the semantic properties of the verb and the
+animacy of the arguments.
+
+This lack of structure is intentional in the design of CG.
+\cite{karlsson1995constraint} justifies the choice with a number of
+theoretical principles: that language is open-ended and grammars are
+bound to leak, and that necessary information for the syntactic analysis
+comes from the morphology, hence morphology is ``the cornerstone of
+syntax''. In a CG, one has access to all levels at the same time,
+ranging from morphology to syntax or dependency labels, or even
+semantics, if one wants to introduce semantic roles in the
+tagset. One can have a rule such as \texttt{REMOVE ... IF (+1 "bear" <noun>
+  @Object §Patient)}, followed by a second rule which only considers the POS of the
+context word.
+%  From an engineering point of view, even an incomplete CG can
+% already disambiguate a lot, whereas an incomplete phrase structure
+% grammar is nearly useless.
+
+\subsection*{Ordered vs.~unordered}\label{ordered-vs.unordered}
+
+The constraint rules are executed in sequence, and the consequences of
+previous rule applications affect the coming rules. In addition, there
+is a default rule, which overrides all other rules: the last reading of
+a word must not be removed.
+
+If a grammar contains the rules ``select \texttt{noun} after
+\texttt{det}'' and ``select \texttt{verb} after \texttt{det}'',
+whichever occurs first will be applied; after it has selected the noun
+reading and removed the rest, there is no verb reading available anymore
+for the second rule to fire.
+
+More careful rules are usually placed first, followed by stronger
+rules---see the pattern below. If a rare condition is met, the rare
+analysis is selected, and since it will be the only analysis, it will be
+protected from the remove rule. If the rare condition is not met, the
+rare analysis is removed.
+
+
+\begin{verbatim}
+SELECT <rare analysis> IF <rare condition> ;
+...
+REMOVE <rare analysis> ;
+\end{verbatim}
+
+Another example of a reductionist and shallow-syntax formalism is
+Finite-State Intersection Grammar (FSIG) \citep{koskenniemi90}. In the
+formalism, the tagged sequences of words, as well as rules, are modelled
+as finite state automata: for instance, there are three transitions from
+the state \emph{bear} to the state \emph{sleeps} in the automaton
+representing \emph{the bear sleeps}. This automaton is intersected with
+a rule automaton, and each path through the resulting automaton
+represents a possible analysis for the whole sequence.
+
+In contrast to CG, rule sets in FSIG are logically
+unordered---\cite{koskenniemi90} explicitly says that the grammar must be
+consistent:
+
+\begin{quote}
+Each constraint simply adds something to the discriminating power of the
+whole grammar. No constraint rule may ever forbid something that would
+later on be accepted as an exception. This, maybe, puts more strain for
+the grammar writer but gives us better hope of understanding the grammar
+we write.
+\end{quote}
+
+\cite{lager_nivre01} illustrate the difference between CG and FSIG with
+the following example. Suppose we have the same rule that removes \texttt{verb}
+after \texttt{det}, and we apply it to the sequence \emph{what
+question}:
+
+
+\begin{verbatim}
+"<what>"
+        det
+        pron
+"<question>"
+        noun
+        verb
+\end{verbatim}
+
+
+In FSIG, the path that consists of choosing the \texttt{det} arc
+followed by \texttt{verb} arc is ruled out, but other interpretations
+are still valid: \texttt{det+noun}, \texttt{pron+noun} and
+\texttt{pron+verb}. In contrast, applying a rule in CG removes an
+analysis permanently; if the rule removes the verb reading in
+\emph{question}, then we cannot retrieve the \texttt{pron+verb}
+possibility. Therefore, it is important to consider the order of the
+rules. It is possible to operate with \emph{cautious context}, where the
+rule only takes action if the context is unambiguous. For this case, the
+``remove \texttt{verb} after \texttt{det}'' rule would not fire before
+the word \emph{what} is fully disambiguated as a determiner.
+
+
+\section{Encoding in logic}\label{encoding-in-logic}
+
+\cite{lager98} represents a CG-like, shallow and reductionist system in
+logic. \cite{lager_nivre01} builds on that in a study which reconstructs
+four formalisms in logic. CG is contrasted with Finite-State
+Intersection Grammar (FSIG) and Brill tagging; all three work on a set
+of constraint rules which modify the initially ambiguous input, but with some crucial
+differences.
+
+The rules and analyses are represented as clauses, and if it is
+possible to build a model which satisfies all clauses, then there is
+an analysis for the sentence.
+Take the unordered case first. The authors define predicates \emph{word}
+and \textsc{pos}, and form clauses as follows. The variable $P$ is used to
+denote any word, and the index $n$ its position.
+
+\begin{align*}
+\text{word(P, the)} \  &\Rightarrow \ \text{{\sc pos}(P, det)} \\
+\text{word(P, bear)} \ &\Rightarrow \ \text{{\sc pos}(P, verb)} \vee \text{{\sc pos}(P, noun)} \\
+\text{{\textsc pos}(P$_n$, det)} \wedge \text{{\sc pos}(P$_{n+1}$, verb)} \ &\Rightarrow 
+\end{align*}
+
+\noindent The first clauses read as ``if the word is \emph{the}, it
+is a determiner'' and ``if the word is \emph{bear}, it can be a verb or a noun''.
+The third clause represents the rule which prohibits a verb after a
+determiner. It normalises to $\neg \text{{\sc pos}(P$_n$, det)} \vee \neg \text{{\sc pos}(P$_{n+1}$, verb)}$, and we know that {\sc pos}(P, det) must be true for
+the word \emph{the}, thus the verb analysis for \emph{bear} must be
+false.
+
+This representation models FSIG, where the rules are logically
+unordered. For CG, the authors introduce a new predicate for each rule,
+$\text{{\sc pos}}^i$, where $i$ indicates the index of the rule in the
+sequence of all rules.
+Each rule is translated into two
+clauses: 1) the conditions hold, the target has >1 analysis, and the 
+targetet reading is selected or removed; and
+2) the conditions don't hold or the target has only one analysis, and the target is left untouched. The general form of the clauses is shown below:
+
+\begin{align*}
+\text{{\sc pos}}^i\text{(P, T)} \: \wedge \: (\;\:\,  \text{conditions\_hold}
+\wedge  \text{|T|} > 1) \  &\Rightarrow \  \text{{\sc pos}}^{i+1}\text{(P, T$\,\setminus\,$[target])} \\
+\text{{\sc pos}}^i\text{(P, T)} \: \wedge \: (\neg \text{conditions\_hold} \vee
+\text{|T|} = 1) \  &\Rightarrow \ \text{{\sc pos}}^{i+1}\text{(P, T)}
+\end{align*}
+
+
+To show a concrete example, the following shows the two rules in the specified order:
+\begin{inparaenum}[\itshape a\upshape)]
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item \texttt{REMOVE verb IF (-1 det)}; and
+\item  \texttt{REMOVE noun IF (-1 noun)}
+\end{inparaenum}.
+
+\begin{align*}
+\text{{\sc pos}$^1$(P, [det])} \  &\Leftarrow \  \text{word(P, the)} \\
+\text{{\sc pos}$^1$(P, [verb,noun])} \ &\Leftarrow \ \text{word(P, bear)} \\
+\text{{\sc pos}$^1$(P, [verb,noun])} \ &\Leftarrow \ \text{word(P, sleeps)} \\ \\
+\text{{\sc pos}$^2$(P$_n$, T$\,\setminus\,$[verb])} \ &\Leftarrow \ \text{{\sc pos}$^1$(P$_n$, T)}
+ \wedge (\;\; \text{{\sc pos}$^1$(P$_{n-1}$, [det])}  \wedge  \text{T$\,\setminus\,$[verb] $\neq$ []}) \\
+\text{{\sc pos}$^2$(P$_n$, T)} \ &\Leftarrow \  \text{{\sc pos}$^1$(P$_n$, T)} \wedge
+(\neg \text{{\sc pos}$^1$(P$_{n-1}$, [det])} \vee \text{T$\,\setminus\,$[verb]
+  $=$ []}) \\ \\
+\text{{\sc pos}$^3$(P$_n$, T$\,\setminus\,$[noun])} \ &\Leftarrow \ \text{{\sc pos}$^2$(P$_n$, T)}
+ \wedge (\;\; \text{{\sc pos}$^2$(P$_{n-1}$, [noun])}  \wedge  \text{T$\,\setminus\,$[noun] $\neq$ []}) \\
+\text{{\sc pos}$^3$(P$_n$, T)} \ &\Leftarrow \  \text{{\sc pos}$^2$(P$_n$, T)} \wedge
+(\neg \text{{\sc pos}$^2$(P$_{n-1}$, [noun])} \vee \text{T$\,\setminus\,$[noun]
+  $=$ []})
+\end{align*}
+
+The logical reconstruction helps to provide some clarity when comparing CG
+to FSIG. In FSIG, the predicate {\sc pos} is a statement of an analysis of a
+word; in case of uncertainty, disjunction is used to present all possible analyses. In CG, uncertainty is modelled by sets of analyses,
+and the predicate ${\sc pos}^i$ is a statement of the
+set of analyses of a word at a given stage of the rule sequence. The
+final result is obtained by composition of these clauses in the order of
+the rule sequence.
+
+
+\section{Conclusion}
+
+In this chapter I've presented an introduction to Constraint Grammar,
+highlighting some key properties and contrasting it to other grammar
+formalisms.
+CG is relatively young, popularised 20 years ago, and throughout its
+history, it has been in favour of linguists more than computer
+scientists, which might explain why its formal background has not been
+studied extensively---notable exceptions being \cite{lager98} and \cite{lager_nivre01}.
+ 
+Is CG a formalism? In order to be a grammar formalism, a candidate
+framework should discriminate between grammatical and ungrammatical
+sequences, and provide a structure to the grammatical sequences.
+Let us start from the latter criterion. Clearly a successful run of a
+high-quality rule set leaves us with more structure than we started
+with. In the beginning, we know that \emph{bear} could be a verb
+(infinitive or present tense, any number or person except 3rd
+singular) or a noun (subject, object, predicative, ...), and in the end, we
+will know the right analysis for it, given that the rule set is
+good. The requirement of a good rule set doesn't affect CG's status as
+a formalism or not; one could as well write a terrible context-free
+grammar that doesn't correspond to natural language at all.
+If POS tags are not enough to consider as a structure,
+CG can also be used to manipulate syntactic analyses and even to add
+dependency relations, using exactly the same mechanisms (``set parent to +1 if the word at 0 is \emph{bear} and -1 is a determiner'').
+
+The first criterion can be harder to justify. \cite{bick2015} describe CG as ``a
+declarative whole of contextual possibilities and impossibilities for
+a language or genre'', which is nevertheless implemented in a
+low-level way: selecting and removing readings from individual words,
+without explicit connection between the rules. Bick and Didriksen
+argue that as a side effect, the rules actually manage to describe language.
+CG seems to even have some interest as a tool for psycholinguistics research:
+there is a Russian being developed within the research group
+ \href{https://uit.no/forskning/forskningsgrupper/gruppe?p_document_id=344365}{CLEAR
+} (Cognitive Linguistics: Empirical Approaches to Russian); accessing
+all levels from morphology to semantics at the same time is particularly attractive to cognitive linguists (personal communication).
+As for its descriptive power, we can again compare CG to CFG. If
+badly constructed, both CG and CFG can analyse almost everything,
+making it useless for language description. If we accept that a
+possibility to construct a bad grammar doesn't revoke CFG's status as
+a formalism, it shouldn't do so for CG either. One can always compare
+the relative ease of constructing a good grammar between formalisms,
+but that is another topic already.
+
+As a bottom line, CG provides a lightweight framework where already a
+moderate amount of rules can be useful (e.g. \cite{lene_trond2011} with 115
+rules), although high quality requires in general thousands of rules.
+Like any formalism, CG itself leaves the users with much freedom; a
+single grammar can be anything from completely ungrammatical rules to near-perfect description of language.
+
+% For example \cite{bick2015} mentions a ``mature morphosyntactic core
+% grammar'' which has 6000 rules. Assuming this is a typical number of
+% rules, one could compare the efforts of writing those rules to writing
+% a grammar of similar coverage and precision in another formalis
+
+
+% This lack of structure is intentional in the design of CG;
+% \cite{karlsson1995constraint} cites a number of theoretical principles,
+% including
+
+% \begin{quote}
+% Language is an open-ended system where there is no strict demarcation
+% line between grammatical and ungrammatical sentences. Therefore all
+% grammars are bound to leak.
+% \end{quote}
+
+% \begin{quote}
+% The cornerstone of syntax is morphology {[}--{]}. Syntactic rules are
+% generalisations telling a) how word-forms occur in particular word order
+% configurations, and b) what natural classes, ''syntactic functions'',
+% can be isolated and inferred in such configurations.
+% \end{quote}
+
+% The first point also justifies a reductionist approach in favour of
+% licencing; the second highlights that information comes from the
+% morphological analyses

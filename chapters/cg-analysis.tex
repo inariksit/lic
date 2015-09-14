@@ -1,0 +1,145 @@
+\chapter{CG analysis using SAT}
+
+\paragraph{This is just random ramblings from my github.}
+
+\subsection{Task}\label{task}
+
+We create an initial symbolic sentence \texttt{w} that would make the
+``last'' rule fire. Then we want to make \texttt{w} so that none of the
+earlier rules has effect on it, because
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  conditions are out of scope (trivial, no clauses)
+\item
+  conditions in scope, but one or more doesn't hold
+\item
+  tag has been removed in target
+\item
+  all readings of target have the desired tag (cannot remove)
+\end{enumerate}
+
+\subsection{Examples}\label{examples}
+
+Last rule:
+
+\begin{verbatim}
+   REMOVE inf  IF (-1 (prn pers))
+\end{verbatim}
+
+Earlier rules:
+
+\begin{verbatim}
+   REMOVE:r_pr_v pr  IF (1 vblex vbmod vaux vbhaver vbser ) (NOT 0 "te" "om te" )
+   REMOVE:r_adv_n adv  IF (1 n np )
+   SELECT:s_pr_v pr  + "te" "om te"  IF (1 vblex vbmod vaux vbhaver vbser  + inf )
+\end{verbatim}
+
+Examined rule creates a model with many solutions, among which the
+following:
+
+\begin{verbatim}
+  "<w1>"
+        prn pers
+  "<w2>"
+        <<<
+        vblex inf
+\end{verbatim}
+
+Then we apply the earlier rules to our symbolic string. First two are
+fine. They don't affect the analyses that are crucial to our examined
+rule. However, the third SELECT rule has \texttt{vblex inf} in its
+context. When we add this clause to SAT solver, it will try to find
+another model which satisfies the examined rule, but will make the
+SELECT rule to have no effect. We find one, which satisfies scenario 2:
+condition is not met.
+
+\begin{verbatim}
+  "<w1>"
+        prn pers
+  "<w2>"
+        <<<
+        inf
+\end{verbatim}
+
+\begin{center}\rule{3in}{0.4pt}\end{center}
+
+An example of scenario 4:
+
+Last rule:
+
+\begin{verbatim}
+  SELECT:s_pr_v pr  + "te" "om te"  IF (1 vblex vbmod vaux vbhaver vbser  + inf ) 
+\end{verbatim}
+
+Earlier rules:
+
+\begin{verbatim}
+   REMOVE:r_pr_v pr  IF (1 vblex vbmod vaux vbhaver vbser ) (NOT 0 "te" "om te" )
+   REMOVE:r_adv_n adv  IF (1 n np )
+\end{verbatim}
+
+One solution for the initial constraints:
+
+\begin{verbatim}
+  "<w1>"
+        >>>
+        pr "te"
+  "<w2>"
+        vblex inf
+\end{verbatim}
+
+First REMOVE rule conflicts. Solve by applying scenario 4: only targets
+are left. Scenario 3 wouldn't work because \texttt{(pr "te")} is a
+requirement. Scenario 2 wouldn't work because ???
+
+Solution after all clauses:
+
+\begin{verbatim}
+"<w1>"
+        pr "te"
+        pr "om te"
+"<w2>"
+        vblex inf
+\end{verbatim}
+
+\subsection{Interaction of previous
+rules}\label{interaction-of-previous-rules}
+
+Look at the following three rules.
+
+\begin{verbatim}
+r1 = REMOVE V   IF (-1C Det) ;
+r2 = REMOVE Det IF ( 1  V)   ;
+r3 = REMOVE V   IF (-1  Det) ;
+\end{verbatim}
+
+Is there an input which can go through the rules and trigger at the
+last?
+
+\begin{verbatim}
+"<w1>"
+        det
+        pron
+"<w2>"
+        v
+        n
+\end{verbatim}
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  r1: Doesn't trigger because condition \texttt{(-1C Det)} isn't met.
+\item
+  r2: Cannot trigger, because r3 requires \texttt{w2} to have a
+  \texttt{v} analysis.
+\item
+  Tries to go for ``ok what if the target (\texttt{w1}) \emph{only} has
+  a \texttt{det} analysis!''
+\item
+  In that case, the input would already trigger \texttt{r1}
+\item
+  Cannot do neither =\textgreater{} conflict
+\end{itemize}

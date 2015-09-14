@@ -1,0 +1,56 @@
+\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
+\newcommand{\REWRITE}{\TODO{Rewrite needed}}
+
+% Names
+
+\newcommand{\propn}[1]{\textbf{#1}} % e.g. Creative Commons, TOSBack
+\newcommand{\pname}[1]{\propn{#1}}
+
+\newcommand{\CL}{\ensuremath{\mathcal{CL}}}
+\newcommand{\bfCL}{\ensuremath{\bm{\mathcal{CL}}}}
+
+\newcommand{\codiag}{\textit{C-O Diagram}}
+\newcommand{\codiags}{\textit{C-O Diagrams}}
+%% \newcommand{\anacon}{{\small\textsf{AnaCon}}}
+\newcommand{\anacon}{AnaCon}
+\newcommand{\AnaCon}{\anacon}
+
+\newcommand{\COML}{COML}
+\newcommand{\coml}{COML}
+\newcommand{\UPPAAL}{\textsc{Uppaal}}
+
+\newcommand{\naturals}{\mathds{N}}
+\newcommand{\integers}{\mathds{Z}}
+\newcommand{\timestamp}{\mathds{T}}
+\newcommand{\names}{\mathcal{N}}
+\newcommand{\actions}{\Sigma}
+
+%% % Text in math mode, with spacing
+%% \newcommand{\mand}{\ensuremath{\text{ and }}}
+%% \newcommand{\mor}{\ensuremath{\text{ or }}}
+%% \newcommand{\mif}{\ensuremath{\text{ if }}}
+%% \newcommand{\miff}{\ensuremath{\text{ iff }}}
+%% \newcommand{\mwhere}{\ensuremath{\text{ where }}}
+
+\newcommand{\defeq}{\vcentcolon=}
+
+% Tuples
+\newcommand{\<}{\ensuremath{\langle}}
+\renewcommand{\>}{\ensuremath{\rangle}}
+
+% Arrows
+\newcommand{\arrAct}[1]{\ensuremath{\xrightarrow{{#1}}}}
+\newcommand{\arrNot}[1]{\ensuremath{\xrightarrow{\bar{{#1}}}}}
+\newcommand{\arrDel}[1]{\ensuremath{\leadsto^{{#1}}}}
+\newcommand{\arrAny}{\ensuremath{\xrightarrow{\cdot}}}
+
+\newcommand{\true}{\ensuremath{\mathit{True}}}
+\newcommand{\false}{\ensuremath{\mathit{False}}}
+
+% Predicates
+\newcommand{\isTop}[1]{\pred{isTop}{{#1}}}
+\newcommand{\notTop}[1]{\pred{notTop}{{#1}}}
+\newcommand{\isBot}[1]{\pred{isBot}{{#1}}}
+\newcommand{\notBot}[1]{\pred{notBot}{{#1}}}
+
+\newcommand{\pred}[2]{\ensuremath{\mathsf{{#1}}({#2})}}
