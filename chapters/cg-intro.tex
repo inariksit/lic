@@ -306,6 +306,80 @@ rule only takes action if the context is unambiguous. For this case, the
 ``remove \texttt{verb} after \texttt{det}'' rule would not fire before
 the word \emph{what} is fully disambiguated as a determiner.
 
+\subsection{Sequential vs.~parallel}\label{sequential-vs.parallel}
+
+In addition to the rules, also the input text for a single rule can be
+processed in a sequential or parallel manner. Consider an example:
+
+\begin{verbatim}
+"<bears>"
+        noun
+        verb
+"<can>"
+        noun
+        verb
+"<sleep>"
+        noun
+        verb
+\end{verbatim}
+
+and a single rule, \texttt{REMOVE noun IF (-1 noun)}. The standard CG
+implementations would go through the text word by word. \emph{Bears}
+doesn't match the condition, so it is left unchanged. The next word,
+\emph{can}, matches, and the noun reading is removed. The result of this
+operation, \emph{bears can sleep} with \emph{can} disambiguated, is
+given as an input to the same rule again. Now there is no more targets
+to match the condition \texttt{-1 noun}, so \emph{sleep} is left as it
+is.
+
+Another possibility would be to look at the state of the sentence before
+starting the disambiguation process, and apply the rules in parallel.
+Both \emph{can} and \emph{sleep} have a word tagged as \texttt{noun}
+before them, so for both of them should have their own noun reading
+removed. In practice, the first order is preferred, perhaps because of
+the interaction with the cautious mode. From that perspective, it makes
+sense that new information should be visible to the rule application
+function as soon as possible. If a rule disambiguates the fourth word in
+the sentence, we want that to be known when we apply the same rule to
+the fifth word.
+
+A related question is whether to apply all rules at once to each word,
+or apply one rule at a time to all the words in the sentence:
+
+\begin{verbatim}
+                 for each sentence:
+1.  for each word:              2.  for each rule:
+      for each rule:                  for each word:
+                     apply rule
+\end{verbatim}
+
+Let us demonstrate the difference with the following rules and input.
+
+\begin{verbatim}
+r1 = REMOVE a IF (-1 b) ;
+r2 = REMOVE b ;
+
+"<w1>"
+        a
+        b
+        c
+"<w2>"
+        a
+        b
+        c
+\end{verbatim}
+
+With order 1, we will try to apply \texttt{r1} to \texttt{w1} with no
+effect. Then we apply \texttt{r2} to \texttt{w1} and remove the reading
+\texttt{b}. Only after this we move on to apply \texttt{r1} to
+\texttt{w2}---it will not fire, because \texttt{b} is already removed
+from \texttt{w1}. 
+In contrast, if we choose order 2, we will apply \texttt{r1} to
+\texttt{w2} before touching \texttt{r2} at all, in which case
+\texttt{r1} will remove the reading \texttt{a} from
+\texttt{w2}. Implementations of both strategies exist, but according
+to \cite{vislcg3}, order 2 is preferred as more predictable.
+
 
 \section{Encoding in logic}\label{encoding-in-logic}
 
