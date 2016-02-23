@@ -9,20 +9,20 @@ constraint rules which can select or remove a potential analysis
 (called `reading') for a
 target word, depending on the context words around it. Together these rules disambiguate the whole text.
 
-In the example below, I show possible tags for the sentence ``the bear
+In the example below, I show possible analyses for the sentence ``the bear
 sleeps'':
 
 
 \begin{verbatim}
 "<the>"
-        det def
+        "the" det def
 "<bear>"
-        noun sg
-        verb pres
-        verb inf
+        "bear" noun sg
+        "bear" verb pres
+        "bear" verb inf
 "<sleeps>"
-        noun pl
-        verb pres p3 sg
+        "sleep" noun pl
+        "sleep" verb pres p3 sg
 \end{verbatim}
 
 \noindent We can disambiguate this sentence with two rules:
@@ -45,11 +45,11 @@ reading. The finished analysis is shown below:
 
 \begin{verbatim}
 "<the>"
-        det def
+        "the" det def
 "<bear>"
-        noun sg
+        "bear" noun sg
 "<sleeps>"
-        verb pres p3 sg
+        "sleep" verb pres p3 sg
 \end{verbatim}
 
 It is also possible to use syntactic tags and (mostly rudimentary) phrase
@@ -62,32 +62,31 @@ look like the following:
 
 \begin{verbatim}
 "<the>"
-        det def  \textbf{<BEGIN-NP @Det}
+        "the" det def  \textbf{<BEGIN-NP @Det}
 "<bear>"
-        {noun sg  \textbf{@Subj END-NP>}
+        "bear" noun sg  \textbf{@Subj END-NP>}
 "<sleeps>"
-        verb pres p3 sg  \textbf{@Pred}
+        "sleep" verb pres p3 sg  \textbf{@Pred}
 
 \end{verbatim}
 
 With the introduction of CG-3, it is also possible to add dependency
 relations: number the words in the sentence and for each set a parent,
-such as \texttt{"<the>" det def  \textbf{IND=1 PARENT=2}}. However, these features
-are recent and not used in many of the grammars written in the
-community. In this paper, I will illustrate my examples with the most
-basic operations, that is, disambiguating morphological tags.
+such as UNCOMMENT THIS LATER%\texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
+However, these features are recent and not used in many of the grammars written 
+in the community. In this introduction, I will illustrate my examples with the 
+most basic operations, that is, disambiguating morphological tags.
 
 
-\section*{Properties of Constraint
-Grammar}\label{properties-of-constraint-grammar}
+\section*{Properties of Constraint Grammar}\label{properties}
 
 All theories and implementations of CG agree that is a \emph{reductionist}
 system with \emph{shallow} syntax. There are different takes on how
 \emph{deterministic} the rules are: the state-of-the-art CG parser VISL CG-3
 executes the rules strictly based on the order they appear, but there
 are other implementations that apply their own heuristics, or remove the
-ordering in total, such as in finite-state or logic-based
-implementations. In the following, I will address the three features and relate CG to
+ordering in total, such as in finite-state or logic-based implementations. 
+In the following, I will address the three features and relate CG to
 other formalisms, in terms of the feature in question.
 
 \subsection*{Reductionist vs.~licencing}\label{reductionist-vs.licencing}
@@ -101,49 +100,71 @@ be explicitly allowed, otherwise they are illegal. An empty
 reductionist grammar will accept any string, whereas an empty
 licencing grammar will accept no string.
 
+
 \subsection*{Shallow vs.~deep structure}\label{shallow-vs.deep-structure}
 
-CG is shallow for various reasons. The rules do not usually handle very
+CG is shallow for various reasons.
+
+\paragraph{Locality of context} The rules do not usually handle 
 long-distance dependencies; they operate on a unit of a few words, and
 don't abstract away from surface features such as word order.
 More importantly, CG doesn't introduce a full tree structure to the
 whole sentence. Some local subtrees can be detected, but mostly
-for the purposes of helping the disambiguation.
-%Even though it is possible to introduce, most CG grammars don't build any tree structure, aside or at least not one that encompasses the whole sentence.
-%; the rules only operate on surface strings and morphological analyses. 
-Another criterion to describe CG as shallow is that a grammar doesn't
-perform well for defining the set of grammatical sequences: there is
-no enforcement of well-formedness, such as gender agreement.
+for the purposes of aiding the disambiguation.
+ 
+\paragraph{Little enforcement of grammaticality} CG doesn't
+per se define sequences as \emph{grammatically correct}.
+Beside the lack of long-distance dependencies, there is
+no mandatory enforcement of even local well-formedness, such as gender agreement.
+However, this is often helpful for practical purposes, because it adds robustness.
+Let us illustrate with an example in Swedish.
+
+\begin{verbatim}
+"<en>"
+        "en" det indef utr sg
+        "en" noun indef utr sg 
+"<bord>"
+        "bord" noun indef neutr sg
+\end{verbatim}
+
+The first word, \emph{en}, is ambiguous between the indefinite determiner for
+\emph{utrum} gender  (masculine and feminine collapsed into one), or a noun (`juniper').
+The second word, \emph{bord}, is a neuter noun (`table')---now, the writer has
+most likely meant to write ``a table'' instead of ``juniper table'', but has mistaken the gender of `table'.
+
+ One can write a grammar that covers
+ enough to be truly useful as a POS-tagger, but nevertheless, it would
+ not reject the Swedish string ``en bord''. For practical purposes, the
+ rules  don't need to be as fine-grained as to reject agreement
+ errors. The example has a noun preceded by a determiner, albeit of a
+ wrong gender, and the grammar would most likely do a fine job in disambiguating
+ \emph{en} as a determiner instead of a juniper, but it would not raise
+ an alarm that \emph{bord} requires a neutrum determiner. 
+ The whole notion of rejection is not clear: if agreement was enforced,
+ the grammar would just refuse to disambiguate an ungrammatical
+ sequence and leave all tags intact, but in that case, its performance
+ would not differ from a grammar that simply doesn't have many rules. 
+ CG-3 introduces an optional feature which actually requires such
+ agreement\footnote{This feature is used mostly to disambiguate
+   analyses; for instance, if a certain adjective is underspecified for
+   gender but its head noun is specified, then we can pick the right
+   gender for the adjective.}, but still, majority of the grammars
+ written during the 20 years of CG are not CG-3 and don't have such
+ feature; if one wanted to enforce agreement pre-CG-3, they'd need to
+ write each combination by hand.
+
+
+
 The notion of rejection is not clear: if agreement was enforced
-by enumerating only legal combinations (``select \texttt{det utr} if
-+1 is \texttt{n utr}''), the grammar would just refuse to disambiguate
+by enumerating only legal combinations (``select \texttt{det neutr} if
++1 is \texttt{n neutr}''), the grammar would just refuse to disambiguate
 an ungrammatical sequence and leave all tags intact---in that case,
-its performance would not differ from a grammar that simply doesn't have many rules.
-On the other hand, if we redefine \emph{grammatical sequences} to concern POS
-tags, the question becomes trivial: this is the whole purpose of CG,
+its performance would not differ from a grammar that simply does not have many rules.
+
+On the other hand, if we redefine \emph{grammatical sequences}
+to concern sequences of POS tags, 
+the question becomes trivial: this is the whole purpose of CG,
 to construct appropriate tag sequences.
-
-% One can write a grammar that covers
-% enough to be truly useful as a POS-tagger, but nevertheless, it would
-% not reject the Swedish string ``en bord''. For practical purposes, the
-% rules  don't need to be as fine-grained as to reject agreement
-% errors. The example has a noun preceded by a determiner, albeit of a
-% wrong gender, and the grammar would most likely do a fine job in disambiguating
-% \emph{en} as a determiner instead of a juniper, but it would not raise
-% an alarm that \emph{bord} requires a neutrum determiner. 
-% The whole notion of rejection is not clear: if agreement was enforced,
-% the grammar would just refuse to disambiguate an ungrammatical
-% sequence and leave all tags intact, but in that case, its performance
-% would not differ from a grammar that simply doesn't have many rules. 
-% CG-3 introduces an optional feature which actually requires such
-% agreement\footnote{This feature is used mostly to disambiguate
-%   analyses; for instance, if a certain adjective is underspecified for
-%   gender but its head noun is specified, then we can pick the right
-%   gender for the adjective.}, but still, majority of the grammars
-% written during the 20 years of CG are not CG-3 and don't have such
-% feature; if one wanted to enforce agreement pre-CG-3, they'd need to
-% write each combination by hand.
-
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
 
@@ -192,12 +213,12 @@ Introducing a subset of verbs, even if they are used only in one rule,
 is very cheap and doesn't create a complicated inheritance hierarchy
 of different verb types.
 We can introduce a similar granularity in other systems, for instance,
-a GF grammar which would include the functions \texttt{MkVP} for
+a GF grammar which would include the functions \texttt{GenVP} for
 whichever verbs and \texttt{CogVP} for cognitive verbs:
 
 
 \begin{verbatim}
-MkVP  : V2    -> NP -> VP ;
+GenVP : V2    -> NP -> VP ;
 CogVP : CogV2 -> NP -> VP ;
 \end{verbatim}
 
@@ -228,7 +249,44 @@ context word.
 % already disambiguate a lot, whereas an incomplete phrase structure
 % grammar is nearly useless.
 
-\subsection*{Ordered vs.~unordered}\label{ordered-vs.unordered}
+\subsection*{Ordering of the rules}\label{ordering}
+
+The previous properties of Constraint Grammar formalism and rules were specified in \cite{karlsson1995constraint}. However, Karlsson omits some practical details regarding implementation, one being the order in which the rules are executed. After the initial specification, there have been several independent implementations of CG, with different ordering schemes. In the following section, we will present the different parameters of ordering and test their performance, using a previously written grammar.
+
+The execution of the rules depends on the following parameters: strict vs. heuristic ordering, and sequential vs. parallel execution. These parameters can combine freely: strict and sequential, strict and parallel, heuristic and sequential, or heuristic and parallel. Throughout the section, we will apply the rules to the following ambiguous passage:
+\begin{verbatim}
+"<what>"
+        "what" determiner
+        "what" pronoun                                        
+ "<question>"
+        "question" noun
+        "question" verb
+ "<is>"
+        "be" verb
+ "<this>"
+       "this" determiner
+\end{verbatim}
+
+Strict vs. heuristic
+
+This aspect concerns the ordering of the rules in the file. An implementation with strict order applies each rule in the order in which they appear in the file. If a grammar contains the rules “select noun after determiner” and “select verb after pronoun” in the given order, the rule that selects noun will be applied first. After it has selected the noun reading for question, there are no verb readings available anymore for the second rule to fire.
+					
+How do we know which rule is the right one? There can be many rules that fit the context, but we choose the one that just happens to appear first in the rule file. More careful rules are usually placed first, followed by stronger rules—see the pattern below.
+
+\begin{verbatim}					
+SELECT <rare analysis> IF <rare condition> ;
+...
+REMOVE <rare analysis> ;
+\end{verbatim}
+If a rare condition is met, the rare analysis is selected, and since it will be the only analysis, it will be protected from the remove rule. If the rare condition is not met, the rare analysis is removed.
+					
+An alternative solution to a strict order is to use heuristic order: when disambiguating a particular word, find the rule that has the longest and most detailed match. Now, assume that there is a rule with a longer context, such as “select noun if -1 is determiner and +1 is verb”, even if this rule appears last in the file, it would be preferred to the shorter rules, because it is a more exact match.
+					
+Both methods have their strengths and weaknesses. A/The strict order is more predictable, but it also means that the grammar writers need to pay more thought to rule interaction. Heuristic order frees the grammar writer from finding an optimal order, but it can give unexpected results, which are harder to debug.
+
+
+
+
 
 The constraint rules are executed in sequence, and the consequences of
 previous rule applications affect the coming rules. In addition, there
