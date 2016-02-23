@@ -122,53 +122,37 @@ Let us illustrate with an example in Swedish.
 \begin{verbatim}
 "<en>"
         "en" det indef utr sg
-        "en" noun indef utr sg 
+        "en" noun utr sg 
 "<bord>"
-        "bord" noun indef neutr sg
+        "bord" noun neutr sg
 \end{verbatim}
 
 The first word, \emph{en}, is ambiguous between the indefinite determiner for
 \emph{utrum} gender  (masculine and feminine collapsed into one), or a noun (`juniper').
-The second word, \emph{bord}, is a neuter noun (`table')---now, the writer has
-most likely meant to write ``a table'' instead of ``juniper table'', but has mistaken the gender of `table'.
+The second word, \emph{bord}, is a neuter noun (`table')---the writer has
+most likely meant to write ``a table'' instead of ``juniper table'', but has mistaken the gender of `table'. The correct form, which also would not be ambiguous, is ``ett bord''.
 
- One can write a grammar that covers
- enough to be truly useful as a POS-tagger, but nevertheless, it would
- not reject the Swedish string ``en bord''. For practical purposes, the
- rules  don't need to be as fine-grained as to reject agreement
- errors. The example has a noun preceded by a determiner, albeit of a
- wrong gender, and the grammar would most likely do a fine job in disambiguating
- \emph{en} as a determiner instead of a juniper, but it would not raise
- an alarm that \emph{bord} requires a neutrum determiner. 
- The whole notion of rejection is not clear: if agreement was enforced,
- the grammar would just refuse to disambiguate an ungrammatical
- sequence and leave all tags intact, but in that case, its performance
- would not differ from a grammar that simply doesn't have many rules. 
- CG-3 introduces an optional feature which actually requires such
- agreement\footnote{This feature is used mostly to disambiguate
-   analyses; for instance, if a certain adjective is underspecified for
-   gender but its head noun is specified, then we can pick the right
-   gender for the adjective.}, but still, majority of the grammars
- written during the 20 years of CG are not CG-3 and don't have such
- feature; if one wanted to enforce agreement pre-CG-3, they'd need to
- write each combination by hand.
+CG allows the rules to be as fine-grained or broad as we want: 
+\texttt{SELECT det IF (1 noun) (0 noun)} would match any determiner and any noun, 
+and succesfully disambiguate \emph{en} in this case. 
+We can also enforce grammaticality by writing \texttt{SELECT det utr sg IF (1 noun utr sg)}%\footnote{the counterpart neuter determiner is not ambiguous with noun, so \texttt{SELECT det neutr sg IF (1 noun neutr sg) (0 noun)} would be redundant. Though it can be ambiguous with the numeral `1'. So actually maybe it's good anyway.}
+. In that case, nothing in the example phrase matches, and it is left ambiguous.
 
 
+%On the other hand, we can introduce such fine-graind rules in order to pick the right analysis, for instance, if a certain modifier is underspecified. If we analyse Spanish text \emph{la casa grande}, where \emph{grande} is underspecified for gender, then having a rule that picks the feminine adjective after a feminine article and feminine noun makes our analysis of \emph{grande} more accurate. 
+% a certain adjective is underspecified for gender but its head noun is specified, then we can pick the right gender for the adjective.
 
-The notion of rejection is not clear: if agreement was enforced
-by enumerating only legal combinations (``select \texttt{det neutr} if
-+1 is \texttt{n neutr}''), the grammar would just refuse to disambiguate
+The previous example illustrates that the notions of \emph{accept} and \emph{reject} are not clear: if agreement was enforced
+by enumerating only legal combinations, the grammar would just refuse to disambiguate
 an ungrammatical sequence and leave all tags intact---in that case,
 its performance would not differ from a grammar that simply does not have many rules.
-
-On the other hand, if we redefine \emph{grammatical sequences}
-to concern sequences of POS tags, 
-the question becomes trivial: this is the whole purpose of CG,
-to construct appropriate tag sequences.
+If we define \emph{grammatical sequences} to be sequences of POS tags,
+then the question is somewhat easier to answer: \texttt{\textless{}det\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} is ungrammatical, and CG doesn't raise an alarm that there is something wrong. However, the alternative \texttt{\textless{}noun\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} might be in that particular context even ``more wrong''; same goes for the option with no disambiguation at all.
+Bottom line: it's not about defining grammaticality, it's providing analyses in any case.
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
 
-CG has a more lightweight task than e.g.~a phrase structure grammar: a
+\paragraph{Some relevant heading for this part} CG has a more lightweight task than e.g.~a phrase structure grammar: a
 successful disambiguation can depend on just a local context, in a
 window of 1-3 words left or right. To demonstrate the the difference,
 let us take the same the example sentence \emph{the bear sleeps}, and a
@@ -213,8 +197,8 @@ Introducing a subset of verbs, even if they are used only in one rule,
 is very cheap and doesn't create a complicated inheritance hierarchy
 of different verb types.
 We can introduce a similar granularity in other systems, for instance,
-a GF grammar which would include the functions \texttt{GenVP} for
-whichever verbs and \texttt{CogVP} for cognitive verbs:
+a grammar in Grammatical Framework, which would include the functions
+\texttt{GenVP} for whichever verbs and \texttt{CogVP} for cognitive verbs:
 
 
 \begin{verbatim}
@@ -234,7 +218,7 @@ is applied before, and vice versa. This allows for very fine control,
 for example combining the semantic properties of the verb and the
 animacy of the arguments.
 
-This lack of structure is intentional in the design of CG.
+\paragraph{Theoretical principles after all these practical examples} This lack of deep structure is intentional in the design of CG.
 \cite{karlsson1995constraint} justifies the choice with a number of
 theoretical principles: that language is open-ended and grammars are
 bound to leak, and that necessary information for the syntactic analysis
@@ -267,7 +251,7 @@ The execution of the rules depends on the following parameters: strict vs. heuri
        "this" determiner
 \end{verbatim}
 
-Strict vs. heuristic
+\paragraph{Strict vs. heuristic}
 
 This aspect concerns the ordering of the rules in the file. An implementation with strict order applies each rule in the order in which they appear in the file. If a grammar contains the rules “select noun after determiner” and “select verb after pronoun” in the given order, the rule that selects noun will be applied first. After it has selected the noun reading for question, there are no verb readings available anymore for the second rule to fire.
 					
@@ -282,36 +266,45 @@ If a rare condition is met, the rare analysis is selected, and since it will be 
 					
 An alternative solution to a strict order is to use heuristic order: when disambiguating a particular word, find the rule that has the longest and most detailed match. Now, assume that there is a rule with a longer context, such as “select noun if -1 is determiner and +1 is verb”, even if this rule appears last in the file, it would be preferred to the shorter rules, because it is a more exact match.
 					
-Both methods have their strengths and weaknesses. A/The strict order is more predictable, but it also means that the grammar writers need to pay more thought to rule interaction. Heuristic order frees the grammar writer from finding an optimal order, but it can give unexpected results, which are harder to debug.
+Both methods have their strengths and weaknesses. A strict order is more predictable, but it also means that the grammar writers need to pay more thought to rule interaction. A heuristic order frees the grammar writer from finding an optimal order, but it can give unexpected results, which are harder to debug.
+
+
+\paragraph{Sequential vs. parallel}
+
+The input sentence can be processed in sequential or parallel manner. In sequential execution, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule ``select noun after determine''.
+
+In contrast, a parallel execution disambiguates all the words at the same time, using their initial, ambiguous context. Both ``select noun after determiner'' and ``select verb after pronoun'' will be applied to question, because the original input from the morphological analyser contains both determiner and pronoun as the preceding word.
+
+Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}.
+Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other. 
 
 
 
-
-
-The constraint rules are executed in sequence, and the consequences of
-previous rule applications affect the coming rules. In addition, there
-is a default rule, which overrides all other rules: the last reading of
-a word must not be removed.
-
-If a grammar contains the rules ``select \texttt{noun} after
-\texttt{det}'' and ``select \texttt{verb} after \texttt{det}'',
-whichever occurs first will be applied; after it has selected the noun
-reading and removed the rest, there is no verb reading available anymore
-for the second rule to fire.
-
-More careful rules are usually placed first, followed by stronger
-rules---see the pattern below. If a rare condition is met, the rare
-analysis is selected, and since it will be the only analysis, it will be
-protected from the remove rule. If the rare condition is not met, the
-rare analysis is removed.
-
-
-\begin{verbatim}
-SELECT <rare analysis> IF <rare condition> ;
-...
-REMOVE <rare analysis> ;
-\end{verbatim}
-
+% The constraint rules are executed in sequence, and the consequences of
+% previous rule applications affect the coming rules. In addition, there
+% is a default rule, which overrides all other rules: the last reading of
+% a word must not be removed.
+% 
+% If a grammar contains the rules ``select \texttt{noun} after
+% \texttt{det}'' and ``select \texttt{verb} after \texttt{det}'',
+% whichever occurs first will be applied; after it has selected the noun
+% reading and removed the rest, there is no verb reading available anymore
+% for the second rule to fire.
+% 
+% More careful rules are usually placed first, followed by stronger
+% rules---see the pattern below. If a rare condition is met, the rare
+% analysis is selected, and since it will be the only analysis, it will be
+% protected from the remove rule. If the rare condition is not met, the
+% rare analysis is removed.
+% 
+% 
+% \begin{verbatim}
+% SELECT <rare analysis> IF <rare condition> ;
+% ...
+% REMOVE <rare analysis> ;
+% \end{verbatim}
+% 
+\paragraph{Comparison to FSIG} 
 Another example of a reductionist and shallow-syntax formalism is
 Finite-State Intersection Grammar (FSIG) \citep{koskenniemi90}. In the
 formalism, the tagged sequences of words, as well as rules, are modelled
@@ -320,47 +313,47 @@ the state \emph{bear} to the state \emph{sleeps} in the automaton
 representing \emph{the bear sleeps}. This automaton is intersected with
 a rule automaton, and each path through the resulting automaton
 represents a possible analysis for the whole sequence.
-
-In contrast to CG, rule sets in FSIG are logically
-unordered---\cite{koskenniemi90} explicitly says that the grammar must be
+ 
+A parallel and unordered rule set in CG corresponds to FSIG.
+\cite{koskenniemi90} explicitly says that an FSIG grammar must be
 consistent:
-
-\begin{quote}
-Each constraint simply adds something to the discriminating power of the
-whole grammar. No constraint rule may ever forbid something that would
-later on be accepted as an exception. This, maybe, puts more strain for
-the grammar writer but gives us better hope of understanding the grammar
-we write.
-\end{quote}
-
-\cite{lager_nivre01} illustrate the difference between CG and FSIG with
-the following example. Suppose we have the same rule that removes \texttt{verb}
-after \texttt{det}, and we apply it to the sequence \emph{what
-question}:
-
-
-\begin{verbatim}
-"<what>"
-        det
-        pron
-"<question>"
-        noun
-        verb
-\end{verbatim}
-
-
-In FSIG, the path that consists of choosing the \texttt{det} arc
-followed by \texttt{verb} arc is ruled out, but other interpretations
-are still valid: \texttt{det+noun}, \texttt{pron+noun} and
-\texttt{pron+verb}. In contrast, applying a rule in CG removes an
-analysis permanently; if the rule removes the verb reading in
-\emph{question}, then we cannot retrieve the \texttt{pron+verb}
-possibility. Therefore, it is important to consider the order of the
-rules. It is possible to operate with \emph{cautious context}, where the
-rule only takes action if the context is unambiguous. For this case, the
-``remove \texttt{verb} after \texttt{det}'' rule would not fire before
-the word \emph{what} is fully disambiguated as a determiner.
-
+ 
+ \begin{quote}
+ Each constraint simply adds something to the discriminating power of the
+ whole grammar. No constraint rule may ever forbid something that would
+ later on be accepted as an exception. This, maybe, puts more strain for
+ the grammar writer but gives us better hope of understanding the grammar
+ we write.
+ \end{quote}
+ 
+% \cite{lager_nivre01} illustrate the difference between CG and FSIG with
+% the following example. Suppose we have the same rule that removes \texttt{verb}
+% after \texttt{det}, and we apply it to the sequence \emph{what
+% question}:
+% 
+% 
+% \begin{verbatim}
+% "<what>"
+        % det
+        % pron
+% "<question>"
+        % noun
+        % verb
+% \end{verbatim}
+% 
+% 
+% In FSIG, the path that consists of choosing the \texttt{det} arc
+% followed by \texttt{verb} arc is ruled out, but other interpretations
+% are still valid: \texttt{det+noun}, \texttt{pron+noun} and
+% \texttt{pron+verb}. In contrast, applying a rule in CG removes an
+% analysis permanently; if the rule removes the verb reading in
+% \emph{question}, then we cannot retrieve the \texttt{pron+verb}
+% possibility. Therefore, it is important to consider the order of the
+% rules. It is possible to operate with \emph{cautious context}, where the
+% rule only takes action if the context is unambiguous. For this case, the
+% ``remove \texttt{verb} after \texttt{det}'' rule would not fire before
+% the word \emph{what} is fully disambiguated as a determiner.
+% 
 
 \section*{Encoding in logic}\label{encoding-in-logic}
 
