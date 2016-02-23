@@ -62,17 +62,17 @@ look like the following:
 
 \begin{verbatim}
 "<the>"
-        "the" det def  \textbf{<BEGIN-NP @Det}
+        "the" det def            <BEGIN-NP @Det
 "<bear>"
-        "bear" noun sg  \textbf{@Subj END-NP>}
+        "bear" noun sg           @Subj END-NP>
 "<sleeps>"
-        "sleep" verb pres p3 sg  \textbf{@Pred}
+        "sleep" verb pres p3 sg  @Pred
 
 \end{verbatim}
 
 With the introduction of CG-3, it is also possible to add dependency
 relations: number the words in the sentence and for each set a parent,
-such as UNCOMMENT THIS LATER%\texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
+such as \texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
 However, these features are recent and not used in many of the grammars written 
 in the community. In this introduction, I will illustrate my examples with the 
 most basic operations, that is, disambiguating morphological tags.
@@ -103,14 +103,23 @@ licencing grammar will accept no string.
 
 \subsection*{Shallow vs.~deep structure}\label{shallow-vs.deep-structure}
 
-CG is shallow for various reasons.
+CG can be described as shallow for various reasons. The rules usually
+operate on a local context of a few words. Moreover, a CG grammar does
+not necessarily enforce grammaticality.
+In addition, ...
+I will address these points in the following sections.
 
-\paragraph{Locality of context} The rules do not usually handle 
+
+\paragraph{Flat structure} The rules do not usually handle 
 long-distance dependencies; they operate on a unit of a few words, and
 don't abstract away from surface features such as word order.
+You need to define rules separately for stuff like ``select noun if -1
+determiner'' and ``select noun if -2 determiner -1 adjective''.
+
 More importantly, CG doesn't introduce a full tree structure to the
 whole sentence. Some local subtrees can be detected, but mostly
 for the purposes of aiding the disambiguation.
+TODO: talk about dependency trees in CG-3!
  
 \paragraph{Little enforcement of grammaticality} CG doesn't
 per se define sequences as \emph{grammatically correct}.
@@ -248,7 +257,7 @@ The execution of the rules depends on the following parameters: strict vs. heuri
  "<is>"
         "be" verb
  "<this>"
-       "this" determiner
+        "this" determiner
 \end{verbatim}
 
 \paragraph{Strict vs. heuristic}
@@ -271,9 +280,9 @@ Both methods have their strengths and weaknesses. A strict order is more predict
 
 \paragraph{Sequential vs. parallel}
 
-The input sentence can be processed in sequential or parallel manner. In sequential execution, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule ``select noun after determine''.
+The input sentence can be processed in sequential or parallel manner. In sequential execution, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule ``select noun after determiner''.
 
-In contrast, a parallel execution disambiguates all the words at the same time, using their initial, ambiguous context. Both ``select noun after determiner'' and ``select verb after pronoun'' will be applied to question, because the original input from the morphological analyser contains both determiner and pronoun as the preceding word.
+In contrast, a parallel execution disambiguates all the words at the same time, using their initial, ambiguous context. Both ``select noun after determiner'' and ``select verb after pronoun'' will be applied to \emph{question}, because the original input from the morphological analyser contains both determiner and pronoun as the preceding word.
 
 Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}.
 Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other. 
@@ -308,9 +317,9 @@ Parallel execution may have uses in more marginal cases: for instance, if we hav
 Another example of a reductionist and shallow-syntax formalism is
 Finite-State Intersection Grammar (FSIG) \citep{koskenniemi90}. In the
 formalism, the tagged sequences of words, as well as rules, are modelled
-as finite state automata: for instance, there are three transitions from
-the state \emph{bear} to the state \emph{sleeps} in the automaton
-representing \emph{the bear sleeps}. This automaton is intersected with
+as finite state automata: for instance, there are two transitions from
+the state \emph{what} to the state \emph{question} in the automaton
+representing \emph{what question is this}. This automaton is intersected with
 a rule automaton, and each path through the resulting automaton
 represents a possible analysis for the whole sequence.
  
@@ -325,35 +334,20 @@ consistent:
  the grammar writer but gives us better hope of understanding the grammar
  we write.
  \end{quote}
- 
-% \cite{lager_nivre01} illustrate the difference between CG and FSIG with
-% the following example. Suppose we have the same rule that removes \texttt{verb}
-% after \texttt{det}, and we apply it to the sequence \emph{what
-% question}:
-% 
-% 
-% \begin{verbatim}
-% "<what>"
-        % det
-        % pron
-% "<question>"
-        % noun
-        % verb
-% \end{verbatim}
-% 
-% 
-% In FSIG, the path that consists of choosing the \texttt{det} arc
-% followed by \texttt{verb} arc is ruled out, but other interpretations
-% are still valid: \texttt{det+noun}, \texttt{pron+noun} and
-% \texttt{pron+verb}. In contrast, applying a rule in CG removes an
-% analysis permanently; if the rule removes the verb reading in
-% \emph{question}, then we cannot retrieve the \texttt{pron+verb}
-% possibility. Therefore, it is important to consider the order of the
-% rules. It is possible to operate with \emph{cautious context}, where the
-% rule only takes action if the context is unambiguous. For this case, the
-% ``remove \texttt{verb} after \texttt{det}'' rule would not fire before
-% the word \emph{what} is fully disambiguated as a determiner.
-% 
+
+
+In FSIG, the path that consists of choosing the \texttt{det} arc
+followed by \texttt{verb} arc is ruled out, but other interpretations
+are still valid: \texttt{det+noun}, \texttt{pron+noun} and
+\texttt{pron+verb}. In contrast, applying a rule in CG removes an
+analysis permanently; if the rule removes the verb reading in
+\emph{question}, then we cannot retrieve the \texttt{pron+verb}
+possibility. Therefore, it is important to consider the order of the
+rules. It is possible to operate with \emph{cautious context}, where the
+rule only takes action if the context is unambiguous. For this case, the
+``remove \texttt{verb} after \texttt{det}'' rule would not fire before
+the word \emph{what} is fully disambiguated as a determiner.
+
 
 \section*{Encoding in logic}\label{encoding-in-logic}
 
