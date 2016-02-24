@@ -2,8 +2,10 @@
  
 \paragraph{This used to be my course paper for Grammar Formalisms.}
 
-Constraint Grammar (CG) is a tool for disambiguating text which has various
-possible analyses for each word. It was first introduced by
+Constraint Grammar (CG) is a formalism for 
+% disambiguating morphologically analysed text. 
+analysing unrestricted text. It relies on morphology 
+It was first introduced by
 \cite{karlsson1995constraint}, and has been used for many tasks in
 computational linguistics, such as POS tagging, surface syntax and
 machine translation \cite{bick2011}. It disambiguates output by
@@ -15,7 +17,7 @@ target word, depending on the context words around it. Together these rules disa
 In the example below, I show possible analyses for the sentence ``the bear
 sleeps'':
 
-
+\begin{center}
 \begin{verbatim}
 "<the>"
         "the" det def
@@ -27,6 +29,7 @@ sleeps'':
         "sleep" noun pl
         "sleep" verb pres p3 sg
 \end{verbatim}
+\end{center}
 
 \noindent We can disambiguate this sentence with two rules:
 
@@ -55,30 +58,79 @@ reading. The finished analysis is shown below:
         "sleep" verb pres p3 sg
 \end{verbatim}
 
-It is also possible to use syntactic tags and (mostly rudimentary) phrase
-structure in the analyses. In that
-case, after disambiguating \emph{bear} by part of speech (noun), it
+It is also possible to add syntactic tags and (mostly rudimentary) phrase
+structure within CG. 
+After disambiguating \emph{bear} by part of speech (noun), it
 remains to disambiguate whether it is a subject, object, adverbial or
-any of the possible syntactic roles. An example disambiguation could
-look like the following:
+any other possible syntactic role.
+This can be done in several ways. One option is to get both
+syntactic and morphological analyses from the initial parser---the analysis
+for \emph{bear} would look like the following:
 
+\begin{verbatim}
+"<bear>"
+        "bear" noun sg           @Subj
+        "bear" noun sg           @Obj
+        "bear" verb pres         @Pred
+        "bear" verb inf 
+\end{verbatim}
+
+\noindent Morphological disambiguation rules would
+resolve \emph{bear} into a noun, and syntactic disambiguation rules
+would be applied later, to resolve \emph{bear}-noun into subject or object.
+
+Alternatively, one can have the initial parser return only
+morphological tags, and use CG rules that map a syntactic tag to a
+reading (or a reading to a cohort).
+The rules to add work similarly to the rules to remove and select:
+if a target matches the context, then the new tag is added.
+These rules are usually run after the morphological disambiguation is
+finished.
+The following rules could be applied to the example sentence. The
+letter `C' after the position means \emph{careful} context: e.g. 
+\texttt{(-1C noun)} requires the previous word to be unambiguously
+noun. Such rule would not fire if the previous word has any other
+reading in addition to the noun reading.
+
+\begin{enumerate}
+\itemsep1pt\parskip0pt\parsep0pt
+\item[] \texttt{MAP @Pred IF (0C verb) (-1C noun)}
+\item[] \texttt{MAP @Subj IF (0C noun) (1C verb)}
+\end{enumerate}
+
+\noindent With both of the strategies, we would end up with the
+following output:
 
 \begin{verbatim}
 "<the>"
-        "the" det def            <BEGIN-NP @Det
+        "the" det def            
 "<bear>"
-        "bear" noun sg           @Subj END-NP>
+        "bear" noun sg           @Subj 
 "<sleeps>"
         "sleep" verb pres p3 sg  @Pred
 
 \end{verbatim}
 
-With the introduction of CG-3, it is also possible to add dependency
+The syntactic tags can also indicate some phrase structure. For
+instance, \emph{the} could get a tag such as
+\texttt{@DN\textgreater}, to indicate that it is a determiner whose
+head is to the right. A phrase such as \emph{the little dog} could get
+tagged as  \emph{the}\texttt{@DN>} \emph{little}\texttt{@AN>}
+\emph{bear}\texttt{@Subj}.
+ Using \texttt{tag\textless} and \texttt{tag\textgreater} can identify
+chunks, as long as they are not disconnected.
+
+With the introduction of CG-3, it is possible to add full-fledged dependency
 relations: number the words in the sentence and for each set a parent,
 such as \texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
 However, these features are recent and not used in many of the grammars written 
 in the community. In this introduction, I will illustrate my examples with the 
 most basic operations, that is, disambiguating morphological tags.
+The syntactic and dependency operations are not fundamentally
+different: as with morphological tags, the rules have an \emph{operation}
+performed on a \emph{target}, conditional on a \emph{context}.
+
+
 
 
 \section*{Properties of Constraint Grammar}\label{properties}
@@ -102,6 +154,22 @@ be contrasted with a licencing system, where constructions must
 be explicitly allowed, otherwise they are illegal. An empty
 reductionist grammar will accept any string, whereas an empty
 licencing grammar will accept no string.
+
+\paragraph{From Fred's 1995 book}
+\begin{quote}
+Notice, in passing, that the overall reductionistic set-up gives an
+interesting psycholinguistic prediction. In terms of processing load,
+less processing is required under Constraint Grammar to turn out an
+ambiguous and therefore unclear analysis than to turn out a
+disambiguated and therefore structurally clear analysis. In our
+opinion, this seems to be a reasonable psycholinguistic hypothesis a priori.
+Mental effort is needed for achieving clarity, precision, and maximal
+information. Less efforts imply (retention of) unclarity and
+ambiguity, i.e. information decrease. In several types of parsers, 
+rule applications create rather than discard ambiguities: the more
+processing, the less unambiguous information.
+\end{quote}
+
 
 
 \subsection*{Shallow vs.~deep structure}\label{shallow-vs.deep-structure}
@@ -291,6 +359,25 @@ Which execution scheme is better? For most purposes, a sequential execution is p
 Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other. 
 
 
+\paragraph{Note on termination} 
+Running the grammar multiple times is desirable: especially the rules
+with a careful context may need other rules to run first and
+disambiguate some items.
+With the most basic operations, SELECT and REMOVE, we can ensure that
+applying a grammar to a text will finish. The text might not be fully
+disambiguated, but if there is a point where running the rules again
+doesn't make a change, then the execution is stopped.
+
+If we allow the addition of arbitrary tags to readings, or arbitrary
+readings to cohorts, we cannot guarantee that running the grammar will
+terminate. It is possible to add the same reading over and over again,
+in which case every time we run the grammar, the argument is changed.
+The syntactic tags used by MAP rules have an additional property,
+that one reading can have at most one \texttt{@tag}, and if a reading has one
+already, it is substituted with the old one. One can end up in a loop
+substituting \texttt{@A} with \texttt{@B}.
+However, specific implementations can freely add heuristics to stop
+this kind of behaviour from happening.
 
 % The constraint rules are executed in sequence, and the consequences of
 % previous rule applications affect the coming rules. In addition, there
