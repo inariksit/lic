@@ -1,145 +1,328 @@
-\chapter{CG analysis using SAT}
+\chapter{Grammar analysis using SAT}
 
-\paragraph{This is just random ramblings from my github.}
 
-\subsection{Task}\label{task}
+In the previous chapter, we have seen the SAT encoding of CG used to
+create a CG engine.
+We evaluated our engine against the state-of-the-art VISL CG-3, using
+the same grammar and same gold standard corpus.
+Unsurprisingly, we got worse results when using the SAT-based
+implementation on grammars that were written for an imperative and
+sequential CG engine. Given that most real grammars out there are
+written in such way, using SAT in the CG engine offers little
+practical use.
 
-We create an initial symbolic sentence \texttt{w} that would make the
-``last'' rule fire. Then we want to make \texttt{w} so that none of the
-earlier rules has effect on it, because
+On the other hand, SAT-based implementation offers benefits that are
+out of reach for the standard CG implementations. By design, the
+effect of each rule is retained, because it makes a difference whether
+to execute a rule that appears later. This means that we can use our
+implementation for analysing the grammar.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
-\item
-  conditions are out of scope (trivial, no clauses)
-\item
-  conditions in scope, but one or more doesn't hold
-\item
-  tag has been removed in target
-\item
-  all readings of target have the desired tag (cannot remove)
-\end{enumerate}
+In the implementation described in the previous paragraph, we analysed
+some real input sentences, and generated clauses of the rules that
+applied to those particular sentences. If there is a word that is
+analysed as n or v, it can only match rules that target those analyses
+(and is surrounded by appropriate context).
 
-\subsection{Examples}\label{examples}
+Now, we operate on \emph{symbolic sentences}. We start from a
+situation where each word in the sentence can have any analysis: this
+means that every rule potentially applies to every word. This
+combination of rule application starts narrowing down the potential
+sentence.
+The rules are interpreted as more abstract and declarative:
+\texttt{REMOVE verb IF -1 det} does not just check if a particular
+word is verb, it prohibits a combination of determiner followed by
+verb \emph{anywhere}. The restriction can show in various ways, 
+%if another rule requires the 3rd word of the sentence to be determiner, then the 4th may not be a verb. If a rule requires
+and must be in sync with other restrictions.
 
-Last rule:
+If it turns out that there is no symbolic sentence that can satisfy a
+number of rules, this means that there is a conflict among the
+rules. In the following chapter, we will give examples of such
+conflicts and describe how to detect them.
 
-\begin{verbatim}
-   REMOVE inf  IF (-1 (prn pers))
-\end{verbatim}
 
-Earlier rules:
 
-\begin{verbatim}
-   REMOVE:r_pr_v pr  IF (1 vblex vbmod vaux vbhaver vbser ) (NOT 0 "te" "om te" )
-   REMOVE:r_adv_n adv  IF (1 n np )
-   SELECT:s_pr_v pr  + "te" "om te"  IF (1 vblex vbmod vaux vbhaver vbser  + inf )
-\end{verbatim}
+\paragraph{Former LREC paper starts here}
 
-Examined rule creates a model with many solutions, among which the
-following:
+CGs are valuable resources for rule-based NLP, especially for lesser
+resourced languages. They are robust and can be written without large
+corpora---only morphological analysis is needed. The formalism is
+lightweight and language-independent, and resources can be shared
+between related languages \cite{bick2006spanish,lene_trond_linda2010}.
+Mature CGs contain some thousands of rules, but even small CGs are shown to be effective \cite{lene_trond2011}.
 
-\begin{verbatim}
-  "<w1>"
-        prn pers
-  "<w2>"
-        <<<
-        vblex inf
-\end{verbatim}
 
-Then we apply the earlier rules to our symbolic string. First two are
-fine. They don't affect the analyses that are crucial to our examined
-rule. However, the third SELECT rule has \texttt{vblex inf} in its
-context. When we add this clause to SAT solver, it will try to find
-another model which satisfies the examined rule, but will make the
-SELECT rule to have no effect. We find one, which satisfies scenario 2:
-condition is not met.
+By design, CG is a shallow and robust formalism. 
+There is no particular hierarchy between lexical, morphological,
+syntactic or even semantic tags: individual rules can be written to address any
+property, such as ``verb'', ``copula verb in first person singular'',
+or ``the word form \emph{sailor}, preceded by \emph{drunken} anywhere in the
+sentence''. This makes it possible to treat very particular edge
+cases without touching the more general rule: we would simply write
+the narrow rule first (``if noun AND \emph{sailor}''), and introduce
+the general rule (``if noun'') later.
 
-\begin{verbatim}
-  "<w1>"
-        prn pers
-  "<w2>"
-        <<<
-        inf
-\end{verbatim}
 
-\begin{center}\rule{3in}{0.4pt}\end{center}
+However, this design is not without problems. As CGs grow larger, it
+gets harder to keep track of all the rules and their interaction.
+Our tools will help grammar writers and users to find conflicting
+rules, diagnose problems and improve their grammars. 
+We expect two major use cases: 
+first, to test the effect of new rules while writing a grammar, and
+second, to take a complete grammar and analyse it as a whole, to find
+conflicts or dead rules.
 
-An example of scenario 4:
 
-Last rule:
 
-\begin{verbatim}
-  SELECT:s_pr_v pr  + "te" "om te"  IF (1 vblex vbmod vaux vbhaver vbser  + inf ) 
-\end{verbatim}
-
-Earlier rules:
-
-\begin{verbatim}
-   REMOVE:r_pr_v pr  IF (1 vblex vbmod vaux vbhaver vbser ) (NOT 0 "te" "om te" )
-   REMOVE:r_adv_n adv  IF (1 n np )
-\end{verbatim}
-
-One solution for the initial constraints:
-
-\begin{verbatim}
-  "<w1>"
-        >>>
-        pr "te"
-  "<w2>"
-        vblex inf
-\end{verbatim}
-
-First REMOVE rule conflicts. Solve by applying scenario 4: only targets
-are left. Scenario 3 wouldn't work because \texttt{(pr "te")} is a
-requirement. Scenario 2 wouldn't work because ???
-
-Solution after all clauses:
-
-\begin{verbatim}
-"<w1>"
-        pr "te"
-        pr "om te"
-"<w2>"
-        vblex inf
-\end{verbatim}
-
-\subsection{Interaction of previous
-rules}\label{interaction-of-previous-rules}
-
-Look at the following three rules.
-
-\begin{verbatim}
-r1 = REMOVE V   IF (-1C Det) ;
-r2 = REMOVE Det IF ( 1  V)   ;
-r3 = REMOVE V   IF (-1  Det) ;
-\end{verbatim}
-
-Is there an input which can go through the rules and trigger at the
-last?
-
-\begin{verbatim}
-"<w1>"
-        det
-        pron
-"<w2>"
-        v
-        n
-\end{verbatim}
+\begin{figure}[t]
+\begin{center}
 
 \begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
-\item
-  r1: Doesn't trigger because condition \texttt{(-1C Det)} isn't met.
-\item
-  r2: Cannot trigger, because r3 requires \texttt{w2} to have a
-  \texttt{v} analysis.
-\item
-  Tries to go for ``ok what if the target (\texttt{w1}) \emph{only} has
-  a \texttt{det} analysis!''
-\item
-  In that case, the input would already trigger \texttt{r1}
-\item
-  Cannot do neither =\textgreater{} conflict
+\item[]
+\begin{verbatim}SELECT Inf IF (-1 Para OR De) (0C V) ;
+SELECT Inf IF (-1 Prep) (0C V) ;
+SELECT Inf IF (-1C Vai) ;
+SELECT Inf IF (-1C Vbmod) (0C V) ;
+SELECT Inf IF (-1C Ter/de) ;
+SELECT Inf IF (-1C Vbmod) (0 Ser) ;
+\end{verbatim}
 \end{itemize}
+
+\caption{Rules to select infinitive in Portuguese.}
+\end{center}
+
+\label{infrules}
+\end{figure}
+
+
+
+Given the rules in figure~\ref{infrules}, a grammar writer may ask the following questions while writing a grammar. 
+
+\begin{itemize}
+\item Are all the rules distinct? (e.g. \texttt{Para} and \texttt{De} may be included in \texttt{Prep})
+\item Could two or more rules be merged? (e.g. \texttt{SELECT Inf IF -1 Prep OR Vai OR Vbmod ...})
+\item What is the best order for the rules?
+\item Generate a sequence that triggers rule(s) $R$ but not rule(s) $R'$. 
+\end{itemize}
+
+%%%%%
+
+For the second use case, here are examples of conflicts that our tools will detect.
+\begin{itemize}
+\item If a rule appears twice, the second occurrence will be disabled by the first
+\item $R$ selects something in a context, $R'$ removes~it
+\item $R$ removes something from the context of $R'$, so $R'$ can never
+  apply
+\item $R$ has an internal conflict, such as non-existent
+tag combination, or contradictory requirements for a context word
+\end{itemize}
+$R$ can also be a set of rules: for instance, if one rule removes a verb in
+context $C$, and another in context $\neg C$, together these rules
+remove a verb in all possible cases, disabling any future rule that
+targets verbs.
+
+While rule-internal conflicts can be detected by simpler means, taking
+care of rule interaction requires a {\em semantic} rather than a {\em
+ syntactic} analysis.
+In order to find effects of rule interaction, we must keep track of
+the possible sentences at each step. After each rule, we have two
+possibilities: the rule fires, or it does not fire. In case the rule does
+not fire, we have again two options: either its conditions are not met,
+or its target is the only remaining analysis. 
+
+We express these requirements as a \emph{Boolean satisfiability problem} (SAT).
+SAT problems consist of two components: a set of Boolean variables, and a set
+of clauses on those variables. For instance, let the set be $\{a,b\}$
+and the formulas $\{a \vee b, \neg{}a\}$. A program called \emph{SAT
+  solver} will try to find a solution, where all the variables have a
+value. For this particular problem, the unique solution is $a=False,
+b=True$. It is also possible for a SAT problem to have no solution, or
+multiple solutions.
+
+
+
+
+\section{Implementation}
+\label{sec:implementation}
+
+In this section, we describe the implementation of the tool.
+The SAT-encoding we use is similar to the one introduced in \cite{listenmaa_claessen2015}, with one key difference: in this paper, we operate on {\em symbolic sentences} instead of concrete sentences from a corpus. The idea is that the SAT-solver is going to find the concrete sentence for us.
+
+\paragraph{Preliminaries}
+
+Our analysis operates on one rule $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $R$, even after passing all rules $R'$ that came before $R$?''
+
+Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too. In our experiments, the number of readings has ranged from about 300 to about 6000. 
+
+Furthermore, when we analyse a rule $R$, we need to decide the {\em width} $w(R)$ of the rule $R$: How many different words should there be in a sentence that can trigger $R$? Most often, $w(R)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule mentioned in the introduction, the width is 2.
+
+If the context contains a \verb!*!,
+we may need to make an approximation of $w(R)$ which may result in false negatives later on in the analysis.
+%we create sentences that are up to 3 words wider than the context without \verb!*!, and try them all.
+
+\paragraph{Symbolic sentences}
+
+We start each analysis by creating a so-called {\em symbolic sentence}, which is our representation of the sentence $S$ we are looking for. A symbolic sentence is a sequence of {\em symbolic words}; a symbolic word is a table of all possible readings that a word can have, where each reading is paired up with a SAT-variable.
+
+The number of words in the symbolic sentence we create when we analyse a rule $R$ is $w(R)$. For the rule in the introduction, we have $w(R)=2$ and a symbolic sentence may look as follows:
+\begin{center}
+\begin{tabular}{c|c|c}
+word1 & word2 & reading \\
+\hline
+$v_1$ & $w_1$ & det def \\
+$v_2$ & $w_2$ & noun sg \\
+$v_3$ & $w_3$ & noun pl \\
+$v_4$ & $w_4$ & verb sg \\
+$v_5$ & $w_5$ & verb pl \\
+\end{tabular}
+\end{center}
+Here, $v_i$ and $w_j$ are SAT-variables belonging to word1 and word2, respectively. We can also see that the possible number of readings here was 5.
+
+The SAT-solver contains extra constraints about the variables. Input sentences should have at least one reading per word, so we add the following two constraints:
+\begin{center}
+\begin{tabular}{c}
+$v_1 \vee v_2 \vee v_3 \vee v_4 \vee v_5$, \\
+$w_1 \vee w_2 \vee w_3 \vee w_4 \vee w_5$ \\
+\end{tabular}
+\end{center}
+Any solution to the constraints found by the SAT-solver can be interpreted as a concrete sentence with $w(R)$ words that each have a set of readings.
+
+\paragraph{Applying a rule}
+
+Next, we need to be able to apply a given rule $R'$ to a symbolic sentence, resulting in a new symbolic sentence.
+
+For example, if we apply the rule from the introduction to the symbolic sentence above, the result is the following symbolic sentence:
+\begin{center}
+\begin{tabular}{c|c|c}
+word1 & word2 & reading \\
+\hline
+$v_1$ & $w_1$ & det def \\
+$v_2$ & $w_2$ & noun sg \\
+$v_3$ & $w_3$ & noun pl \\
+$v_4$ & $w_4'$ & verb sg \\
+$v_5$ & $w_5'$ & verb pl \\
+\end{tabular}
+\end{center}
+The example rule can only affect readings of word2 that have a ``verb'' tag, so we create only two new variables $w_4'$ and $w_5'$ for the result, and reuse the other variables. We add the following constraint for $w_4'$:
+\begin{center}
+\begin{tabular}{c}
+$w_4' \Leftrightarrow [ w_4 \wedge \neg{}(v_1 \wedge (w_1 \vee w_2 \vee w_3)) ]$ \\
+\end{tabular}
+\end{center}
+In other words, after applying the rule, the reading ``verb sg'' (represented by the variable $w_4'$) can only be in the resulting sentence exactly when (1) ``verb sg'' was a reading of the input sentence (so $w_4$ is true) and (2) the rule has not been triggered (the rule triggers when $v_1$ is true and at least one of the non-verb readings $w_1 \dots w_3$ is true). We add a similar constraint for the new variable $w_5'$:
+\begin{center}
+\begin{tabular}{c}
+$w_5' \Leftrightarrow [ w_5 \wedge \neg{}(v_1 \wedge (w_1 \vee w_2 \vee w_3)) ]$ \\
+\end{tabular}
+\end{center}
+
+\paragraph{Putting it all together}
+
+Once we know how to apply one rule $R'$ to a symbolic sentence, we can apply all rules preceding the rule $R$ that is under analysis. We simply apply each rule to the result of applying the previous rule. In this way, we end up with a symbolic sentence that represents all sentences that could be the result of applying all those rules.
+
+Finally, we can take a look at the rule $R$ we want to analyse. Here is an example:
+\begin{itemize}
+\item[] \texttt{REMOVE det IF (1 verb) ;}
+\end{itemize}
+If we take the symbolic sentence above as input, we want to ask whether or not it can trigger the rule $R$. We do this by adding some more constraints to the SAT-solver.
+
+First, the context of the rule should be applicable, meaning that the second word should have a reading with a ``verb'' tag:
+\begin{center}
+\begin{tabular}{c}
+$w_4' \vee w_5'$
+\end{tabular}
+\end{center}
+Second, the rule should be able to remove the ``det'' tag, meaning that the first word should have a reading with a ``det'' tag, and there should be at least one other reading:
+\begin{center}
+\begin{tabular}{c}
+$v_1 \wedge (v_2 \vee v_3 \vee v_4 \vee v_5)$
+\end{tabular}
+\end{center}
+If the SAT-solver can find a solution to all constraints generated so far, we have found a concrete sentence that satisfies our goal. If the SAT-solver cannot find a solution, it means that there are no sentences that can ever trigger rule $R$. This means that there is something wrong with the grammar.
+
+
+\paragraph{Creating realistic readings}
+
+Earlier we have shown an example with 5 readings (``det def'', ``noun sg'', ...). In a realistic case, we operate between hundreds and thousands of readings. 
+%This is very much dependent on language: the simplest language we tested was Dutch, with 336 readings. The most complex was 
+In order to find the set of readings, we expand a morphological lexicon\footnote{We used the lexica from Apertium, found in \url{https://svn.code.sf.net/p/apertium/svn/languages/}.}, ignore the word forms and lemmas, and take all distinct analyses. 
+However, many grammar rules target a specific lemma or word form.
+A simple solution is to retain the lemmas and word forms only for those entries where it is specified in the grammar, and otherwise leave them out. For example, the Dutch grammar contains the following rule:
+
+\begin{itemize}
+ \item[] \texttt{REMOVE ("zijn" vbser) IF (-1 Prep) (1 Noun) ;}
+\end{itemize}
+
+This hints that there is something special about the verb \emph{zijn}, compared to the other verbs. Looking at the lexicon, we find \emph{zijn} in the following entries:
+
+\begin{itemize}
+ \item[] 
+\begin{verbatim}zijn:zijn<det><pos><mfn><pl>
+zijn:zijn<det><pos><mfn><sg>
+zijn:zijn<vbser><inf>
+zijn:zijn<vbser><pres><pl>
+\end{verbatim}
+\end{itemize}
+
+Thus we add special entries for these: in addition to the anonymous
+ \texttt{<det><pos><mfn><pl>} reading, we add \texttt{<"zijn"><det><pos><mfn><pl>}. 
+The lemma is treated as just another tag.
+
+ However, for languages with more readings, this may not be feasible. For instance, Spanish has a high number of readings, not only because of many inflectional forms, but because it is possible to add 1--2 clitics to the verb forms.
+The number of verb readings without clitics is 213, and with clitics 1572.
+With the previously mentioned approach, we would have to double 1572 entries for each verb lemma. Even ignoring the clitics, each verb lemma would still result in 213 new readings.
+
+ In our experience,  even ignoring the clitics doubles the amount of readings.
+
+Another note: the readings in grammar can be underspecified (e.g. \texttt{verb sg}), whereas the lexicon only gives us fully specified (\texttt{verb pres p2 sg}) readings. We tried a version where we took the tag combinations specified in the grammar as readings, and we could insert them into the symbolic sentences as well, but this was not an ideal solution: turns out that the tag lists in the grammars contain often errors (e.g. replacing OR with an AND; using a nonexistent tag; using a wrong level in a subreading), and if we accept those lists as readings, we will generate symbolic sentences that are impossible, and won't discover the bug in the grammar.
+
+However, if we only want to find rule interaction effects, then using the underspecified readings from the grammar makes the task faster, and it will still catch potential interaction errors. 
+
+
+
+\paragraph{Creating realistic ambiguities}
+
+
+
+
+In the previous section, we have created realistic \emph{readings}, by simply hardcoding legal tag combinations into variables. The next step in creating realistic ambiguities is to constrain what readings can go together. For instance, the case of \emph{zijn} shows us that ``determiner or verb'', is a possible ambiguity. In contrast, there is no word form in the lexicon that would be ambiguous between an adjective and a comma, hence we don't want to generate such ambiguity in our symbolic sentences.
+
+\begin{center}
+\begin{tabular}{c|c|c|c|c}
+
+
+            & n nt sg  & n f pl  &  vblex sep inf & det pos mfn  \\ \hline
+uitgaven    & 0        & 1       & 1              & 0    \\ 
+toespraken  & 0        & 1       & 1              & 0    \\ 
+haar        & 1        & 0       & 0              & 1    \\ 
+
+
+\end{tabular}
+\end{center}
+
+We solve the problem by creating \emph{ambiguity classes}: groups of analyses that can be ambiguous with each other. 
+We represent the expanded morphological lexicon as a matrix, as seen in figure~\todo{make a nice picture with rows and columns}: word forms on the rows and analyses on the columns. Each distinct row forms an ambiguity class. For example, the ambiguity class \verb![1257,496,16]! %TODO better description
+contains masculine plural adjectives and masculine plural past participles.
+Then we form SAT clauses that allow or prohibit certain combinations. These clauses will interact with the constraints created from the rules, and the end result will be closer to real-life sentences.
+
+Our approach is similar to \cite{cutting_etal92}, who use ambiguity classes instead of distinct word forms, in order to reduce the number of parameters in a Hidden Markov Model. They take advantage of the fact that they don't have to model ``bear'' and ``wish'' as separate entries, but they can just reduce it to ``word that can be ambiguous between noun and verb'', and use it as a parameter in their HMM. 
+We can do a similar thing by saving a list of words with each ambiguity class. For example, we map the ambiguity class ``feminine plural noun or a separable verb infinitive'' to the list of word forms \{``uitgaven'', ``toespraken''\}, and then, if we generate such reading for our symbolic word, we can give one of these words as an example word.
+
+There are two advantages of restricting the ambiguity within words.
+Firstly, we can create more realistic example sentences, which should help the grammar writer.
+Secondly, we can possibly detect some more conflicts. Assume that the grammar contains the following rules:
+
+ \begin{itemize}
+ \item[] 
+\begin{verbatim}
+ REMOVE adj IF (-1 aux) ;
+ REMOVE pp  IF (-1 aux) ;
+ \end{verbatim}
+ \end{itemize}
+
+ With our symbolic sentence, these rules will be no problem; to apply the latter, we only need to construct a target that has a realistic ambiguity with a past participle; the adjective will be gone already.
+However, it could be that past participles (pp) only ever get confused with adjectives---in that case, the above rules would be in conflict with each other.
+ By removing the adjective reading, the first rule selects the past participle reading, making it an instance of ``$R$ selects something in a context, $R'$ removes~it''. 
+The additional constraints will prevent the SAT-solver from creating an ambiguity outside the allowed classes, and such a case would be caught as a conflict.
+
+
