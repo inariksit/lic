@@ -199,12 +199,14 @@ High-level description of the procedure. Following subsections delve into detail
 
 ### Symbolic sentence
 
-When the sentence starts off as anything, the rules become truly declarative.
-We do not remove the verb after determiner, we prevent such sequence from being created in the first place.
 
 #### Creating realistic readings
 
+Expand morphological lexicon, hardcode tag combinations into variables. Handle lexical forms smartly.
+
 #### Creating realistic ambiguities
+
+Ambiguity classes.
 
 ### Ordering
 
@@ -222,19 +224,20 @@ r1 = REMOVE V   IF (-1C Det)
 r2 = SELECT Det IF (1 V)
 r3 = REMOVE V   IF (-1 Det)
 ```
-Does r3 conflict with r1?   
+Does r3 conflict with r1? 
 No, we can create a sentence that has Det and something else in -1; this triggers only r3.
 
 What if we add r2 in the middle?  
 Selecting Det is the only possibility to make a sentence where r3 can trigger: if we said "no, condition does not hold", r3 would not trigger. 
 Thus, $r2$ leaves Det as the only remaining analysis at time $t2$.
-Remember that `SELECT x` is, in fact, `REMOVE (*) - x`: thus, we create new variables for all other readings except those which contain Det. We do not care if their previous values have been true or false, now we set these new
+Remember that `SELECT x` is, in fact, `REMOVE (*) - x`: thus, we create new variables for all other readings except those which contain Det. Then, we create clauses for each of them.
 
-Now, we arrive at $r3$ again. The condition is more allowing than $r1$; the Det in -1 may be ambiguous or unambiguous. 
+We arrive at $r3$ again. The condition is more allowing than $r1$; the Det in -1 may be ambiguous or unambiguous.  
+Now, had we not created `w1'<n>` and `w1'<adj>` after applying $r2$, we would have a conflict: in order to escape $r1$, one of the non-Det readings must be true. But after $r2$, they must all be false. As long as the clauses by $r1$ operate on `w1<n>` and `w1<adj>`, and the clauses by $r2$ on `w1'<n>` and `w1'<adj>`, there is no conflict.
 
-The value of the new variable is determined by the formula
+The value of the new variable `w2'<v>` is determined by the formula
 
-  w2'<v> $\Leftarrow$ w2\textless v\textgreater $\wedge$ ( $\neg$ w1\textless det-unamb\textgreater $\vee$ w2'\textless only-v-left\textgreater )
+  w2'\textless v\textgreater $\Leftarrow$ w2\textless v\textgreater $\wedge$ ( $\neg$ w1\textless det-unamb\textgreater $\vee$ w2'\textless only-v-left\textgreater )
 
 
 ### Example application
@@ -256,6 +259,9 @@ Try to find more gold standard corpora and run experiments?
 
 We find non-trivial conflicts from real grammars.
 
+Philosophical questions: can CG rules *generate* language?
+When the sentence starts off as anything, the rules become truly declarative.
+We do not remove the verb after determiner, we prevent such sequence from being created in the first place.
 
 # Conclusions
 
