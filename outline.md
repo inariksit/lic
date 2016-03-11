@@ -1,6 +1,65 @@
-# Introduction to CG (10-15 pages)
+# Introduction to this thesis
 
-## Background
+
+*I wish a wish*.
+
+
+How do you know that the first *wish* is a verb and the second one is a noun?
+
+A computer can approach this from many angles.
+
+1. We can gather thousands of words of text, annotate some of the sentences manually: "this *wish* is a verb, that one is a noun". The computer will learn to classify each instance of *wish* into a noun or a verb with a certain probability, depending on what other words appear in the sentence.
+
+1. We can write generative rules how to form a sentence: you need a subject, a predicate and an object.
+With this vocabulary, we can say four things: *I wish a wish, a wish wishes a wish, I wish me* and  *a wish wishes me*. 
+A parser is only able to generate a well-formed tree when the first *wish* is a verb and the second is a noun; alternative hypotheses are cut down early on in parsing.
+
+1. We can look up all morphological analyses, separately for each word.
+Given that we do not know anything about the context in the lookup phase, we end up with analyses $wish_N$ and $wish_V$ for both of the instances.
+In contrast to approach 2, which starts with no information, we start with too much information.  
+Now, in the spirit of approach 1, we can look at the context words for help. A learning-based method may encounter plenty of examples where *wish* appearing after *a* is a noun, and learn to assign a high probability to that hypothesis. 
+But we have more powerful tools, namely, grammatical categories and abstraction.
+Instead of learning facts about strings *a* and *wish*, or *my* and *house*, we can formulate a *constraint rule*: "If you find something that can be a verb, but it is preceded by a determiner, throw that guess away". 
+Add some hundreds of these rules, and they expose the structure hidden behind the clutter.
+
+
+The method number 3 is known as *Constraint Grammar* (CG, Karlsson 1995).  
+It is robust, fast, easy to get started, even small grammars are useful.  
+
+
+This thesis has two main contributions in the field of CG.
+
+### Formalisation of CG
+
+Based on Lager and Nivre, we did more stuff. With SAT!
+
+
+### Analysis and quality control of CG
+
+The same factors that make it easy to write, also make it easy to write poorly.  
+Even with the most careful grammar writers, managing big grammars is demanding.
+
+We use the newly found stuff (with SAT!) to analyse CGs.
+With the rules modelled in logic,
+
+
+(All three methods have their advantages.
+Statistical methods (1) are actually great help for automatically finding these rules! 
+Save the time from the linguist: they can just check instead of invent.
+Method 2, generative grammar, is not really competing for the same task. CG isn't a tool for deep structure.)
+
+
+
+## Structure of this thesis 
+
+Chapter 2 presents a general introduction to both CG and SAT, aimed for a reader who is unfamiliar with the topics.
+Chapter 3 discusses previous logical representations of CG, and describes our SAT-encoding in detail, complete with an appendix.
+Chapter 4 presents the 
+
+
+# Background (10-15 pages)
+
+## Constraint Grammar 
 
 Disambiguate morphologically analysed text.  
 Been used in many tasks.  
@@ -14,30 +73,35 @@ Not much formal written on CG. We want to change that.
 * Studies on the formal side? Måns Huldén on speed; Anssi ?
 * Related formalism: FSIG (gotta cite all the Finns)
 
-## Properties of CG
+### Properties of CG
 
-### Reductionist
+#### Reductionist
 
 Structure is created by removing alternatives.
 
 Karlsson 1995: psycholinguistic principles -- easier for humans to reduce than generate.
 
-### Shallow
+#### Shallow
 
 * Flat structure (POS-tagging; chunks)
 * Local context
 * No enforcement of grammaticality
 
-### Deterministic?
+#### Deterministic?
 
 * Strict vs. heuristic; sequential vs. parallel ?
 * Karlsson 1995 leaves details open. Different variants implemented.
 
-## Summary
+### Summary of CG
 
 Is it a formalism?
 
 Bick & Didriksen: "declarative whole of contextual possibilities for a language or genre".
+
+## Boolean satisfiability (SAT) 
+
+Some stuff here too.
+
 
 # CG as a SAT-problem (15-20 pages)
 
