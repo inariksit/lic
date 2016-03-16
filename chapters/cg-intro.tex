@@ -134,7 +134,7 @@ performed on a \emph{target}, conditional on a \emph{context}.
 
 
 
-\section*{Properties of Constraint Grammar}\label{properties}
+\section{Properties of Constraint Grammar}\label{properties}
 
 \cite{karlsson1995constraint} lists 24 design principles and describes
 related work at the time of writing.
@@ -142,6 +142,8 @@ Here we summarise a set of main features, and relate CG to the developments in g
 
 All theories and implementations of CG  a \emph{reductionist}
 system, designed primarily for analysis, not generation.
+Its task is to parse sentences that are given, not to describe a language
+as a collection of ``all and only the grammatical sentences''.
 
 The syntax is decidedly \emph{shallow}: the rules do not aim to
 describe all aspects of an abstract phenomenon such as noun phrase, 
@@ -157,7 +159,7 @@ ordering in total, such as in finite-state or logic-based implementations.
 
 In addition, we will discuss the \emph{expressivity} of CG---while it is not a generative grammar and cannot be placed in the Chomsky hierarchy, we aim to provide parallels in what kind of output it can produce.
 
-\subsection*{Reductionist vs.~licencing (or Analysis vs. Generation???)}\label{reductionist-vs.licencing}
+\subsection{Reductionist vs.~licencing (or Analysis vs. Generation???)}\label{reductionist-vs.licencing}
 
 CG is a reductionist system: it starts from a set of alternative
 analyses, and eliminates the impossible or improbable ones using
@@ -190,28 +192,6 @@ It would be optimal if the formalism were general and abstract enough for it, or
 Constraint Grammar takes no explicit stand on this issue. In practice, however, constraints are geared towards parsing, and Constraint Grammars are analysis grammars. It remains to be demonstrated that full-scale syntax can be done by one and the same reversible grammar.
 \end{quote}
 
-
-\subsection*{Shallow vs.~deep structure}\label{shallow-vs.deep-structure}
-
-CG can be described as shallow for various reasons. The rules usually
-operate on a local context of a few words. Moreover, a CG grammar does
-not necessarily enforce grammaticality.
-In addition, ...
-I will address these points in the following sections.
-
-\
-
-
-\paragraph{Flat structure} The rules do not usually handle 
-long-distance dependencies; they operate on a unit of a few words, and
-don't abstract away from surface features such as word order.
-You need to define rules separately for stuff like ``select noun if -1
-determiner'' and ``select noun if -2 determiner -1 adjective''.
-
-More importantly, CG doesn't introduce a full tree structure to the
-whole sentence. Some local subtrees can be detected, but mostly
-for the purposes of aiding the disambiguation.
-TODO: talk about dependency trees in CG-3!
  
 \paragraph{No enforcement of grammaticality} 
 
@@ -220,12 +200,6 @@ TODO: talk about dependency trees in CG-3!
 \begin{quote}
 The foremost task of a parsing-oriented grammar is rather to aid in parsing every input than to define the notion ”grammatically correct sentence”, or to describe ”all and only the grammatical sentences”.
 \end{quote}
-
-\begin{quote}
-The constraints will mostly be on a more delicate level, more concrete, closer to real words and sentences, than ordinary grammar rules tend to be in much of current syntactic theory. Most certainly there will be no single general or purportedly simple rule stating all aspects of the syntax of, say, grammatical subjects or noun phrases in language L.
-Rather, there will be a few dozens of down-to-earth constraints that state bits and pieces of the phenomenon, approaching or even reaching the correct description by ruling out what cannot be the case in this or that context. 
-\end{quote}
-
 
 
 CG does not define sequences as \emph{grammatically correct}.
@@ -267,7 +241,30 @@ Bottom line: it's not about defining grammaticality, it's providing analyses in 
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
 
-\paragraph{Expressivity} 
+\subsection{Shallow vs.~deep structure}\label{shallow-vs.deep-structure}
+
+CG can be described as shallow for various reasons. The rules usually
+operate on a local context of a few words. 
+I will address these points in the following sections.
+
+\
+
+
+\paragraph{Flat structure} The rules do not usually handle 
+long-distance dependencies; they operate on a unit of a few words, and
+don't abstract away from surface features such as word order.
+You need to define rules separately for stuff like ``select noun if -1
+determiner'' and ``select noun if -2 determiner -1 adjective''.
+
+More importantly, CG doesn't introduce a full tree structure to the
+whole sentence. Some local subtrees can be detected, but mostly
+for the purposes of aiding the disambiguation.
+TODO: talk about dependency trees in CG-3!
+
+
+
+\paragraph{Compare to CFG} 
+
 
 \cite{karlsson1995constraint}
 \begin{quote}
@@ -357,7 +354,7 @@ context word.
 % already disambiguate a lot, whereas an incomplete phrase structure
 % grammar is nearly useless.
 
-\subsection*{Ordering of the rules}\label{ordering}
+\subsection{Ordering of the rules}\label{ordering}
 
 The previous properties of Constraint Grammar formalism and rules were specified in \cite{karlsson1995constraint}, and retained in further implementations.
 However, the notion of \emph{ordering} has been interpreted more freely. 
@@ -496,92 +493,16 @@ rule only takes action if the context is unambiguous. For this case, the
 the word \emph{what} is fully disambiguated as a determiner.
 
 
-\section*{Encoding in logic}\label{encoding-in-logic}
+\subsection{Expressivity}
+As we have learnt, CG is not a generative grammar---it needs a list of alternatives to start removing some of them.
+But can we emulate some kind of behaviour that would put it into the Chomsky hierarchy?
 
-\cite{lager98} represents a CG-like, shallow and reductionist system in
-logic. \cite{lager_nivre01} builds on that in a study which reconstructs
-four formalisms in logic. CG is contrasted with Finite-State
-Intersection Grammar (FSIG) and Brill tagging; all three work on a set
-of constraint rules which modify the initially ambiguous input, but with some crucial
-differences.
-
-The rules and analyses are represented as clauses, and if it is
-possible to build a model which satisfies all clauses, then there is
-an analysis for the sentence.
-Take the unordered case first. The authors define predicates \emph{word}
-and \emph{\sc{pos}}, and form clauses as follows. The variable $P$ is used to
-denote any word, and the index $n$ its position.
-
-\begin{align*}
-\text{word(P, the)} \  &\Rightarrow \ \text{{\sc pos}(P, det)} \\
-\text{word(P, bear)} \ &\Rightarrow \ \text{{\sc pos}(P, verb)} \vee \text{{\sc pos}(P, noun)} \\
-\text{{\sc pos}(P$_n$, det)} \wedge \text{{\sc pos}(P$_{n+1}$, verb)} \ &\Rightarrow 
-\end{align*}
-
-\noindent The first clauses read as ``if the word is \emph{the}, it
-is a determiner'' and ``if the word is \emph{bear}, it can be a verb or a noun''.
-The third clause represents the rule which prohibits a verb after a
-determiner. It normalises to $\neg \text{{\sc pos}(P$_n$, det)} \vee \neg \text{{\sc pos}(P$_{n+1}$, verb)}$, and we know that {\sc pos}(P, det) must be true for
-the word \emph{the}, thus the verb analysis for \emph{bear} must be
-false.
-
-This representation models FSIG, where the rules are logically
-unordered. For CG, the authors introduce a new predicate for each rule,
-$\text{{\sc pos}}^i$, where $i$ indicates the index of the rule in the
-sequence of all rules.
-Each rule is translated into two
-clauses: 1) the conditions hold, the target has >1 analysis\footnote{In \cite{listenmaa_claessen2015}, the default rules
-  are given to the SAT solver as separate clauses; for every word
-  $w$, at least one of its analyses \{$w_1$,$w_2$,...,$w_n$\} must be
-  true. Then the clauses for each rule don't need to repeat the ``only
-  if it doesn't remove the last reading'' condition.}, and the 
-targetet reading is selected or removed; and
-2) the conditions don't hold or the target has only one analysis, and the target is left untouched. The general form of the clauses is shown below:
-
-\begin{align*}
-\text{{\sc pos}}^i\text{(P, T)} \: \wedge \: (\;\:\,  \text{conditions\_hold}
-\wedge  \text{|T|} > 1) \  &\Rightarrow \  \text{{\sc pos}}^{i+1}\text{(P, T$\,\setminus\,$[target])} \\
-\text{{\sc pos}}^i\text{(P, T)} \: \wedge \: (\neg \text{conditions\_hold} \vee
-\text{|T|} = 1) \  &\Rightarrow \ \text{{\sc pos}}^{i+1}\text{(P, T)}
-\end{align*}
-
-
-To show a concrete example, the following shows the two rules in the specified order:
-\begin{inparaenum}[\itshape a\upshape)]
-\def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
-\item \texttt{REMOVE verb IF (-1 det)}; and
-\item  \texttt{REMOVE noun IF (-1 noun)}
-\end{inparaenum}.
-
-\begin{align*}
-\text{{\sc pos}$^1$(P, [det])} \  &\Leftarrow \  \text{word(P, the)} \\
-\text{{\sc pos}$^1$(P, [verb,noun])} \ &\Leftarrow \ \text{word(P, bear)} \\
-\text{{\sc pos}$^1$(P, [verb,noun])} \ &\Leftarrow \ \text{word(P, sleeps)} \\ \\
-\text{{\sc pos}$^2$(P$_n$, T$\,\setminus\,$[verb])} \ &\Leftarrow \ \text{{\sc pos}$^1$(P$_n$, T)}
- \wedge (\;\; \text{{\sc pos}$^1$(P$_{n-1}$, [det])}  \wedge  \text{T$\,\setminus\,$[verb] $\neq$ []}) \\
-\text{{\sc pos}$^2$(P$_n$, T)} \ &\Leftarrow \  \text{{\sc pos}$^1$(P$_n$, T)} \wedge
-(\neg \text{{\sc pos}$^1$(P$_{n-1}$, [det])} \vee \text{T$\,\setminus\,$[verb]
-  $=$ []}) \\ \\
-\text{{\sc pos}$^3$(P$_n$, T$\,\setminus\,$[noun])} \ &\Leftarrow \ \text{{\sc pos}$^2$(P$_n$, T)}
- \wedge (\;\; \text{{\sc pos}$^2$(P$_{n-1}$, [noun])}  \wedge  \text{T$\,\setminus\,$[noun] $\neq$ []}) \\
-\text{{\sc pos}$^3$(P$_n$, T)} \ &\Leftarrow \  \text{{\sc pos}$^2$(P$_n$, T)} \wedge
-(\neg \text{{\sc pos}$^2$(P$_{n-1}$, [noun])} \vee \text{T$\,\setminus\,$[noun]
-  $=$ []})
-\end{align*}
-
-The logical reconstruction helps to provide some clarity when comparing CG
-to FSIG. In FSIG, the predicate ${\sc pos}$ is a statement of an analysis of a
-word; in case of uncertainty, disjunction is used to present all possible analyses. In CG, uncertainty is modelled by sets of analyses,
-and the predicate ${\sc pos}^i$ is a statement of the
-set of analyses of a word at a given stage of the rule sequence. The
-final result is obtained by composition of these clauses in the order of
-the rule sequence.
+We can assume that an input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma$.
 
 
 %The implementation in \cite{listenmaa_claessen2015} is not quite CG, not quite FSIG.
 
-\section*{Conclusion}
+\section{Conclusion}
 
 In the paper I've presented an introduction to Constraint Grammar,
 highlighting some key properties and contrasting it to other grammar
