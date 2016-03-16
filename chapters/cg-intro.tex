@@ -1,4 +1,4 @@
-\chapter{Introduction to CG}
+\section{Introduction to CG}
  
 \paragraph{This used to be my course paper for Grammar Formalisms.}
 
@@ -192,6 +192,17 @@ It would be optimal if the formalism were general and abstract enough for it, or
 Constraint Grammar takes no explicit stand on this issue. In practice, however, constraints are geared towards parsing, and Constraint Grammars are analysis grammars. It remains to be demonstrated that full-scale syntax can be done by one and the same reversible grammar.
 \end{quote}
 
+
+Two decades later, \cite{bick2015} describe CG as ``a
+declarative whole of contextual possibilities and impossibilities for
+a language or genre'', which is nevertheless implemented in a
+low-level way: selecting and removing readings from individual words,
+without explicit connection between the rules. Bick and Didriksen
+argue that as a side effect, the rules actually manage to describe language.
+
+We return to the questions of generation and declarativity in section~\ref{sec:expressivity}. 
+In chapter~\ref{chapterCGana}, we revisit these questions in the context of CG analysis.
+
  
 \paragraph{No enforcement of grammaticality} 
 
@@ -241,16 +252,21 @@ Bottom line: it's not about defining grammaticality, it's providing analyses in 
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
 
-\subsection{Shallow vs.~deep structure}\label{shallow-vs.deep-structure}
+\subsection{Shallow structure}\label{shallow-vs.deep-structure}
 
 CG can be described as shallow for various reasons. The rules usually
 operate on a local context of a few words. 
-I will address these points in the following sections.
 
-\
+More importantly, CG analysis is not aimed to produce trees. (IS THIS TOO MUCH OF REPETITION OF PREVIOUS?)
+
+Whereas a generative grammar could fail to produce any analysis, if even one of the words is unknown or misspelt, CG would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
 
 
-\paragraph{Flat structure} The rules do not usually handle 
+
+
+\paragraph{Flat structure} 
+
+The rules do not usually handle 
 long-distance dependencies; they operate on a unit of a few words, and
 don't abstract away from surface features such as word order.
 You need to define rules separately for stuff like ``select noun if -1
@@ -259,11 +275,11 @@ determiner'' and ``select noun if -2 determiner -1 adjective''.
 More importantly, CG doesn't introduce a full tree structure to the
 whole sentence. Some local subtrees can be detected, but mostly
 for the purposes of aiding the disambiguation.
-TODO: talk about dependency trees in CG-3!
+(TODO: should I talk about dependency trees in CG-3?)
 
 
 
-\paragraph{Compare to CFG} 
+\paragraph{Description by elimination} 
 
 
 \cite{karlsson1995constraint}
@@ -297,7 +313,7 @@ to the whole sentence. If one of the words was out of vocabulary, say
 \emph{bear} either. In CG, an unrecognised verb would be no problem at
 all in disambiguating the previous words.
 
-
+\paragraph{Low abstraction}
 Contrasting with phrase-structure or dependency grammars, the rules in
 CG are often on a lower level of abstraction. 
 The rule that tells to remove verb reading after a determiner
@@ -308,6 +324,7 @@ pronoun (``my bear sleeps''). A phenomenon that is expressed with one
 big rule in a deep formalism such as HPSG or categorial grammar, is
 split into many low-level rules.
 
+\paragraph{Mutual independence}
 On the other hand, these features can provide
 flexibility that is hard to mimic by a deeper formalism.
 For instance, rules can target individual words
@@ -411,7 +428,7 @@ Parallel execution may have uses in more marginal cases: for instance, if we hav
 
 \paragraph{No ordering}
 
-
+What does it even mean? Unordered is just FSIG--how can it not break with conflicts? Don't tell me ``there are
 
 \paragraph{Note on termination} 
 Running the grammar multiple times is desirable: especially the rules
@@ -494,6 +511,7 @@ the word \emph{what} is fully disambiguated as a determiner.
 
 
 \subsection{Expressivity}
+\label{sec:expressivity}
 As we have learnt, CG is not a generative grammar---it needs a list of alternatives to start removing some of them.
 But can we emulate some kind of behaviour that would put it into the Chomsky hierarchy?
 
@@ -502,9 +520,9 @@ We can assume that an input sentence is a finite sequence, where every cohort is
 
 %The implementation in \cite{listenmaa_claessen2015} is not quite CG, not quite FSIG.
 
-\section{Conclusion}
+\section{Summary}
 
-In the paper I've presented an introduction to Constraint Grammar,
+In this chapter, I've presented an introduction to Constraint Grammar,
 highlighting some key properties and contrasting it to other grammar
 formalisms.
 CG is relatively young, popularised 20 years ago, and throughout its
@@ -528,12 +546,6 @@ If POS tags are not enough to consider as a structure,
 CG can also be used to manipulate syntactic analyses and even to add
 dependency relations, using exactly the same mechanisms (``set parent to +1 if the word at 0 is \emph{bear} and -1 is a determiner'').
 
-The first criterion can be harder to justify. \cite{bick2015} describe CG as ``a
-declarative whole of contextual possibilities and impossibilities for
-a language or genre'', which is nevertheless implemented in a
-low-level way: selecting and removing readings from individual words,
-without explicit connection between the rules. Bick and Didriksen
-argue that as a side effect, the rules actually manage to describe language.
 CG seems to even have some interest as a tool for psycholinguistics research:
 there is a Russian being developed within the research group
  \href{https://uit.no/forskning/forskningsgrupper/gruppe?p_document_id=344365}{CLEAR
