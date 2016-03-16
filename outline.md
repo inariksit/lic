@@ -12,9 +12,7 @@ A computer can approach this from many angles.
 
 1. We can write a generative grammar to describe our language. 
 A parser is only able to generate a well-formed tree for the sentence when the first *wish* is a verb and the second is a noun; alternative hypotheses are cut down, because they would not fit in the structure.
-%To build a *sentence*, we need a subject, a predicate and an object; to build a *subject*, we need a noun phrase or a pronoun; to build a *noun phrase*, we need ...  
-%These rules, along with the chosen vocabulary, are able to generate precisely the following four sentences: *I wish a wish, a wish wishes a wish, I wish me* and *a wish wishes me*. 
- 
+
 
 1. We can look up all morphological analyses, separately for each word.
 Given that we do not know anything about the context in the lookup phase, we end up with analyses $wish_N$ and $wish_V$ for both of the instances.
@@ -92,15 +90,34 @@ Karlsson 1995: psycholinguistic principles -- easier for humans to reduce than g
 * Strict vs. heuristic; sequential vs. parallel ?
 * Karlsson 1995 leaves details open. Different variants implemented.
 
+#### Expressivity
+
+As we have learnt, CG is not a generative grammar---it needs a list of alternatives to start removing some of them.
+But can we emulate some kind of behaviour that would put it into the Chomsky hierarchy?
+
+We can assume that an input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma$.
+
+Then we can easily code up a grammar that would select us a sequence of $a^nb^n$, for any even length of string. (We do need a finite sequence, because we abuse the ordering of the rules and the C context: we can start from `SELECT a IF (-1 >>>)` and `SELECT b IF (1 <<<)`.)
+
+While CG still has no strict notion of fail---we can emulate it by adding in a `FAIL` tag, and an AFTER-SECTIONS which states that if a FAIL is still present, then do REMCOHORT for all.
+
+TODO: effect of ordering! Can we do the counting languages without ordering?
+
 ### Summary of CG
 
 Is it a formalism?
 
 Bick & Didriksen: "declarative whole of contextual possibilities for a language or genre".
 
+This work is partly exploring how declarative we can go. Other part is to build (hopefully useful) tools.
+
 ## Boolean satisfiability (SAT) 
 
-Some stuff here too.
+* Example
+* What it is & what it can do
+* What else it has been used for
+* WHY? What does it help you to formulate something as a SAT-problem?
+
 
 
 # CG as a SAT-problem (15-20 pages)
@@ -326,6 +343,8 @@ We find non-trivial conflicts from real grammars.
 Philosophical questions: can CG rules *generate* language?
 When the sentence starts off as anything, the rules become truly declarative.
 We do not remove the verb after determiner, we prevent such sequence from being created in the first place.
+
+Check if the rules already enforce some trivial stuff, like not generating word boundaries in the middle of the symbolic sentence.
 
 # Conclusions
 
