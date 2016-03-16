@@ -1,48 +1,101 @@
 \chapter{Introduction to this thesis}
 
 
-\emph{I wish a wish}.
+\begin{quote}
+\emph{I wish a wish.}
+\end{quote}
 
-
-\noindent How do you know that the first \emph{wish} is a verb and the second one is a noun? A computer can approach this from many angles.
+\noindent How do you know that the first \emph{wish} is a verb and the second one is a noun? A computer can approach this from many angles; below we list a few of them.
 
 \begin{enumerate}
-\item We can gather example sentences and annotate them manually: ``this \emph{wish} is a verb, that one is a noun''. Based on these examples, the computer will learn to guess the part of speech for new instances of \emph{wish} with a certain probability, depending on what other words appear in the sentence.
+\item We can gather example sentences and annotate them manually. % ``this \emph{wish} is a verb, that one is a noun''. 
+Based on these examples, the computer will learn to guess the 
+part of speech for new instances of \emph{wish} with a certain probability, 
+depending on what other words appear in the sentence.
 
-\item We can write a generative grammar to describe our language. 
-A parser is only able to generate a well-formed tree for the sentence when the first \emph{wish} is a verb and the second is a noun; alternative hypotheses are cut down, because they would not fit in the structure.
+\item We can write a generative grammar to describe the English language, and analyse this sentence with it. 
+The only well-formed solution has the first \emph{wish} as a verb and the second as a noun: alternative hypotheses are rejected, 
+% as soon as it becomes evident that they do not fit in the structure.
+because they do not fit in the structure.
 
 
 \item We can look up all morphological analyses, separately for each word.
-Given that we do not know anything about the context in the lookup phase, we end up with analyses $wish_N$ and $wish_V$ for both of the instances.
-In contrast to approach 2, which starts with no information, we start with too much information.  
+Given that we know nothing about the context in the lookup phase, we start off with both wishes potentially $wish_N$ and $wish_V$.
+%In contrast to approach 2, which starts with no information, we start with too much information: all alternatives are present.  
 Now, in the spirit of approach 1, we can look at the context words for help. A learning-based method may encounter plenty of examples where \emph{wish} appearing after \emph{a} is a noun, and learn to assign a high probability to that hypothesis. 
-But we have more powerful tools, namely, grammatical categories and abstraction.
-Instead of learning facts about strings \emph{a} and \emph{wish} , or \emph{my} and \emph{house} , we can formulate a \emph{constraint rule} : ``If you find something that can be a verb, but it is preceded by a determiner, throw that guess away''. 
+But we have more powerful tools, from the world of approach 2: grammatical categories and abstraction.
+Instead of learning facts about the strings \emph{a} and \emph{wish}, or \emph{my} and \emph{house}, we can formulate a \emph{constraint rule}: ``If you find something that can be a verb, but it is preceded by a determiner, throw that guess away''. 
 Add some hundreds of these rules, and they expose the structure hidden behind the clutter.
 \end{enumerate}
 
-The method number 3 is known as \emph{Constraint Grammar} (CG, Karlsson 1995).  
-It is robust, fast, easy to get started, even small grammars are useful.  
+Method number 3 is known as \emph{Constraint Grammar}, \cite{karlsson1995constraint}, abbreviated as \emph{CG} throughout this thesis. 
+CG is a formalism for writing disambiguation rules for an initially ambiguous input. The rules describe the impossibilities and improbabilities of a given language, such that after a successful run of the rules, only correct analyses remain.
+
+In the grand scheme of grammar formalisms, CG is lightweight, but efficient and accurate. The rules are self-contained and mutually independent, each describing small pieces of complex phenomena. %, such as noun phrases or subjunctive clauses.
+These features make the formalism fast, because the input sentence can be processed in local units. In addition, it is highly robust: even if some parts of the sentence contain errors or unknown words, the rest of the sentence will still be processed.
+This makes it possible to assign \emph{some} structure to \emph{any} input.
+Finally, a grammar can always be made more accurate: if there is one single exception in the whole language, we can write a new rule only for that, without modifying any of the more general rules.
+
+However, the same properties also make it challenging to manage the grammars.
+%possible to introduce internal contradictions in the grammar. 
+Due to the bits-and-pieces nature of CG rules, grammars tend to grow large;
+up to several thousands of rules. At the same time, there are no inbuilt 
+mechanisms to detect if a new rule contradicts an older one.
+From these two factors, it is natural that errors creep in without anyone noticing.
+This thesis aims to create methods for analysing and detecting conflicts in CGs, as well as contribute to the theoretical understanding of the formalism and its various implementations.
 
 
 \section{Scope of this thesis}
+
+Automatic creation and analysis of CG rules has been a research topic since the beginning of the formalism. Already \cite{karlsson1995constraint} envisions ...
+
 This thesis has two main contributions in the field of CG.
 
-\paragraph{Formalisation of CG}
+\paragraph{Theoretical understanding of CG}
 
-Based on Lager and Nivre, we did more stuff. With SAT!
+\begin{quote}Fred 1995: This explicitly reductionistic approach does not seem to have any obvious counterparts in the grammatical literature or in current formal syntactic theory.\end{quote}
 
-Can we have a notion of ``the language generated by the grammar'' with Constraint Grammar?  
-We can use the symbolic sentence approach: assuming that the initial input can be anything, then the rules would actually describe what is allowed in the language.
+Throughout its history, Constraint Grammar has been very practically oriented, with 
+little studies on the formal properties of CG, or attempts to relate it to existing
+frameworks.
+%Notable exeptions are \cite{lager_nivre01}, who model CG in logic, and \cite{nemeskey14}, who evaluate different parsers for efficiency.
+
+We model CG in the framework of \emph{Boolean satisfiability}, abbreviated \emph{SAT}.
+The analyses of the word forms are translated into Boolean variables, 
+and the constraint rules into logical formulas operating on those variables.
+Applying a rule becomes a task of assigning truth values to different analyses,
+such that ultimately each word should have one true value.
+
+This simple translation gives us properties that standard CG engines lack.
+In particular, the rules lose their independence: any conflict between two rules renders the formula unsatisfiable.
+While this is not necessarily a desirable property in a CG engine, it is interesting for two reasons. Firstly, it enables us to track the effect of each rule, both for a given text, or for \emph{any possible text}. The first will tell us about a rule conflict, if the rules happen to fire; the latter will tell us about a rule conflict without any input text.
+
+The second reason is more high-level.
+An interesting question for any grammar formalism is ``how expressive is it?'' 
+Given the reductionist nature of CG, this is a harder question:
+can we even have a notion of ``the language generated by the grammar'' with Constraint Grammar?
+A side-effect of encoding the rules in logic, and giving a \emph{maximally ambiguous sentence} as an input, turns out we can approximate the \emph{generation} of language with CG.
+% then the rules would actually describe what is allowed in the language.
 
 \paragraph{Analysis and quality control of CG}
+
+\todo{quote from Voutilainen 2004}
+
+The most important contribution is, however, a practical one. 
+With the rules modelled in logic, we can track their effects and 
+find out if they contradict each other.
+In Chapter~\ref{chapterCGana}, we describe a method and a working 
+implementation to analyse existing grammars. In addition, the method allows
+us to \emph{generate} sequences based on the rules.
+
 
 The same factors that make it easy to write, also make it easy to write poorly.  
 Even with the most careful grammar writers, managing big grammars is demanding.
 
 We use the newly found stuff (with SAT!) to analyse CGs.
-With the rules modelled in logic, we can track their effects and find out if they contradict each other.
+
+
+
 
 
 

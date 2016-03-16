@@ -16,7 +16,9 @@ constraint rules which can select or remove a potential analysis
 target word, depending on the context words around it. Together these rules disambiguate the whole text.
 
 In the example below, I show possible analyses for the sentence ``the bear
-sleeps'':
+sleeps''. 
+To introduce the terminology: each \emph{word form} appears surrounded by "< >".
+The analyses for each word form contain one lemma, and a list of morphological tags. A list of lemma and tags is called \emph{reading}, and a word form together with its readings is called a \emph{cohort}. A cohort is ambiguous, if it contains more than one reading.
 
 \begin{center}
 \begin{verbatim}
@@ -31,6 +33,7 @@ sleeps'':
         "sleep" verb pres p3 sg
 \end{verbatim}
 \end{center}
+
 
 \noindent We can disambiguate this sentence with two rules:
 
@@ -59,8 +62,7 @@ reading. The finished analysis is shown below:
         "sleep" verb pres p3 sg
 \end{verbatim}
 
-It is also possible to add syntactic tags and (mostly rudimentary) phrase
-structure within CG. 
+It is also possible to add syntactic tags and dependency structure within CG. 
 After disambiguating \emph{bear} by part of speech (noun), it
 remains to disambiguate whether it is a subject, object, adverbial or
 any other possible syntactic role.
@@ -112,23 +114,23 @@ following output:
 
 \end{verbatim}
 
-The syntactic tags can also indicate some phrase structure. For
+The syntactic tags can also indicate some dependency structure. For
 instance, \emph{the} could get a tag such as
 \texttt{@DN\textgreater}, to indicate that it is a determiner whose
 head is to the right. A phrase such as \emph{the little dog} could get
-tagged as  \emph{the}\texttt{@DN>} \emph{little}\texttt{@AN>}
+tagged as  \emph{the}\texttt{DN>} \emph{little}\texttt{AN>}
 \emph{bear}\texttt{@Subj}.
- Using \texttt{tag\textless} and \texttt{tag\textgreater} can identify
+ Using \texttt{\textless{}tag} and \texttt{tag\textgreater} can identify
 chunks, as long as they are not disconnected.
 
 With the introduction of CG-3, it is possible to add full-fledged dependency
 relations: number the words in the sentence and for each set a parent,
-such as %\texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
+such as \texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
 However, these features are recent and not used in many of the grammars written 
-in the community. In this introduction, I will illustrate my examples with the 
+in the community. In this introduction, we will illustrate the examples with the 
 most basic operations, that is, disambiguating morphological tags.
-The syntactic and dependency operations are not fundamentally
-different: as with morphological tags, the rules have an \emph{operation}
+The syntactic operations are not fundamentally
+different from morphological: the rules describe an \emph{operation}
 performed on a \emph{target}, conditional on a \emph{context}.
 
 
@@ -248,11 +250,11 @@ an ungrammatical sequence and leave all tags intact---in that case,
 its performance would not differ from a grammar that simply does not have many rules.
 If we define \emph{grammatical sequences} to be sequences of POS tags,
 then the question is somewhat easier to answer: \texttt{\textless{}det\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} is ungrammatical, and CG doesn't raise an alarm that there is something wrong. However, the alternative \texttt{\textless{}noun\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} might be in that particular context even ``more wrong''; same goes for the option with no disambiguation at all.
-Bottom line: it's not about defining grammaticality, it's providing analyses in any case.
+As \citename{karlsson1995constraint} states, CG is not designed for defining grammaticality, but rather providing analyses for real-life texts.
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
 
-\subsection{Shallow structure}\label{shallow-vs.deep-structure}
+\subsection{Shallow syntax}\label{shallow-syntax}
 
 CG can be described as shallow for various reasons. The rules usually
 operate on a local context of a few words. 
@@ -265,6 +267,15 @@ Whereas a generative grammar could fail to produce any analysis, if even one of 
 
 
 \paragraph{Flat structure} 
+
+The rules do not produce any hierarchical structure.
+
+
+Syntactic labels may be added, but no invisible structure is postulated.
+The syntax of CG is dependency syntax.
+
+Syntactic labels are functionally same as morphological: \texttt{@SUBJ} is just one more tag in a reading.
+
 
 The rules do not usually handle 
 long-distance dependencies; they operate on a unit of a few words, and
@@ -413,6 +424,7 @@ If a rare condition is met, the rare analysis is selected, and since it will be 
 An alternative solution to a strict order is to use a \emph{heuristic order}: when disambiguating a particular word, find the rule that has the longest and most detailed match. Now, assume that there is a rule with a longer context, such as ``select noun if -1 is determiner and +1 is verb'', even if this rule appears last in the file, it would be preferred to the shorter rules, because it is a more exact match.
 					
 Both methods have their strengths and weaknesses. A strict order is more predictable, but it also means that the grammar writers need to pay more thought to rule interaction. A heuristic order frees the grammar writer from finding an optimal order, but it can give unexpected results, which are harder to debug.
+As for existing implementations, \cite{vislcg3} follows the strict scheme, whereas \cite{tapanainen1996} is heuristic.
 
 
 \paragraph{Sequential vs. parallel}
