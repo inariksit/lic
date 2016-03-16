@@ -31,10 +31,10 @@ Add some hundreds of these rules, and they expose the structure hidden behind th
 Method number 3 is known as \emph{Constraint Grammar}, \cite{karlsson1995constraint}, abbreviated as \emph{CG} throughout this thesis. 
 CG is a formalism for writing disambiguation rules for an initially ambiguous input. The rules describe the impossibilities and improbabilities of a given language, such that after a successful run of the rules, only correct analyses remain.
 
-In the grand scheme of grammar formalisms, CG is lightweight, but efficient and accurate. The rules are self-contained and mutually independent, each describing small pieces of complex phenomena. %, such as noun phrases or subjunctive clauses.
-These features make the formalism fast, because the input sentence can be processed in local units. In addition, it is highly robust: even if some parts of the sentence contain errors or unknown words, the rest of the sentence will still be processed.
+In the grand scheme of grammar formalisms, CG is markedly lightweight, yet accurate and efficient. The rules are self-contained and mutually independent, each describing small pieces of complex phenomena. %, such as noun phrases or subjunctive clauses.
+These features make the formalism fast, because the input sentence can be processed in local units. Furthermore, CG is highly robust: even if some parts of the sentence contain errors or unknown words, the rest of the sentence will still be processed.
 This makes it possible to assign \emph{some} structure to \emph{any} input.
-Finally, a grammar can always be made more accurate: if there is one single exception in the whole language, we can write a new rule only for that, without modifying any of the more general rules.
+Finally, a grammar can always be made more accurate: if there is one single exception in the whole language, we can address only that, without modifying any of the more general rules.
 
 However, the same properties also make it challenging to manage the grammars.
 %possible to introduce internal contradictions in the grammar. 
@@ -53,46 +53,52 @@ This thesis has two main contributions in the field of CG.
 
 \paragraph{Theoretical understanding of CG}
 
-\begin{quote}Fred 1995: This explicitly reductionistic approach does not seem to have any obvious counterparts in the grammatical literature or in current formal syntactic theory.\end{quote}
+\begin{quote}
+This explicitly reductionistic approach does not seem to have any obvious counterparts in the grammatical literature or in current formal syntactic theory. \\
+-- Karlsson, 1995
+\end{quote}
 
-Throughout its history, Constraint Grammar has been very practically oriented, with 
-little studies on the formal properties of CG, or attempts to relate it to existing
+Throughout its history, CG has been very practically oriented, with 
+little studies on its formal properties, or attempts to relate it to existing
 frameworks.
-%Notable exeptions are \cite{lager_nivre01}, who model CG in logic, and \cite{nemeskey14}, who evaluate different parsers for efficiency.
+Notable exeptions are \cite{lager_nivre01}, who model CG in logic, and \cite{nemeskey14}, who evaluate different finite-state based parsers for efficiency.
 
+\todo{find "Hulden (2011) showed that if the rules are compiled to transducers ..." -- what kind of scheme was that? is there an ordered FST-based CG engine? Also read Peltonen 2011.}
+
+This brings us to the yet unmentioned part of the title.
 We model CG in the framework of \emph{Boolean satisfiability}, abbreviated \emph{SAT}.
 The analyses of the word forms are translated into Boolean variables, 
 and the constraint rules into logical formulas operating on those variables.
 Applying a rule becomes a task of assigning truth values to different analyses,
 such that ultimately each word should have one true value.
 
-This simple translation gives us properties that standard CG engines lack.
-In particular, the rules lose their independence: any conflict between two rules renders the formula unsatisfiable.
-While this is not necessarily a desirable property in a CG engine, it is interesting for two reasons. Firstly, it enables us to track the effect of each rule, both for a given text, or for \emph{any possible text}. The first will tell us about a rule conflict, if the rules happen to fire; the latter will tell us about a rule conflict without any input text.
+This simple translation gives us properties that standard CG engines do not have.
+Most importantly, the rules lose their independence: any conflict between two rules renders the formula unsatisfiable.
+While this is not necessarily a desirable property in a CG engine---it is hard to justify the loss of robustness---it is nevertheless interesting for other purposes. 
+Encoding the rules in logic enables us to track the effect of each rule: each rule which triggers at the instance of \emph{wish} creates a clause, and in case of a 
+conflict, we can find out which clauses cause it.
 
-The second reason is more high-level.
-An interesting question for any grammar formalism is ``how expressive is it?'' 
-Given the reductionist nature of CG, this is a harder question:
-can we even have a notion of ``the language generated by the grammar'' with Constraint Grammar?
-A side-effect of encoding the rules in logic, and giving a \emph{maximally ambiguous sentence} as an input, turns out we can approximate the \emph{generation} of language with CG.
-% then the rules would actually describe what is allowed in the language.
+Furthermore, we are not restricted analysing only existing texts---in fact, we can analyse \emph{any possible text}. We can feed our rules with a \emph{maximally ambiguous sentence}: every word starts off with every possible analysis.
+This setup brings us lets us conceive a notions of \emph{generation} and \emph{expressivity} within the framework of CG.
+
+%An interesting question for any grammar formalism is ``how expressive is it?'' 
+%Given the reductionist nature of CG, this is a harder question:
+%can we even have a notion of ``the language generated by the grammar'' with Constraint Grammar?
+
 
 \paragraph{Analysis and quality control of CG}
 
-\todo{quote from Voutilainen 2004}
+\begin{quote}
+Another desirable facility in the grammar development environment would be a mechanism for identifying pairs of rules that contradict each other. \\
+-- Voutilainen 2004
+\end{quote}
 
 The most important contribution is, however, a practical one. 
 With the rules modelled in logic, we can track their effects and 
 find out if they contradict each other.
 In Chapter~\ref{chapterCGana}, we describe a method and a working 
-implementation to analyse existing grammars. In addition, the method allows
-us to \emph{generate} sequences based on the rules.
-
-
-The same factors that make it easy to write, also make it easy to write poorly.  
-Even with the most careful grammar writers, managing big grammars is demanding.
-
-We use the newly found stuff (with SAT!) to analyse CGs.
+implementation to analyse existing grammars. In addition, the method which allows
+us to \emph{generate} sequences, is used for giving the grammar writer feedback of the rules they are writing.
 
 
 
@@ -101,6 +107,8 @@ We use the newly found stuff (with SAT!) to analyse CGs.
 
 
 \section{Structure of this thesis}
+
+The core of this thesis is an extension of two articles: \cite{listenmaa_claessen2015} and \todo{Listenmaa and Claessen (2016)}. Some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
 
 Chapter 2 presents a general introduction to both CG and SAT, aimed for a reader who is unfamiliar with the topics.
 Chapter 3 discusses previous logical representations of CG, and describes our SAT-encoding in detail, complete with an appendix.
