@@ -2,9 +2,10 @@
  
 \paragraph{This used to be my course paper for Grammar Formalisms.}
 
+(TODO: should I write here something in depth about e.g. set operations in target/conditions?)
+
 Constraint Grammar (CG) is a formalism for 
-% disambiguating morphologically analysed text. 
-analysing unrestricted text. It relies on morphology 
+disambiguating morphologically analysed text. 
 It was first introduced by
 \cite{karlsson1995constraint}, and has been used for many tasks in
 computational linguistics, such as POS tagging, surface syntax and
@@ -122,7 +123,7 @@ chunks, as long as they are not disconnected.
 
 With the introduction of CG-3, it is possible to add full-fledged dependency
 relations: number the words in the sentence and for each set a parent,
-such as \texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
+such as %\texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
 However, these features are recent and not used in many of the grammars written 
 in the community. In this introduction, I will illustrate my examples with the 
 most basic operations, that is, disambiguating morphological tags.
@@ -135,16 +136,28 @@ performed on a \emph{target}, conditional on a \emph{context}.
 
 \section*{Properties of Constraint Grammar}\label{properties}
 
-All theories and implementations of CG agree that is a \emph{reductionist}
-system with \emph{shallow} syntax. There are different takes on how
-\emph{deterministic} the rules are: the state-of-the-art CG parser VISL CG-3
-executes the rules strictly based on the order they appear, but there
-are other implementations that apply their own heuristics, or remove the
-ordering in total, such as in finite-state or logic-based implementations. 
-In the following, I will address the three features and relate CG to
-other formalisms, in terms of the feature in question.
+\cite{karlsson1995constraint} lists 24 design principles and describes
+related work at the time of writing.
+Here we summarise a set of main features, and relate CG to the developments in grammar formalism since the initial CG description.
 
-\subsection*{Reductionist vs.~licencing}\label{reductionist-vs.licencing}
+All theories and implementations of CG  a \emph{reductionist}
+system, designed primarily for analysis, not generation.
+
+The syntax is decidedly \emph{shallow}: the rules do not aim to
+describe all aspects of an abstract phenomenon such as noun phrase, 
+but rather bits and pieces with concrete conditions.
+The rules are self-contained and mutually independent---this makes it 
+easy to add exceptions, and exceptions to exceptions, without 
+changing the more general rules.
+
+There are different takes on how \emph{deterministic} the rules are.
+The current state-of-the-art CG parser VISL CG-3 executes the rules strictly based on the order of appearance, but there
+are other implementations that apply their own heuristics or remove the
+ordering in total, such as in finite-state or logic-based implementations. 
+
+In addition, we will discuss the \emph{expressivity} of CG---while it is not a generative grammar and cannot be placed in the Chomsky hierarchy, we aim to provide parallels in what kind of output it can produce.
+
+\subsection*{Reductionist vs.~licencing (or Analysis vs. Generation???)}\label{reductionist-vs.licencing}
 
 CG is a reductionist system: it starts from a set of alternative
 analyses, and eliminates the impossible or improbable ones using
@@ -170,6 +183,12 @@ rule applications create rather than discard ambiguities: the more
 processing, the less unambiguous information.
 \end{quote}
 
+According to the initial specification, it is a grammar for analysis: \cite{karlsson1995constraint} does not see it fit for generation:
+
+\begin{quote}
+It would be optimal if the formalism were general and abstract enough for it, or rather for grammars written in the framework of it, to be used both for sentence analysis and sentence generation. 
+Constraint Grammar takes no explicit stand on this issue. In practice, however, constraints are geared towards parsing, and Constraint Grammars are analysis grammars. It remains to be demonstrated that full-scale syntax can be done by one and the same reversible grammar.
+\end{quote}
 
 
 \subsection*{Shallow vs.~deep structure}\label{shallow-vs.deep-structure}
@@ -179,6 +198,8 @@ operate on a local context of a few words. Moreover, a CG grammar does
 not necessarily enforce grammaticality.
 In addition, ...
 I will address these points in the following sections.
+
+\
 
 
 \paragraph{Flat structure} The rules do not usually handle 
@@ -192,8 +213,22 @@ whole sentence. Some local subtrees can be detected, but mostly
 for the purposes of aiding the disambiguation.
 TODO: talk about dependency trees in CG-3!
  
-\paragraph{Little enforcement of grammaticality} CG doesn't
-per se define sequences as \emph{grammatically correct}.
+\paragraph{No enforcement of grammaticality} 
+
+\cite{karlsson1995constraint} states explicitly:
+
+\begin{quote}
+The foremost task of a parsing-oriented grammar is rather to aid in parsing every input than to define the notion ”grammatically correct sentence”, or to describe ”all and only the grammatical sentences”.
+\end{quote}
+
+\begin{quote}
+The constraints will mostly be on a more delicate level, more concrete, closer to real words and sentences, than ordinary grammar rules tend to be in much of current syntactic theory. Most certainly there will be no single general or purportedly simple rule stating all aspects of the syntax of, say, grammatical subjects or noun phrases in language L.
+Rather, there will be a few dozens of down-to-earth constraints that state bits and pieces of the phenomenon, approaching or even reaching the correct description by ruling out what cannot be the case in this or that context. 
+\end{quote}
+
+
+
+CG does not define sequences as \emph{grammatically correct}.
 Beside the lack of long-distance dependencies, there is
 no mandatory enforcement of even local well-formedness, such as gender agreement.
 However, this is often helpful for practical purposes, because it adds robustness.
@@ -232,7 +267,16 @@ Bottom line: it's not about defining grammaticality, it's providing analyses in 
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
 
-\paragraph{Some relevant heading for this part} CG has a more lightweight task than e.g.~a phrase structure grammar: a
+\paragraph{Expressivity} 
+
+\cite{karlsson1995constraint}
+\begin{quote}
+For example, ordinary phrase structure rules for English NPs would state that a determiner is followed by certain optional premodifiers plus an obligatory noun. A consequence of this is that a determiner cannot be followed by a finite or infinitive verb form, without an intervening noun. In Constraint Grammar, a constraint could be postulated to this effect, discarding the verbal readings of the word-form bank in expressions like the bank, the old bank.
+\end{quote}
+
+
+
+CG has a more lightweight task than e.g.~a phrase structure grammar: a
 successful disambiguation can depend on just a local context, in a
 window of 1-3 words left or right. To demonstrate the the difference,
 let us take the same the example sentence \emph{the bear sleeps}, and a
@@ -315,9 +359,17 @@ context word.
 
 \subsection*{Ordering of the rules}\label{ordering}
 
-The previous properties of Constraint Grammar formalism and rules were specified in \cite{karlsson1995constraint}. However, Karlsson omits some practical details regarding implementation, one being the order in which the rules are executed. After the initial specification, there have been several independent implementations of CG, with different ordering schemes. In the following section, we will present the different parameters of ordering and test their performance, using a previously written grammar.
+The previous properties of Constraint Grammar formalism and rules were specified in \cite{karlsson1995constraint}, and retained in further implementations.
+However, the notion of \emph{ordering} has been interpreted more freely. 
+\cite{karlsson1995constraint} states on page 17:
 
-The execution of the rules depends on the following parameters: strict vs. heuristic ordering, and sequential vs. parallel execution. These parameters can combine freely: strict and sequential, strict and parallel, heuristic and sequential, or heuristic and parallel. Throughout the section, we will apply the rules to the following ambiguous passage:
+\begin{quote} 
+Each single statement is true when examined in isolation, either absolutely or with some degree of certainty, depending upon how careful the grammar writer has been. Furthermore, disregarding morphosyntactic mappings, the constraints are \emph{unordered}.
+\end{quote}
+
+After the initial specification, there have been several independent implementations of CG, with different ordering schemes. In the following section, we will present the different parameters of ordering.
+
+The execution of the rules depends on the following parameters: strict vs. heuristic ordering, and sequential vs. parallel execution. These parameters may combine freely: strict and sequential, strict and parallel, heuristic and sequential, or heuristic and parallel. Throughout the section, we will apply the rules to the following ambiguous passage:
 \begin{verbatim}
 "<what>"
         "what" determiner
@@ -333,9 +385,9 @@ The execution of the rules depends on the following parameters: strict vs. heuri
 
 \paragraph{Strict vs. heuristic}
 
-This aspect concerns the ordering of the rules in the file. An implementation with strict order applies each rule in the order in which they appear in the file. If a grammar contains the rules “select noun after determiner” and “select verb after pronoun” in the given order, the rule that selects noun will be applied first. After it has selected the noun reading for question, there are no verb readings available anymore for the second rule to fire.
+This aspect concerns the ordering of the rules in the file. An implementation with \emph{strict order} applies each rule in the order in which they appear in the file. If a grammar contains the rules ``select noun after determiner'' and ``select verb after pronoun'' in the given order, the rule that selects noun will be applied first. After it has selected the noun reading for \emph{question}, there are no verb readings available anymore for the second rule to fire.
 					
-How do we know which rule is the right one? There can be many rules that fit the context, but we choose the one that just happens to appear first in the rule file. More careful rules are usually placed first, followed by stronger rules—see the pattern below.
+How do we know which rule is the right one? There can be many rules that fit the context, but we choose the one that just happens to appear first in the rule file. More careful rules are usually placed first, followed by stronger rules---see the pattern below.
 
 \begin{verbatim}					
 SELECT <rare analysis> IF <rare condition> ;
@@ -344,19 +396,24 @@ REMOVE <rare analysis> ;
 \end{verbatim}
 If a rare condition is met, the rare analysis is selected, and since it will be the only analysis, it will be protected from the remove rule. If the rare condition is not met, the rare analysis is removed.
 					
-An alternative solution to a strict order is to use heuristic order: when disambiguating a particular word, find the rule that has the longest and most detailed match. Now, assume that there is a rule with a longer context, such as “select noun if -1 is determiner and +1 is verb”, even if this rule appears last in the file, it would be preferred to the shorter rules, because it is a more exact match.
+An alternative solution to a strict order is to use a \emph{heuristic order}: when disambiguating a particular word, find the rule that has the longest and most detailed match. Now, assume that there is a rule with a longer context, such as ``select noun if -1 is determiner and +1 is verb'', even if this rule appears last in the file, it would be preferred to the shorter rules, because it is a more exact match.
 					
 Both methods have their strengths and weaknesses. A strict order is more predictable, but it also means that the grammar writers need to pay more thought to rule interaction. A heuristic order frees the grammar writer from finding an optimal order, but it can give unexpected results, which are harder to debug.
 
 
 \paragraph{Sequential vs. parallel}
 
-The input sentence can be processed in sequential or parallel manner. In sequential execution, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule ``select noun after determiner''.
+The input sentence can be processed in sequential or parallel manner. In \emph{sequential execution}, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule ``select noun after determiner''.
 
-In contrast, a parallel execution disambiguates all the words at the same time, using their initial, ambiguous context. Both ``select noun after determiner'' and ``select verb after pronoun'' will be applied to \emph{question}, because the original input from the morphological analyser contains both determiner and pronoun as the preceding word.
+In contrast, a \emph{parallel execution} disambiguates all the words at the same time, using their initial, ambiguous context. Both ``select noun after determiner'' and ``select verb after pronoun'' will be applied to \emph{question}, because the original input from the morphological analyser contains both determiner and pronoun as the preceding word.
 
 Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}.
 Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other. 
+
+\todo{See Tino's table in CG3 manual: foreach word: foreach rule etc.}
+
+\paragraph{No ordering}
+
 
 
 \paragraph{Note on termination} 
