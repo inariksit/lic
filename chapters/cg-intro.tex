@@ -385,14 +385,14 @@ context word.
 \subsection{Ordering of the rules}\label{ordering}
 
 The previous properties of Constraint Grammar formalism and rules were specified in \cite{karlsson1995constraint}, and retained in further implementations.
-However, the notion of \emph{ordering} has been interpreted more freely. 
-\cite{karlsson1995constraint} states on page 17:
+However, even Karlsson's original specifications differ as for the \emph{ordering} of the rules:
+\cite{karlsson1990cgp} describes the CGP as executing the rules strictly in the order in which they appear, but \cite{karlsson1995constraint} states on page 17:
 
 \begin{quote} 
 Each single statement is true when examined in isolation, either absolutely or with some degree of certainty, depending upon how careful the grammar writer has been. Furthermore, disregarding morphosyntactic mappings, the constraints are \emph{unordered}.
 \end{quote}
 
-After the initial specification, there have been several independent implementations of CG, with different ordering schemes. In the following section, we will present the different parameters of ordering.
+In the two decades following the initial specification, there have been several independent implementations of CG, with different ordering schemes. In the following section, we will present the different parameters of ordering.
 
 The execution of the rules depends on the following parameters: strict vs. heuristic ordering, and sequential vs. parallel execution. These parameters may combine freely: strict and sequential, strict and parallel, heuristic and sequential, or heuristic and parallel. Throughout the section, we will apply the rules to the following ambiguous passage:
 \begin{verbatim}
@@ -412,35 +412,39 @@ The execution of the rules depends on the following parameters: strict vs. heuri
 
 This aspect concerns the ordering of the rules in the file. An implementation with \emph{strict order} applies each rule in the order in which they appear in the file. If a grammar contains the rules ``select noun after determiner'' and ``select verb after pronoun'' in the given order, the rule that selects noun will be applied first. After it has selected the noun reading for \emph{question}, there are no verb readings available anymore for the second rule to fire.
 					
-How do we know which rule is the right one? There can be many rules that fit the context, but we choose the one that just happens to appear first in the rule file. More careful rules are usually placed first, followed by stronger rules---see the pattern below.
+How do we know which rule is the right one? There can be many rules that fit the context, but we choose the one that just happens to appear first in the rule file. 
+A common design pattern is to place more careful rules first; only if they do not 
+apply, then try a rule with less conditions.
 
-\begin{verbatim}					
-SELECT <rare analysis> IF <rare condition> ;
-...
-REMOVE <rare analysis> ;
-\end{verbatim}
-If a rare condition is met, the rare analysis is selected, and since it will be the only analysis, it will be protected from the remove rule. If the rare condition is not met, the rare analysis is removed.
+% More careful rules are usually placed first, followed by stronger rules---see the pattern below.
+
+% \begin{verbatim}					
+% SELECT <rare analysis> IF <rare condition> ;
+% ...
+% REMOVE <rare analysis> ;
+% \end{verbatim}
+% If a rare condition is met, the rare analysis is selected, and since it will be the only analysis, it will be protected from the remove rule. If the rare condition is not met, the rare analysis is removed.
 					
 An alternative solution to a strict order is to use a \emph{heuristic order}: when disambiguating a particular word, find the rule that has the longest and most detailed match. Now, assume that there is a rule with a longer context, such as ``select noun if -1 is determiner and +1 is verb'', even if this rule appears last in the file, it would be preferred to the shorter rules, because it is a more exact match.
 					
 Both methods have their strengths and weaknesses. A strict order is more predictable, but it also means that the grammar writers need to pay more thought to rule interaction. A heuristic order frees the grammar writer from finding an optimal order, but it can give unexpected results, which are harder to debug.
-As for existing implementations, \cite{vislcg3} follows the strict scheme, whereas \cite{tapanainen1996} is heuristic.
+As for existing implementations, \cite{karlsson1990cgp} and \cite{vislcg3} follow the strict scheme, whereas \cite{tapanainen1996} is heuristic.
 
 
 \paragraph{Sequential vs. parallel}
 
 The input sentence can be processed in sequential or parallel manner. In \emph{sequential execution}, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule ``select noun after determiner''.
 
+
 In contrast, a \emph{parallel execution} disambiguates all the words at the same time, using their initial, ambiguous context. Both ``select noun after determiner'' and ``select verb after pronoun'' will be applied to \emph{question}, because the original input from the morphological analyser contains both determiner and pronoun as the preceding word.
 
-Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}.
-Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other. 
+Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
+If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}. 
+Perhaps unsurprisingly, most of the existing CG implementations are sequential.
 
-\todo{See Tino's table in CG3 manual: foreach word: foreach rule etc.}
+A notable exception is the system proposed in \cite{koskenniemi90}, known by the names Finite-State Intersection Grammar (FSIG) or Parallel Constraint Grammar (PCG). As per \cite{koskenniemi97}, we use the latter term. In addition, a variant of the CG engine in \cite{listenmaa_claessen2015} is parallel. 
 
-\paragraph{No ordering}
 
-What does it even mean? Unordered is just FSIG--how can it not break with conflicts? Don't tell me ``there are
 
 \paragraph{Note on termination} 
 Running the grammar multiple times is desirable: especially the rules
