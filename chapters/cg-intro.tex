@@ -249,7 +249,7 @@ by enumerating only legal combinations, the grammar would just refuse to disambi
 an ungrammatical sequence and leave all tags intact---in that case,
 its performance would not differ from a grammar that simply does not have many rules.
 If we define \emph{grammatical sequences} to be sequences of POS tags,
-then the question is somewhat easier to answer: \texttt{\textless{}det\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} is ungrammatical, and CG doesn't raise an alarm that there is something wrong. However, the alternative \texttt{\textless{}noun\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} might be in that particular context even ``more wrong''; same goes for the option with no disambiguation at all.
+then the question is somewhat easier to answer: \texttt{\textless{}det\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} is ungrammatical, and CG does not raise an alarm that there is something wrong. However, the alternative \texttt{\textless{}noun\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} might be in that particular context even ``more wrong''; same goes for the option with no disambiguation at all.
 As \citename{karlsson1995constraint} states, CG is not designed for defining grammaticality, but rather providing analyses for real-life texts.
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
@@ -328,23 +328,23 @@ all in disambiguating the previous words.
 Contrasting with phrase-structure or dependency grammars, the rules in
 CG are often on a lower level of abstraction. 
 The rule that tells to remove verb reading after a determiner
-doesn't tell us about the structure of noun phrase; we need a second
-rule to remove a verb after a determiner and an adjective (``the happy
-bear sleeps''), and a third rule to remove verb after a possessive
-pronoun (``my bear sleeps''). A phenomenon that is expressed with one
+does not describe the whole abstract category ``''noun phrase; we need a second
+rule to remove a verb after a determiner and an adjective (\emph{the happy
+bear sleeps}), and a third rule to remove verb after a possessive
+pronoun (\emph{my bear sleeps}). A phenomenon that is expressed with one
 big rule in a deep formalism such as HPSG or categorial grammar, is
 split into many low-level rules.
 
 \paragraph{Mutual independence}
-On the other hand, these features can provide
-flexibility that is hard to mimic by a deeper formalism.
+The rules are self-contained and independent.
+On the one hand, th
+On the other hand, these features provide flexibility that is hard to mimic by a deeper formalism.
 For instance, rules can target individual words
 % (select \texttt{noun} if the word form is \emph{bear})
 or other properties that are not generalisable to a whole word class,
 such as verbs that express cognitive processes.
 Introducing a subset of verbs, even if they are used only in one rule,
-is very cheap and doesn't create a complicated inheritance hierarchy
-of different verb types.
+is very cheap and does not create a complicated taxonomy of different verb types.
 We can introduce a similar granularity in other systems, for instance,
 a grammar in Grammatical Framework, which would include the functions
 \texttt{GenVP} for whichever verbs and \texttt{CogVP} for cognitive verbs:
@@ -448,56 +448,48 @@ In \emph{sequential execution}, the rules are applied to one word at a time, sta
 
 In contrast, a \emph{parallel execution} scheme disambiguates all the words at the same 
 time, using their initial, ambiguous context. Both ``remove verb after determiner'' and 
-``remove noun after pronoun'' will be applied to \emph{question}, because the original 
+``remove noun after pronoun'' would match \emph{question}, because the original 
 input from the morphological analyser contains both determiner and pronoun as the 
 preceding word. Then, the final decision depends on any another rule that resolves \emph{what}.
 
-To give a minimal example, parallel and sequential would disambiguate
+To give a minimal example, assume we have a single rule, \texttt{REMOVE verb IF (-1 verb)}, and the three words \emph{w1--w3}, shown below. 
+In parallel execution, both \emph{w2} and \emph{w3} lose their verb tag; in sequential only \emph{w2}.
 
-Här är ett exempel. Antag att vi har tre ord, alla kan vara noun eller verb:
+%Parallel and sequential would return a different result for the following passage: 
 
-  <"w1">
-       "w1" noun
-       "w1" verb
-  <"w2">
-       "w2" noun
-       "w2" verb
-  <"w3">: noun, verb
+\begin{verbatim}
+"<w1>"
+        "w1" noun
+        "w1" verb
+"<w2>"
+        "w2" noun
+        "w2" verb
+"<w3>"
+        "w3" noun
+        "w3" verb
+\end{verbatim}
 
-Och så har vi den enda regeln:
-
-  REMOVE verb IF (-1 verb)
 
 Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
-If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}. 
-In contrast, parallel execution can provide multiple solutions: 
+If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}: there are less possible rules that apply. 
+Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other.
+\cite{koskenniemi90} states the following about parallel CG:
 
-%Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other.
+ \begin{quote}
+ Each constraint simply adds something to the discriminating power of the
+ whole grammar. No constraint rule may ever forbid something that would
+ later on be accepted as an exception. This, maybe, puts more strain for
+ the grammar writer but gives us better hope of understanding the grammar
+ we write.
+ \end{quote}
 
 Perhaps unsurprisingly, most of the existing CG implementations are sequential.
-A notable exception is the system proposed in \cite{koskenniemi90}, known by the names Finite-State Intersection Grammar (FSIG) or Parallel Constraint Grammar (PCG). As per \cite{koskenniemi97}, we use the latter term. In addition, a variant of the CG engine in \cite{listenmaa_claessen2015} is parallel. 
+A notable exception is the system proposed in \cite{koskenniemi90}, known by the names Finite-State Intersection Grammar (FSIG) or Parallel Constraint Grammar (PCG). 
+As per \cite{koskenniemi97}, we use the latter term. 
+In addition, a variant of the CG engine in \cite{listenmaa_claessen2015} is parallel. 
 
 
 
-\paragraph{Note on termination} 
-Running the grammar multiple times is desirable: especially the rules
-with a careful context may need other rules to run first and
-disambiguate some items.
-With the most basic operations, SELECT and REMOVE, we can ensure that
-applying a grammar to a text will finish. The text might not be fully
-disambiguated, but if there is a point where running the rules again
-doesn't make a change, then the execution is stopped.
-
-If we allow the addition of arbitrary tags to readings, or arbitrary
-readings to cohorts, we cannot guarantee that running the grammar will
-terminate. It is possible to add the same reading over and over again,
-in which case every time we run the grammar, the argument is changed.
-The syntactic tags used by MAP rules have an additional property,
-that one reading can have at most one \texttt{@tag}, and if a reading has one
-already, it is substituted with the old one. One can end up in a loop
-substituting \texttt{@A} with \texttt{@B}.
-However, specific implementations can freely add heuristics to stop
-this kind of behaviour from happening.
 
 % The constraint rules are executed in sequence, and the consequences of
 % previous rule applications affect the coming rules. In addition, there
@@ -523,40 +515,28 @@ this kind of behaviour from happening.
 % REMOVE <rare analysis> ;
 % \end{verbatim}
 % 
-\paragraph{Comparison to FSIG} 
-Another example of a reductionist and shallow-syntax formalism is
-Finite-State Intersection Grammar (FSIG) \citep{koskenniemi90}. In the
-formalism, the tagged sequences of words, as well as rules, are modelled
-as finite state automata: for instance, there are two transitions from
-the state \emph{what} to the state \emph{question} in the automaton
-representing \emph{what question is this}. This automaton is intersected with
-a rule automaton, and each path through the resulting automaton
-represents a possible analysis for the whole sequence.
- 
-A parallel and unordered rule set in CG corresponds to FSIG.
-\cite{koskenniemi90} explicitly says that an FSIG grammar must be
-consistent:
- 
- \begin{quote}
- Each constraint simply adds something to the discriminating power of the
- whole grammar. No constraint rule may ever forbid something that would
- later on be accepted as an exception. This, maybe, puts more strain for
- the grammar writer but gives us better hope of understanding the grammar
- we write.
- \end{quote}
 
-
-In FSIG, the path that consists of choosing the \texttt{det} arc
-followed by \texttt{verb} arc is ruled out, but other interpretations
-are still valid: \texttt{det+noun}, \texttt{pron+noun} and
-\texttt{pron+verb}. In contrast, applying a rule in CG removes an
-analysis permanently; if the rule removes the verb reading in
-\emph{question}, then we cannot retrieve the \texttt{pron+verb}
-possibility. Therefore, it is important to consider the order of the
-rules. It is possible to operate with \emph{cautious context}, where the
-rule only takes action if the context is unambiguous. For this case, the
-``remove \texttt{verb} after \texttt{det}'' rule would not fire before
-the word \emph{what} is fully disambiguated as a determiner.
+% \paragraph{Comparison to FSIG} 
+% Another example of a reductionist and shallow-syntax formalism is
+% Finite-State Intersection Grammar (FSIG) \citep{koskenniemi90}. In the
+% formalism, the tagged sequences of words, as well as rules, are modelled
+% as finite state automata: for instance, there are two transitions from
+% the state \emph{what} to the state \emph{question} in the automaton
+% representing \emph{what question is this}. This automaton is intersected with
+% a rule automaton, and each path through the resulting automaton
+% represents a possible analysis for the whole sequence.
+  
+% In FSIG, the path that consists of choosing the \texttt{det} arc
+% followed by \texttt{verb} arc is ruled out, but other interpretations
+% are still valid: \texttt{det+noun}, \texttt{pron+noun} and
+% \texttt{pron+verb}. In contrast, applying a rule in CG removes an
+% analysis permanently; if the rule removes the verb reading in
+% \emph{question}, then we cannot retrieve the \texttt{pron+verb}
+% possibility. Therefore, it is important to consider the order of the
+% rules. It is possible to operate with \emph{cautious context}, where the
+% rule only takes action if the context is unambiguous. For this case, the
+% ``remove \texttt{verb} after \texttt{det}'' rule would not fire before
+% the word \emph{what} is fully disambiguated as a determiner.
 
 
 \subsection{Expressivity}
@@ -567,7 +547,26 @@ But can we emulate some kind of behaviour that would put it into the Chomsky hie
 We can assume that an input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma$.
 
 
-%The implementation in \cite{listenmaa_claessen2015} is not quite CG, not quite FSIG.
+\paragraph{Note on termination} 
+Running the grammar multiple times is desirable: especially the rules
+with a careful context may need other rules to run first and
+disambiguate some items.
+With the most basic operations, SELECT and REMOVE, we can ensure that
+applying a grammar to a text will finish. The text might not be fully
+disambiguated, but if there is a point where running the rules again
+doesn't make a change, then the execution is stopped.
+
+If we allow the addition of arbitrary tags to readings, or arbitrary
+readings to cohorts, we cannot guarantee that running the grammar will
+terminate. It is possible to add the same reading over and over again,
+in which case every time we run the grammar, the argument is changed.
+The syntactic tags used by MAP rules have an additional property,
+that one reading can have at most one \texttt{@tag}, and if a reading has one
+already, it is substituted with the old one. One can end up in a loop
+substituting \texttt{@A} with \texttt{@B}.
+However, specific implementations can freely add heuristics to stop
+this kind of behaviour from happening.
+
 
 \section{Summary}
 
