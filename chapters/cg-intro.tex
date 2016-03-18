@@ -1,8 +1,5 @@
 \section{Introduction to CG}
  
-\paragraph{This used to be my course paper for Grammar Formalisms.}
-
-(TODO: should I write here something in depth about e.g. set operations in target/conditions?)
 
 Constraint Grammar (CG) is a formalism for 
 disambiguating morphologically analysed text. 
@@ -11,14 +8,17 @@ It was first introduced by
 computational linguistics, such as POS tagging, surface syntax and
 machine translation \cite{bick2011}. It disambiguates output by
 morphological analyser by using
-constraint rules which can select or remove a potential analysis
-(called `reading') for a
-target word, depending on the context words around it. Together these rules disambiguate the whole text.
+constraint rules which can select or remove a potential analysis (called \emph{reading})
+for a target word, depending on the context words around it. 
+Together these rules disambiguate the whole text.
 
-In the example below, I show possible analyses for the sentence ``the bear
+In the example below, we show an initially ambiguous sentence ``the bear
 sleeps''. 
-To introduce the terminology: each \emph{word form} appears surrounded by "< >".
-The analyses for each word form contain one lemma, and a list of morphological tags. A list of lemma and tags is called \emph{reading}, and a word form together with its readings is called a \emph{cohort}. A cohort is ambiguous, if it contains more than one reading.
+It contains three word forms, each followed by its \emph{readings}.
+A reading contains one lemma, such as ``bear'', and a list of morphological tags, such as \emph{det def}.
+%Additional lemmas within one word form, such as clitic pronouns, are represented as \emph{subreadings}; each indented one more tab.
+A word form together with its readings is called a \emph{cohort}. A cohort is ambiguous, if it contains more than one reading.
+
 
 \begin{center}
 \begin{verbatim}
@@ -144,8 +144,8 @@ Here we summarise a set of main features, and relate CG to the developments in g
 
 All theories and implementations of CG  a \emph{reductionist}
 system, designed primarily for analysis, not generation.
-Its task is to parse sentences that are given, not to describe a language
-as a collection of ``all and only the grammatical sentences''.
+Its task is to give correct analyses to the words given sentences,
+not to describe a language as a collection of ``all and only the grammatical sentences''.
 
 The syntax is decidedly \emph{shallow}: the rules do not aim to
 describe all aspects of an abstract phenomenon such as noun phrase, 
@@ -161,33 +161,35 @@ ordering in total, such as in finite-state or logic-based implementations.
 
 In addition, we will discuss the \emph{expressivity} of CG---while it is not a generative grammar and cannot be placed in the Chomsky hierarchy, we aim to provide parallels in what kind of output it can produce.
 
-\subsection{Reductionist vs.~licencing (or Analysis vs. Generation???)}\label{reductionist-vs.licencing}
+\subsection{Reductionist}\label{reductionist-vs.licencing}
 
-CG is a reductionist system: it starts from a set of alternative
-analyses, and eliminates the impossible or improbable ones using
-constraint rules. The remaining analyses are assumed to be correct; that
-is, everything that is not explicitly eliminated, is allowed. This can
-be contrasted with a licencing system, where constructions must
-be explicitly allowed, otherwise they are illegal. An empty
-reductionist grammar will accept any string, whereas an empty
+CG is not a generative system.
+It starts from a set of alternative analyses, given by a morphological analyser,
+and eliminates the impossible or improbable ones using constraint rules. 
+The remaining analyses are assumed to be correct; that
+is, everything that is not explicitly eliminated, is allowed. 
+This is called a \emph{reductionist} system.
+In contrast, a \emph{licencing} system, all constructions must
+be explicitly allowed, otherwise they are illegal. 
+An empty reductionist grammar will accept any string, whereas an empty
 licencing grammar will accept no string.
 
-\paragraph{From Fred's 1995 book}
-\begin{quote}
-Notice, in passing, that the overall reductionistic set-up gives an
-interesting psycholinguistic prediction. In terms of processing load,
-less processing is required under Constraint Grammar to turn out an
-ambiguous and therefore unclear analysis than to turn out a
-disambiguated and therefore structurally clear analysis. In our
-opinion, this seems to be a reasonable psycholinguistic hypothesis a priori.
-Mental effort is needed for achieving clarity, precision, and maximal
-information. Less efforts imply (retention of) unclarity and
-ambiguity, i.e. information decrease. In several types of parsers, 
-rule applications create rather than discard ambiguities: the more
-processing, the less unambiguous information.
-\end{quote}
+% \paragraph{From Fred's 1995 book}
+% \begin{quote}
+% Notice, in passing, that the overall reductionistic set-up gives an
+% interesting psycholinguistic prediction. In terms of processing load,
+% less processing is required under Constraint Grammar to turn out an
+% ambiguous and therefore unclear analysis than to turn out a
+% disambiguated and therefore structurally clear analysis. In our
+% opinion, this seems to be a reasonable psycholinguistic hypothesis a priori.
+% Mental effort is needed for achieving clarity, precision, and maximal
+% information. Less efforts imply (retention of) unclarity and
+% ambiguity, i.e. information decrease. In several types of parsers, 
+% rule applications create rather than discard ambiguities: the more
+% processing, the less unambiguous information.
+% \end{quote}
 
-According to the initial specification, it is a grammar for analysis: \cite{karlsson1995constraint} does not see it fit for generation:
+According to the initial specification, CG is meant for analysis---\cite{karlsson1995constraint} does not see it fit for generation:
 
 \begin{quote}
 It would be optimal if the formalism were general and abstract enough for it, or rather for grammars written in the framework of it, to be used both for sentence analysis and sentence generation. 
@@ -203,22 +205,22 @@ without explicit connection between the rules. Bick and Didriksen
 argue that as a side effect, the rules actually manage to describe language.
 
 We return to the questions of generation and declarativity in section~\ref{sec:expressivity}. 
-In chapter~\ref{chapterCGana}, we revisit these questions in the context of CG analysis.
+In chapter~\ref{chapterCGana}, we revisit these questions in the context of analysing individual CGs.
 
  
 \paragraph{No enforcement of grammaticality} 
 
-\cite{karlsson1995constraint} states explicitly:
+% \cite{karlsson1995constraint} states explicitly:
 
-\begin{quote}
-The foremost task of a parsing-oriented grammar is rather to aid in parsing every input than to define the notion ”grammatically correct sentence”, or to describe ”all and only the grammatical sentences”.
-\end{quote}
+% \begin{quote}
+% The foremost task of a parsing-oriented grammar is rather to aid in parsing every input than to define the notion ”grammatically correct sentence”, or to describe ”all and only the grammatical sentences”.
+% \end{quote}
 
 
-CG does not define sequences as \emph{grammatically correct}.
-Beside the lack of long-distance dependencies, there is
-no mandatory enforcement of even local well-formedness, such as gender agreement.
-However, this is often helpful for practical purposes, because it adds robustness.
+CG does not define sequences as \emph{grammatically correct}: it simply aims to add structure to any input.
+%Beside the lack of long-distance dependencies, e
+Even local phenomena, such as gender agreement, is not necessarily enforced.
+However, this is often desirable for practical purposes, because it adds robustness.
 Let us illustrate with an example in Swedish.
 
 \begin{verbatim}
@@ -238,7 +240,7 @@ CG allows the rules to be as fine-grained or broad as we want:
 \texttt{SELECT det IF (1 noun) (0 noun)} would match any determiner and any noun, 
 and succesfully disambiguate \emph{en} in this case. 
 We can also enforce grammaticality by writing \texttt{SELECT det utr sg IF (1 noun utr sg)}%\footnote{the counterpart neuter determiner is not ambiguous with noun, so \texttt{SELECT det neutr sg IF (1 noun neutr sg) (0 noun)} would be redundant. Though it can be ambiguous with the numeral `1'. So actually maybe it's good anyway.}
-. In that case, nothing in the example phrase matches, and it is left ambiguous.
+. In that case, nothing in the grammatically incorrect phrase matches, and it is left ambiguous.
 
 
 %On the other hand, we can introduce such fine-graind rules in order to pick the right analysis, for instance, if a certain modifier is underspecified. If we analyse Spanish text \emph{la casa grande}, where \emph{grande} is underspecified for gender, then having a rule that picks the feminine adjective after a feminine article and feminine noun makes our analysis of \emph{grande} more accurate. 
@@ -250,7 +252,7 @@ an ungrammatical sequence and leave all tags intact---in that case,
 its performance would not differ from a grammar that simply does not have many rules.
 If we define \emph{grammatical sequences} to be sequences of POS tags,
 then the question is somewhat easier to answer: \texttt{\textless{}det\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} is ungrammatical, and CG does not raise an alarm that there is something wrong. However, the alternative \texttt{\textless{}noun\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} might be in that particular context even ``more wrong''; same goes for the option with no disambiguation at all.
-As \citename{karlsson1995constraint} states, CG is not designed for defining grammaticality, but rather providing analyses for real-life texts.
+As \cite{karlsson1995constraint} states, CG is not designed for defining grammaticality, but rather providing analyses for real-life texts.
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
 
@@ -483,10 +485,11 @@ Parallel execution may have uses in more marginal cases: for instance, if we hav
  we write.
  \end{quote}
 
-Perhaps unsurprisingly, most of the existing CG implementations are sequential.
+Perhaps unsurprisingly, nearly all of the existing CG implementations are sequential.
 A notable exception is the system proposed in \cite{koskenniemi90}, known by the names Finite-State Intersection Grammar (FSIG) or Parallel Constraint Grammar (PCG). 
 As per \cite{koskenniemi97}, we use the latter term. 
-In addition, a variant of the CG engine in \cite{listenmaa_claessen2015} is parallel. 
+In addition, a variant of the CG engine in \cite{listenmaa_claessen2015} is parallel,
+as well as the ``CG-like'' system in \cite{lager98}.
 
 
 
@@ -545,6 +548,9 @@ As we have learnt, CG is not a generative grammar---it needs a list of alternati
 But can we emulate some kind of behaviour that would put it into the Chomsky hierarchy?
 
 We can assume that an input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma$.
+
+\paragraph{Effect of ordering and execution schemes}
+
 
 
 \paragraph{Note on termination} 
