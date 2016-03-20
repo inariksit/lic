@@ -5,7 +5,7 @@ all: pdf clean
 # Build the PDF
 pdf:
 	xelatex $(tex)
-	bibtex $(tex)
+	bibtex $(tex).aux
 	xelatex $(tex)
 	xelatex $(tex)
 

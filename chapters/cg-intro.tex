@@ -64,9 +64,9 @@ reading. The finished analysis is shown below:
 
 It is also possible to add syntactic tags and dependency structure within CG. 
 After disambiguating \emph{bear} by part of speech (noun), it
-remains to disambiguate whether it is a subject, object, adverbial or
+remains ambiguous whether it is a subject, object, adverbial or
 any other possible syntactic role.
-This can be done in several ways. One option is to get both
+Disambiguating the syntactic role can be done in several ways. One option is to get both
 syntactic and morphological analyses from the initial parser---the analysis
 for \emph{bear} would look like the following:
 
@@ -85,8 +85,8 @@ would be applied later, to resolve \emph{bear}-noun into subject or object.
 Alternatively, one can have the initial parser return only
 morphological tags, and use CG rules that map a syntactic tag to a
 reading (or a reading to a cohort).
-The rules to add work similarly to the rules to remove and select:
-if a target matches the context, then the new tag is added.
+%The rules to add work similarly to the rules to remove and select:
+%if a target matches the context, then the new tag is added.
 These rules are usually run after the morphological disambiguation is
 finished.
 The following rules could be applied to the example sentence. The
@@ -116,11 +116,10 @@ following output:
 
 The syntactic tags can also indicate some dependency structure. For
 instance, \emph{the} could get a tag such as
-\texttt{@DN\textgreater}, to indicate that it is a determiner whose
+\texttt{DN\textgreater}, to indicate that it is a determiner whose
 head is to the right. A phrase such as \emph{the little dog} could get
-tagged as  \emph{the}\texttt{DN>} \emph{little}\texttt{AN>}
-\emph{bear}\texttt{@Subj}.
- Using \texttt{\textless{}tag} and \texttt{tag\textgreater} can identify
+tagged as  $the_{@DN>}$ $little_{@AN>}$ $dog_{@HEAD-N}$.
+Using \texttt{\textless{}TAG} and \texttt{TAG\textgreater} can identify
 chunks, as long as they are not disconnected.
 
 With the introduction of CG-3, it is possible to add full-fledged dependency
@@ -148,8 +147,8 @@ Its task is to give correct analyses to the words given sentences,
 not to describe a language as a collection of ``all and only the grammatical sentences''.
 
 The syntax is decidedly \emph{shallow}: the rules do not aim to
-describe all aspects of an abstract phenomenon such as noun phrase, 
-but rather bits and pieces with concrete conditions.
+describe all aspects of an abstract phenomenon such as noun phrase; 
+rather, each rule describes bits and pieces with concrete conditions.
 The rules are self-contained and mutually independent---this makes it 
 easy to add exceptions, and exceptions to exceptions, without 
 changing the more general rules.
@@ -157,22 +156,26 @@ changing the more general rules.
 There are different takes on how \emph{deterministic} the rules are.
 The current state-of-the-art CG parser VISL CG-3 executes the rules strictly based on the order of appearance, but there
 are other implementations that apply their own heuristics or remove the
-ordering in total, such as in finite-state or logic-based implementations. 
+ordering completely, such as in finite-state or logic-based implementations. 
 
 In addition, we will discuss the \emph{expressivity} of CG---while it is not a generative grammar and cannot be placed in the Chomsky hierarchy, we aim to provide parallels in what kind of output it can produce.
 
-\subsection{Reductionist}\label{reductionist-vs.licencing}
+\subsection{Reductionistic}\label{reductionist-vs.licencing}
 
 CG is not a generative system.
 It starts from a set of alternative analyses, given by a morphological analyser,
 and eliminates the impossible or improbable ones using constraint rules. 
 The remaining analyses are assumed to be correct; that
 is, everything that is not explicitly eliminated, is allowed. 
-This is called a \emph{reductionist} system.
-In contrast, a \emph{licencing} system, all constructions must
+This kind of system is called \emph{reductionistic}. It is contrasted 
+with a \emph{licencing} (or \emph{generative}) system, where all constructions must
 be explicitly allowed, otherwise they are illegal. 
 An empty reductionist grammar will accept any string, whereas an empty
 licencing grammar will accept no string.
+
+%\cite{karlsson1995constraint} argues that this reductionistic model is 
+%closer to a psycholinguistic model, because of less processing load.
+
 
 % \paragraph{From Fred's 1995 book}
 % \begin{quote}
@@ -192,12 +195,11 @@ licencing grammar will accept no string.
 According to the initial specification, CG is meant for analysis---\cite{karlsson1995constraint} does not see it fit for generation:
 
 \begin{quote}
-It would be optimal if the formalism were general and abstract enough for it, or rather for grammars written in the framework of it, to be used both for sentence analysis and sentence generation. 
-Constraint Grammar takes no explicit stand on this issue. In practice, however, constraints are geared towards parsing, and Constraint Grammars are analysis grammars. It remains to be demonstrated that full-scale syntax can be done by one and the same reversible grammar.
+%It would be optimal if the formalism were general and abstract enough [--] to be used both for sentence analysis and sentence generation. 
+%Constraint Grammar takes no explicit stand on this issue. 
+In practice, however, constraints are geared towards parsing, and Constraint Grammars are analysis grammars. It remains to be demonstrated that full-scale syntax can be done by one and the same reversible grammar.
 \end{quote}
-
-
-Two decades later, \cite{bick2015} describe CG as ``a
+\noindent Two decades later, \cite{bick2015} describe CG as ``a
 declarative whole of contextual possibilities and impossibilities for
 a language or genre'', which is nevertheless implemented in a
 low-level way: selecting and removing readings from individual words,
@@ -205,7 +207,7 @@ without explicit connection between the rules. Bick and Didriksen
 argue that as a side effect, the rules actually manage to describe language.
 
 We return to the questions of generation and declarativity in section~\ref{sec:expressivity}. 
-In chapter~\ref{chapterCGana}, we revisit these questions in the context of analysing individual CGs.
+In chapter~\ref{chapterCGana}, we revisit these questions in the context of analysing CGs.
 
  
 \paragraph{No enforcement of grammaticality} 
@@ -220,7 +222,7 @@ In chapter~\ref{chapterCGana}, we revisit these questions in the context of anal
 CG does not define sequences as \emph{grammatically correct}: it simply aims to add structure to any input.
 %Beside the lack of long-distance dependencies, e
 Even local phenomena, such as gender agreement, is not necessarily enforced.
-However, this is often desirable for practical purposes, because it adds robustness.
+However, this is often desirable for practical purposes, because it makes the grammar more robust.
 Let us illustrate with an example in Swedish.
 
 \begin{verbatim}
@@ -236,7 +238,8 @@ The first word, \emph{en}, is ambiguous between the indefinite determiner for
 The second word, \emph{bord}, is a neuter noun (`table')---the writer has
 most likely meant to write ``a table'' instead of ``juniper table'', but has mistaken the gender of `table'. The correct form, which also would not be ambiguous, is ``ett bord''.
 
-CG allows the rules to be as fine-grained or broad as we want: 
+%CG allows the rules to be as fine-grained or broad as we want: 
+CG rules can be as fine-grained or broad as we want: 
 \texttt{SELECT det IF (1 noun) (0 noun)} would match any determiner and any noun, 
 and succesfully disambiguate \emph{en} in this case. 
 We can also enforce grammaticality by writing \texttt{SELECT det utr sg IF (1 noun utr sg)}%\footnote{the counterpart neuter determiner is not ambiguous with noun, so \texttt{SELECT det neutr sg IF (1 noun neutr sg) (0 noun)} would be redundant. Though it can be ambiguous with the numeral `1'. So actually maybe it's good anyway.}
@@ -258,75 +261,72 @@ As \cite{karlsson1995constraint} states, CG is not designed for defining grammat
 
 \subsection{Shallow syntax}\label{shallow-syntax}
 
-CG can be described as shallow for various reasons. The rules usually
-operate on a local context of a few words. 
-
-More importantly, CG analysis is not aimed to produce trees. (IS THIS TOO MUCH OF REPETITION OF PREVIOUS?)
-
-Whereas a generative grammar could fail to produce any analysis, if even one of the words is unknown or misspelt, CG would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
-
+CG can be described as a shallow formalism for various reasons. 
+The analysis is limited to moprhology and surface syntax; no hierarchical tree structure is provided.
+CG rules usually operate on a low level of abstraction; instead of one rule to describe the possible structure of \emph{noun phrase},
+CG would include many small rules each describing one possible kind of noun phrase.
+Finally, the rules are independent
 
 
 
-\paragraph{Flat structure} 
-
-The rules do not produce any hierarchical structure.
 
 
-Syntactic labels may be added, but no invisible structure is postulated.
-The syntax of CG is dependency syntax.
+\paragraph{Flat structure}
 
-Syntactic labels are functionally same as morphological: \texttt{@SUBJ} is just one more tag in a reading.
+The analysis starts from a list of alternatives for each word, and proceeds by eliminating impossible or unlikely candidates.
+These alternatives may include syntactic labels as well as morphological, but there are no invisible components in the analysis: all labels attach to a concrete token in the phrase.
+Syntactic or dependency labels are functionally the same as morphological: \texttt{@Subj} is just one more tag in a reading.
 
-
-The rules do not usually handle 
-long-distance dependencies; they operate on a unit of a few words, and
-don't abstract away from surface features such as word order.
-You need to define rules separately for stuff like ``select noun if -1
-determiner'' and ``select noun if -2 determiner -1 adjective''.
-
-More importantly, CG doesn't introduce a full tree structure to the
-whole sentence. Some local subtrees can be detected, but mostly
-for the purposes of aiding the disambiguation.
-(TODO: should I talk about dependency trees in CG-3?)
-
-
-
-\paragraph{Description by elimination} 
-
-
-\cite{karlsson1995constraint}
-\begin{quote}
-For example, ordinary phrase structure rules for English NPs would state that a determiner is followed by certain optional premodifiers plus an obligatory noun. A consequence of this is that a determiner cannot be followed by a finite or infinitive verb form, without an intervening noun. In Constraint Grammar, a constraint could be postulated to this effect, discarding the verbal readings of the word-form bank in expressions like the bank, the old bank.
-\end{quote}
-
-
-
-CG has a more lightweight task than e.g.~a phrase structure grammar: a
-successful disambiguation can depend on just a local context, in a
-window of 1-3 words left or right. To demonstrate the the difference,
-let us take the same the example sentence \emph{the bear sleeps}, and a
-context-free grammar with the following productions:
-
+It is possible to modify the morphological parser, or use a suitable post-processing, to add even more data. One could add semantic roles, or any other information that a lexicon may provide, such as animacy or frequency.
+As a result, readings may look like the following:
 
 \begin{verbatim}
-S   -> NP VP
-VP  -> V NP
-NP  -> Det N
-Det -> "the"
-N   -> "bear" | "sleeps"
-V   -> "bear" | "sleeps"
+"<cat>"
+        "cat" noun sg   @Subj £Agent &Animal
+        "cat" verb pres @Pred &Computer &Rare
 \end{verbatim}
 
-There is no way to reach \texttt{S} if \emph{bear} is analysed as
-\texttt{V} and \emph{sleeps} as \texttt{N}; thus we get the individual
-words disambiguated thanks to the parser, which introduces a structure
-to the whole sentence. If one of the words was out of vocabulary, say
-\emph{the bear warbles}, there would be no analysis for \emph{the} or
-\emph{bear} either. In CG, an unrecognised verb would be no problem at
-all in disambiguating the previous words.
+\noindent Moreover, any of these levels can be accessed in the same rule: e.g. \texttt{SELECT noun IF (-1 "cat" &Animal) (NOT 0 &Rare)}.
 
-\paragraph{Low abstraction}
+
+
+
+
+
+\paragraph{Low abstraction} 
+
+
+% \cite{karlsson1995constraint}
+% \begin{quote}
+% For example, ordinary phrase structure rules for English NPs would state that a determiner is followed by certain optional premodifiers plus an obligatory noun. A consequence of this is that a determiner cannot be followed by a finite or infinitive verb form, without an intervening noun. In Constraint Grammar, a constraint could be postulated to this effect, discarding the verbal readings of the word-form bank in expressions like the bank, the old bank.
+% \end{quote}
+
+
+
+% CG has a more lightweight task than e.g.~a phrase structure grammar: a
+% successful disambiguation can depend on just a local context, in a
+% window of 1-3 words left or right. To demonstrate the the difference,
+% let us take the same the example sentence \emph{the bear sleeps}, and a
+% context-free grammar with the following productions:
+
+
+% \begin{verbatim}
+% S   -> NP VP
+% VP  -> V NP
+% NP  -> Det N
+% Det -> "the"
+% N   -> "bear" | "sleeps"
+% V   -> "bear" | "sleeps"
+% \end{verbatim}
+
+% There is no way to reach \texttt{S} if \emph{bear} is analysed as
+% \texttt{V} and \emph{sleeps} as \texttt{N}; thus we get the individual
+% words disambiguated thanks to the parser, which introduces a structure
+% to the whole sentence. If one of the words was out of vocabulary, say
+% \emph{the bear warbles}, there would be no analysis for \emph{the} or
+% \emph{bear} either. In CG, an unrecognised verb would be no problem at
+% all in disambiguating the previous words.
+
 Contrasting with phrase-structure or dependency grammars, the rules in
 CG are often on a lower level of abstraction. 
 The rule that tells to remove verb reading after a determiner
@@ -337,7 +337,15 @@ pronoun (\emph{my bear sleeps}). A phenomenon that is expressed with one
 big rule in a deep formalism such as HPSG or categorial grammar, is
 split into many low-level rules.
 
-\paragraph{Mutual independence}
+The rules do not usually handle 
+long-distance dependencies; they operate on a unit of a few words, and
+don't abstract away from surface features such as word order.
+You need to define rules separately for stuff like ``select noun if -1
+determiner'' and ``select noun if -2 determiner -1 adjective''.
+
+Whereas a generative grammar could fail to produce any analysis, if even one of the words is unknown or misspelt, CG would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
+
+\paragraph{Independence of rules}
 The rules are self-contained and independent.
 On the one hand, th
 On the other hand, these features provide flexibility that is hard to mimic by a deeper formalism.
@@ -415,7 +423,8 @@ Throughout the section, we will apply the rules to the following ambiguous passa
 
 \paragraph{Strict vs. heuristic}
 
-The first aspect concerns the ordering of the rules in the file. 
+aka. ``In which order are the rules applied to a single cohort?''
+
 An implementation with \emph{strict order} applies each rule in the order in 
 which they appear in the file. If a grammar contains the rules ``remove verb after determiner'' and ``remove noun after pronoun'' in the given order, the rule that removes the verb reading in \emph{question} will be applied first. After it has finished, there are no verb readings available anymore for the second rule to fire.
 					
@@ -443,8 +452,10 @@ As for major CG implementations, \cite{karlsson1990cgp} and \cite{vislcg3} follo
 
 \paragraph{Sequential vs. parallel}
 
-The second aspect concerns the way that sentence is processed.
-%The input sentence can be processed in sequential or parallel manner.
+aka. ``When does the rule application take effect?''
+%aka. ``Does the context change immediately after each rule is applied?''
+
+The input sentence can be processed in sequential or parallel manner.
 In \emph{sequential execution}, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule ``remove verb after determiner''.
 
 
@@ -473,7 +484,7 @@ In parallel execution, both \emph{w2} and \emph{w3} lose their verb tag; in sequ
 
 
 Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
-If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}: there are less possible rules that apply. 
+If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}: there are less possible rules that may apply. 
 Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other.
 \cite{koskenniemi90} states the following about parallel CG:
 
@@ -549,9 +560,18 @@ But can we emulate some kind of behaviour that would put it into the Chomsky hie
 
 We can assume that an input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma$.
 
+
 \paragraph{Effect of ordering and execution schemes}
 
+We can show that the $a^nb^n$ grammar, at least in the form described above,
+requires sequential execution: in the beginning, the status of the positions is 
+clear at the edges, and the certainty spreads towards the middle, with the help of
+the careful context.
+In a parallel execution, we have the initial context during the whole round.
+If we can do parallel with multiple runs, it should work. But not just with one round.
 
+How about strict & heuristic?
+It should 
 
 \paragraph{Note on termination} 
 Running the grammar multiple times is desirable: especially the rules

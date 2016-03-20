@@ -8,48 +8,57 @@
 \noindent How do you know that the first \emph{wish} is a verb and the second one is a noun? A computer can approach this from many angles; below we list a few of them.
 
 \begin{enumerate}
-\item We can gather example sentences and annotate them manually. % ``this \emph{wish} is a verb, that one is a noun''. 
-Based on these examples, the computer will learn to guess the 
+\item We can gather a set of example sentences and annotate them manually. % ``this \emph{wish} is a verb, that one is a noun''. 
+Based on the examples, the computer will learn to guess the 
 part of speech for new instances of \emph{wish} with a certain probability, 
-depending on what other words appear in the sentence.
+depending on what other words appear close to it.
 
-\item We can write a generative grammar to describe the English language, and analyse this sentence with it. 
+\item We can write a generative grammar to describe the English language, and use it to analyse the sentence in question.
 The only well-formed solution has the first \emph{wish} as a verb and the second as a noun: alternative hypotheses are rejected, 
 % as soon as it becomes evident that they do not fit in the structure.
 because they do not fit in the structure.
 
 
-\item We can look up all morphological analyses, separately for each word.
-Given that we know nothing about the context in the lookup phase, we start off with both wishes potentially $wish_N$ and $wish_V$.
-%In contrast to approach 2, which starts with no information, we start with too much information: all alternatives are present.  
-Now, in the spirit of approach 1, we can look at the context words for help. A learning-based method may encounter plenty of examples where \emph{wish} appearing after \emph{a} is a noun, and learn to assign a high probability to that hypothesis. 
-But we have more powerful tools, from the world of approach 2: grammatical categories and abstraction.
-Instead of learning facts about the strings \emph{a} and \emph{wish}, or \emph{my} and \emph{house}, we can formulate a \emph{constraint rule}: ``If you find something that can be a verb, but it is preceded by a determiner, throw that guess away''. 
-Add some hundreds of these rules, and they expose the structure hidden behind the clutter.
+\item We can split the problem in two phases: lookup and disambiguation.
+The lookup component has a dictionary with all inflection forms, so it knows that 
+\emph{wish} can be a noun or a verb, but it knows nothing about context.
+% it simply returns ``noun or verb'' for both of the wishes. 
+The disambiguation component completes the job: $wish_V$ for the first one, and $wish_N$ for the second.
+%In contrast to approach 2, which starts with no information, we start with too much information: all alternatives are present. 
 \end{enumerate}
 
 Method number 3 is known as \emph{Constraint Grammar}, \cite{karlsson1995constraint}, abbreviated as \emph{CG} throughout this thesis. 
 CG is a formalism for writing disambiguation rules for an initially ambiguous input. The rules describe the impossibilities and improbabilities of a given language, such that after a successful run of the rules, only correct analyses remain.
 
-In the grand scheme of grammar formalisms, CG is markedly lightweight, yet accurate and efficient. The rules are self-contained and mutually independent, each describing small pieces of complex phenomena. %, such as noun phrases or subjunctive clauses.
+How does the disambiguation work?
+In the spirit of approach 1, we can look at the context words for help. 
+%A learning-based method may encounter plenty of examples where \emph{wish} appearing after \emph{a} is a noun, and learn to assign a high probability to that hypothesis. 
+But we have more powerful tools, from the world of approach 2: grammatical categories and abstraction.
+Instead of learning facts about the strings \emph{a} and \emph{wish}, or \emph{my} and \emph{house}, we can formulate a \emph{constraint rule}: ``If a word can be a noun or a verb, and is preceded by a determiner, then remove the verb analysis''. 
+Add some hundreds of these rules, and they expose the structure hidden behind the clutter.
+
+In the grand scheme of grammar formalisms, CG is lightweight, yet accurate and efficient. The rules are self-contained and mutually independent, each describing small pieces of complex phenomena. %, such as noun phrases or subjunctive clauses.
 These features make the formalism fast, because the input sentence can be processed in local units. Furthermore, CG is highly robust: even if some parts of the sentence contain errors or unknown words, the rest of the sentence will still be processed.
 This makes it possible to assign \emph{some} structure to \emph{any} input.
-Finally, a grammar can always be made more accurate: if there is one single exception in the whole language, we can address only that, without modifying any of the more general rules.
+Finally, a grammar can always be made more accurate: if there is one single exception in the whole language, we can address only that exception in a new rule, without modifying any of the more general rules.
 
 However, the same properties also make it challenging to manage the grammars.
 %possible to introduce internal contradictions in the grammar. 
 Due to the bits-and-pieces nature of CG rules, grammars tend to grow large;
 up to several thousands of rules. At the same time, there are no inbuilt 
-mechanisms to detect if a new rule contradicts an older one.
+mechanisms to detect if a new rule contradicts an older one\footnote{A rule may also contradict itself: e.g. ``choose noun for all the words that are \emph{not} potentially nouns''.}.
 From these two factors, it is natural that errors creep in without anyone noticing.
-This thesis aims to create methods for analysing and detecting conflicts in CGs, as well as contribute to the theoretical understanding of the formalism and its various implementations.
+
+This thesis aims to create methods for analysing CG rules and detecting conflicts in grammars, as well as contribute to the theoretical understanding of the formalism and its various implementations.
+The main contributions are summarised in the following two sections.
 
 
-\section{Scope of this thesis}
+%\section{Scope of this thesis}
 
-Automatic creation and analysis of CG rules has been a research topic since the beginning of the formalism. Already \cite{karlsson1995constraint} envisions ...
+%Automatic creation and analysis of CG rules has been a research topic since the beginning of the formalism. 
+%Already \cite{karlsson1995constraint} envisions ...
 
-This thesis has two main contributions in the field of CG.
+%This thesis has two main contributions in the field of CG.
 
 \paragraph{Theoretical understanding of CG}
 
@@ -61,25 +70,29 @@ This explicitly reductionistic approach does not seem to have any obvious counte
 Throughout its history, CG has been very practically oriented, with 
 little studies on its formal properties, or attempts to relate it to existing
 frameworks.
-Notable exeptions are \cite{lager_nivre01}, who model CG in logic, and \cite{nemeskey14}, who evaluate different finite-state based parsers for efficiency.
-
-\todo{find "Hulden (2011) showed that if the rules are compiled to transducers ..." -- what kind of scheme was that? is there an ordered FST-based CG engine? Also read Peltonen 2011.}
-
+Notable exeptions are \cite{lager_nivre01}, who model CG in logic, and \cite{nemeskey14}, who evaluate different finite-state based implementations.
+%\todo{find "Hulden (2011) showed that if the rules are compiled to transducers ..." -- what kind of scheme was that? is there an ordered FST-based CG engine?}
 This brings us to the yet unmentioned part of the title.
 We model CG in the framework of \emph{Boolean satisfiability}, abbreviated \emph{SAT}.
 The analyses of the word forms are translated into Boolean variables, 
 and the constraint rules into logical formulas operating on those variables.
 Applying a rule becomes a task of assigning truth values to different analyses,
-such that ultimately each word should have one true value.
+such that ultimately each word should have one true analysis.
 
-This simple translation gives us properties that standard CG engines do not have.
-Most importantly, the rules lose their independence: any conflict between two rules renders the formula unsatisfiable.
-While this is not necessarily a desirable property in a CG engine---it is hard to justify the loss of robustness---it is nevertheless interesting for other purposes. 
-Encoding the rules in logic enables us to track the effect of each rule: each rule which triggers at the instance of \emph{wish} creates a clause, and in case of a 
-conflict, we can find out which clauses cause it.
+This simple translation gives us properties that standard CG implementations do not have.
+Most importantly, the rules lose their independence: any conflict between two rules renders the formula unsatisfiable. To counter that, we have implemented a novel conflict handling scheme, using maximisation. However, the loss of independence between rules is most useful for detecting contradictions in the grammar.
 
-Furthermore, we are not restricted analysing only existing texts---in fact, we can analyse \emph{any possible text}. We can feed our rules with a \emph{maximally ambiguous sentence}: every word starts off with every possible analysis.
-This setup brings us lets us conceive a notions of \emph{generation} and \emph{expressivity} within the framework of CG.
+
+%Secondly, the rules become more expressive. Traditional rules treat \emph{target} 
+%and \emph{context} as separate notions: a rule is only allowed to act upon a target,
+%if the context holds. In the logical reconstruction, rules are declarative:
+%they allow or prohibit sequences. We have contributed to conflict handling in FSIG.
+
+We have also investigated more theoretical properties of CG.
+Our SAT-encoding allows us to \emph{generate} text from CG rules.
+We can construct a \emph{maximally ambiguous sentence}: unlike any real sentence, 
+every word starts off with every analysis, and the CG rules are responsible for shaping the sentence into a possible one. 
+In addition, this setup lets us approximate the notion of \emph{expressivity} within the framework of CG.
 
 %An interesting question for any grammar formalism is ``how expressive is it?'' 
 %Given the reductionist nature of CG, this is a harder question:
@@ -90,15 +103,19 @@ This setup brings us lets us conceive a notions of \emph{generation} and \emph{e
 
 \begin{quote}
 Another desirable facility in the grammar development environment would be a mechanism for identifying pairs of rules that contradict each other. \\
--- Voutilainen 2004
+-- Voutilainen, 2004
 \end{quote}
 
-The most important contribution is, however, a practical one. 
-With the rules modelled in logic, we can track their effects and 
-find out if they contradict each other.
+The most important contribution of this thesis is, however, practical. 
+%Encoding CG rules in SAT is highly interesting for grammar analysis.
+%While this is not necessarily a desirable property in a CG engine---it is hard to justify the loss of robustness---it is nevertheless interesting for grammar analysis. 
+The SAT-encoding enables us to track the effect of each rule, and in case 
+of a conflict, we can find out which rules cause it.
+In addition, we have found practical use for the generation property, 
+to give grammarians feedback on the rules they are writing.
+For instance, a grammar writer can take a set of rules and ask for a sequence that triggers some of them and not others.
 In Chapter~\ref{chapterCGana}, we describe a method and a working 
-implementation to analyse existing grammars. In addition, the method which allows
-us to \emph{generate} sequences, is used for giving the grammar writer feedback of the rules they are writing.
+implementation on grammar analysis, as well as evaluation on real grammars. 
 
 
 
@@ -106,11 +123,11 @@ us to \emph{generate} sequences, is used for giving the grammar writer feedback 
 
 
 
-\section{Structure of this thesis}
+\paragraph{Structure of this thesis}
 
-The core of this thesis is an extension of two articles: \cite{listenmaa_claessen2015} and \todo{Listenmaa and Claessen (2016)}. Some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
+The core of this thesis is an extension of two articles: \cite{listenmaa_claessen2015} and \cite{listenmaa_claessen2016}. Some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
 
 Chapter 2 presents a general introduction to both CG and SAT, aimed for a reader who is unfamiliar with the topics.
-Chapter 3 discusses previous logical representations of CG, and describes our SAT-encoding in detail, complete with an appendix.
+Chapter 3 discusses previous logical representations of CG, and describes our SAT-encoding in detail, complete with an appendix of different rule types as SAT-clauses.
 Chapter 4 presents the method of grammar analysis using our SAT-based implementation, along with evaluation on three different grammars.
 Chapter 5 concludes the thesis.
