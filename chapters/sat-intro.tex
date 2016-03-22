@@ -5,28 +5,36 @@ Imagine you are in a pet shop with the following selection of animals.
 
 {\center Ant, bee, cat, dog, elephant, f..., gorilla}
 
-Some of the animals are very friendly. The dog cannot survive without its best friend __. But the bee is very aggressive towards all carnivores, and the elephant is afraid of anything lighter than 10 kilograms. The gorilla hates four-legged creatures, and the cat cannot stand insects. 
+These animals are very picky about each others' company. The dog has no teeth and needs the cat to chew its food. The cat, in turn, wants its best friend f.... 
+But the bee is very aggressive towards all carnivores, and the elephant is afraid of anything lighter than 10 kilograms. The gorilla hates four-legged creatures, and the cat doesn't trust anything that stings. 
 
 You need to decide on a subset of pets to buy---you love all animals, but realistically, you cannot have them all. You start calculating in your head: ``If I take the gorilla, I cannot take cat, dog, nor elephant. How about I take the dog, I can take everything but the gorilla and the bee.''
 After some time, you decide on ant, cat, dog and f..., leaving the bee, the elephant and the gorilla in the pet shop.
 
 
 This everyday situation is an example of a \emph{SAT-problem}.
-The animals translate into \emph{literals}: ${ant, bee, cat, dog, elephant, f..., gorilla}$.
+The animals translate into \emph{variables}: $\{ant, bee, cat, dog, elephant, f..., gorilla\}$.
 The lists of friends and enemies of each animal translate into \emph{clauses}.
-In this case, the option is simple: positive literal means the animal comes with you, negated value means it is left in the shop. The clause $dog \vee \neg{}bee$ means ``I buy the dog or I don't buy the bee''. 
+These clauses are disjunctions of \emph{literals}: either a variable ($cat$) or its negation ($\neg{}cat$).
+The literal $cat$ means that the animal comes with you, 
+and $\neg{}cat$ means it is left in the shop. 
+The clause $\neg{}dog \vee cat$ means ``I don't buy the dog or I buy the cat''. 
 Some examples of the clauses follow:
 
 \begin{center}
 $\neg{}elephant \vee ant \vee cat \vee bee$ \\
-$dog \vee \neg{}gorilla$ \\
-$dog \vee \neg{}bee$ \\
+$\neg{}dog \vee \neg{}gorilla$ \\
+$\neg{}dog \vee \neg{}bee$ \\
 \end{center}
 
-The objective is to find a \emph{model}: each animal/literal is assigned a Boolean value, such that all clauses evaluate into true. We can see that the assignment ${ant=True, bee=False, cat=True, dog=True, elephant=False, f...=True, gorilla=False}$ satisfies the animals' wishes.
+The objective is to find a \emph{model}: each variable is assigned a Boolean value, such that all clauses evaluate into true. We can see that the assignment 
+
+$\{ant=True, bee=False, cat=True, dog=True, elephant=False, f...=True, gorilla=False\}$ 
+\noindent satisfies the animals' wishes.
 \todo{This model is the only solution to the animal problem}. However, some problems have multiple solutions, and some are unsatisfiable, i.e. they have no solution at all.
 
-\emph{What it is and what it can do}
+
+\paragraph{What it is and what it can do}
 
 
 \begin{quote}
