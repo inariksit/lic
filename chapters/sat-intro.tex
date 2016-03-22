@@ -1,10 +1,53 @@
 \section{Boolean satisfiability (SAT)}
 
-Example
 
-What it is and what it can do
+Imagine you are in a pet shop with the following selection of animals.
 
-What else it has been used for
+{\center Ant, bee, cat, dog, elephant, f..., gorilla}
+
+Some of the animals are very friendly. The dog cannot survive without its best friend __. But the bee is very aggressive towards all carnivores, and the elephant is afraid of anything lighter than 10 kilograms. The gorilla hates four-legged creatures, and the cat cannot stand insects. 
+
+You need to decide on a subset of pets to buy---you love all animals, but realistically, you cannot have them all. You start calculating in your head: ``If I take the gorilla, I cannot take cat, dog, nor elephant. How about I take the dog, I can take everything but the gorilla and the bee.''
+After some time, you decide on ant, cat, dog and f..., leaving the bee, the elephant and the gorilla in the pet shop.
 
 
-WHY? What does it help you to formulate something as a SAT-problem?
+This everyday situation is an example of a \emph{SAT-problem}.
+The animals translate into \emph{literals}: ${ant, bee, cat, dog, elephant, f..., gorilla}$.
+The lists of friends and enemies of each animal translate into \emph{clauses}.
+In this case, the option is simple: positive literal means the animal comes with you, negated value means it is left in the shop. The clause $dog \vee \neg{}bee$ means ``I buy the dog or I don't buy the bee''. 
+Some examples of the clauses follow:
+
+\begin{center}
+$\neg{}elephant \vee ant \vee cat \vee bee$ \\
+$dog \vee \neg{}gorilla$ \\
+$dog \vee \neg{}bee$ \\
+\end{center}
+
+The objective is to find a \emph{model}: each animal/literal is assigned a Boolean value, such that all clauses evaluate into true. We can see that the assignment ${ant=True, bee=False, cat=True, dog=True, elephant=False, f...=True, gorilla=False}$ satisfies the animals' wishes.
+\todo{This model is the only solution to the animal problem}. However, some problems have multiple solutions, and some are unsatisfiable, i.e. they have no solution at all.
+
+\emph{What it is and what it can do}
+
+
+\begin{quote}
+Satisfiability solving, the problem of deciding whether the variables of a propositional formula can be assigned in such a way that the formula evaluates to true, is one of the classic problems in computer science. It is of theoretical interest because it is the canonical NP-complete problem. It is of practical interest because modern SAT-solvers can be used to solve many important and practical problems.\end{quote} \\
+-- Claessen et al, 200?
+
+
+
+\paragraph{Applications of SAT}
+
+Model checking
+
+Since those works, SAT solving techniques have improved significantly \cite{marques_silva2010}, and they are used in domains such as microprocessor design and computational 
+biology---these problems easily match or exceed CG in complexity. 
+Thanks to these advances, we were able to revisit the idea and develop it
+further. 
+
+
+\paragraph{What does it help you to formulate something as a SAT-problem?}
+
+SAT-solving is all about searching.
+SAT-problems are in general NP-complete. However, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics \cite{claessen_al}.
+Formulating a search problem in SAT gives us access to decades of research into SAT-solving. 
+Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
