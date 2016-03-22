@@ -1,0 +1,39 @@
+\appendix
+\chapter{SAT-encoding}
+
+\section{SAT-encoding of sentences}
+
+We receive input from the morphological analyser in the following format.
+
+\begin{verbatim}
+"<wordform1>"
+      "lemma1" morpho1 morpho2
+      "lemma2" morpho3 morpho4
+"<wordform2>"
+      "lemma3" morpho5 morpho6
+      "lemma4" morpho7 morpho8
+\end{verbatim}
+
+We transform each reading into a SAT-variable:
+
+\begin{centering}
+$wordform1/lemma1<morpho1><morpho2>$
+$wordform1/lemma2<morpho3><morpho4>$
+$wordform2/lemma3<morpho5><morpho6>$
+$wordform2/lemma4<morpho7><morpho8>$
+\end{centering}
+
+Then, for each cohort, we require that at least one of its readings is true. We add the following clauses:
+
+\begin{centering}
+$wordform1/lemma1<morpho1><morpho2> \vee wordform1/lemma2<morpho3><morpho4>$
+$wordform2/lemma3<morpho5><morpho6> \vee wordform2/lemma4<morpho7><morpho8>$
+\end{centering}
+
+
+
+\section{SAT-encoding of rules}
+
+\subsubsection{Unordered scheme}
+
+\subsubsection{Ordered scheme}
