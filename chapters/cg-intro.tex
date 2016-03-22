@@ -6,16 +6,17 @@ disambiguating morphologically analysed text.
 It was first introduced by
 \cite{karlsson1995constraint}, and has been used for many tasks in
 computational linguistics, such as POS tagging, surface syntax and
-machine translation \cite{bick2011}. It disambiguates output by
-morphological analyser by using
+machine translation \cite{bick2011},
+\todo{and is reported to achieve F-scores of around 9X \% (citation needed) for various languages.}
+CG disambiguates output by morphological analyser by using
 constraint rules which can select or remove a potential analysis (called \emph{reading})
 for a target word, depending on the context words around it. 
 Together these rules disambiguate the whole text.
 
 In the example below, we show an initially ambiguous sentence ``the bear
 sleeps''. 
-It contains three word forms, each followed by its \emph{readings}.
-A reading contains one lemma, such as ``bear'', and a list of morphological tags, such as \emph{det def}.
+It contains three word forms, such as ``<bear>'', each followed by its \emph{readings}.
+A reading contains one lemma, such as ``bear'', and a list of morphological tags, such as \emph{noun sg}.
 %Additional lemmas within one word form, such as clitic pronouns, are represented as \emph{subreadings}; each indented one more tab.
 A word form together with its readings is called a \emph{cohort}. A cohort is ambiguous, if it contains more than one reading.
 
@@ -141,9 +142,9 @@ performed on a \emph{target}, conditional on a \emph{context}.
 related work at the time of writing.
 Here we summarise a set of main features, and relate CG to the developments in grammar formalism since the initial CG description.
 
-All theories and implementations of CG  a \emph{reductionist}
+All theories and implementations of CG  a \emph{reductionistic}
 system, designed primarily for analysis, not generation.
-Its task is to give correct analyses to the words given sentences,
+Its task is to give correct analyses to the words in given sentences,
 not to describe a language as a collection of ``all and only the grammatical sentences''.
 
 The syntax is decidedly \emph{shallow}: the rules do not aim to
@@ -234,15 +235,15 @@ Let us illustrate with an example in Swedish.
 \end{verbatim}
 
 The first word, \emph{en}, is ambiguous between the indefinite determiner for
-\emph{utrum} gender  (masculine and feminine collapsed into one), or a noun (`juniper').
-The second word, \emph{bord}, is a neuter noun (`table')---the writer has
-most likely meant to write ``a table'' instead of ``juniper table'', but has mistaken the gender of `table'. The correct form, which also would not be ambiguous, is ``ett bord''.
+\emph{utrum} gender  (masculine and feminine collapsed into one), or the noun `juniper'.
+The second word, \emph{bord}, is a neuter noun (`table')---we can assume that the
+most likely meaning is ``a table'' instead of ``juniper table''\footnote{Compound words are written without a space: ``juniper table'' would be \emph{enbord}.}, but the writer has mistaken the gender of `table'. The correct form, which also would not be ambiguous, is ``ett bord''.
 
 %CG allows the rules to be as fine-grained or broad as we want: 
 CG rules can be as fine-grained or broad as we want: 
 \texttt{SELECT det IF (1 noun) (0 noun)} would match any determiner and any noun, 
 and succesfully disambiguate \emph{en} in this case. 
-We can also enforce grammaticality by writing \texttt{SELECT det utr sg IF (1 noun utr sg)}%\footnote{the counterpart neuter determiner is not ambiguous with noun, so \texttt{SELECT det neutr sg IF (1 noun neutr sg) (0 noun)} would be redundant. Though it can be ambiguous with the numeral `1'. So actually maybe it's good anyway.}
+We can also enforce grammaticality by writing \texttt{SELECT det utr sg IF (1 noun utr sg) (0 noun utr sg)}%\footnote{the counterpart neuter determiner is not ambiguous with noun, so \texttt{SELECT det neutr sg IF (1 noun neutr sg) (0 noun)} would be redundant. Though it can be ambiguous with the numeral `1'. So actually maybe it's good anyway.}
 . In that case, nothing in the grammatically incorrect phrase matches, and it is left ambiguous.
 
 
@@ -253,47 +254,62 @@ The previous example illustrates that the notions of \emph{accept} and \emph{rej
 by enumerating only legal combinations, the grammar would just refuse to disambiguate
 an ungrammatical sequence and leave all tags intact---in that case,
 its performance would not differ from a grammar that simply does not have many rules.
-If we define \emph{grammatical sequences} to be sequences of POS tags,
-then the question is somewhat easier to answer: \texttt{\textless{}det\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} is ungrammatical, and CG does not raise an alarm that there is something wrong. However, the alternative \texttt{\textless{}noun\textgreater{}\textless{}utr\textgreater{} \textless{}noun\textgreater{}\textless{}neutr\textgreater{}} might be in that particular context even ``more wrong''; same goes for the option with no disambiguation at all.
-As \cite{karlsson1995constraint} states, CG is not designed for defining grammaticality, but rather providing analyses for real-life texts.
+%The difference lies in that a generative grammar starts building structure from scratch---there are no errors in an empty tree, and i
+%In contrast, CG has to assign structure for any input, including grammatically incorrect.
+The sequence \verb!en<det><utr> bord<noun><neutr>! is undeniably ungrammatical; however, the alternative \verb!en<noun><utr> bord<noun><neutr>! would be even ``more wrong'' for the purpose of analysing the text.
+
+% If we define \emph{grammatical sequences} to be sequences of POS tags,
+% then the question is somewhat easier to answer: \verb!<det><utr> <noun><neutr>! is ungrammatical, and CG does not raise an alarm that there is something wrong; hence we can say that CG ``accepts'' ungrammatical sequences. However, the alternative \verb!<noun><utr>! \verb!<noun><neutr>! would be even ``more wrong'' for the purpose of analysing the text; same goes for the option with no disambiguation at all.
+
+%As \cite{karlsson1995constraint} states, CG is not designed for defining grammaticality, but rather providing analyses for real-life texts.
 
 % Of course, the latter point can be made of any reductionist system, not only CG.
 
 \subsection{Shallow syntax}\label{shallow-syntax}
 
 CG can be described as a shallow formalism for various reasons. 
-The analysis is limited to moprhology and surface syntax; no hierarchical tree structure is provided.
-CG rules usually operate on a low level of abstraction; instead of one rule to describe the possible structure of \emph{noun phrase},
-CG would include many small rules each describing one possible kind of noun phrase.
-Finally, the rules are independent
+The analysis is limited to concrete words; no invisible structure is postulated.
+CG rules usually operate on a low level of abstraction, and may target concrete words or word forms.
+% instead of one rule to describe the possible structure of noun phrase,
+%CG would include many small rules each describing one possible kind of noun phrase.
+Finally, the rules are independent: each rule describes its own piece of a phenomenon, and there is no inbuilt mechanism to guarantee that the rules are consistent with each other.
 
 
 
+\paragraph{Low hierarchy}
 
 
-\paragraph{Flat structure}
-
-The analysis starts from a list of alternatives for each word, and proceeds by eliminating impossible or unlikely candidates.
+We saw that the analysis starts from a list of alternatives for each word, and proceeds by eliminating impossible or unlikely candidates.
 These alternatives may include syntactic labels as well as morphological, but there are no invisible components in the analysis: all labels attach to a concrete token in the phrase.
-Syntactic or dependency labels are functionally the same as morphological: \texttt{@Subj} is just one more tag in a reading.
-
-It is possible to modify the morphological parser, or use a suitable post-processing, to add even more data. One could add semantic roles, or any other information that a lexicon may provide, such as animacy or frequency.
+Syntactic or dependency labels are functionally the same as morphological: for example, \texttt{@Subj} is just one more tag in a reading.
+In fact, it is possible to add even more data to the readings, either from the initial morphological analysis, or with suitable post-processing. One could include semantic roles, or any other information that a lexicon may provide, such as animacy or frequency.
 As a result, readings may look like the following:
 
 \begin{verbatim}
 "<cat>"
-        "cat" noun sg   @Subj £Agent &Animal
-        "cat" verb pres @Pred &Computer &Rare
+        "cat" noun sg   @Subj £Agent §Animal
+        "cat" verb pres @Pred §Computer §Rare
 \end{verbatim}
 
-\noindent Moreover, any of these levels can be accessed in the same rule: e.g. \texttt{SELECT noun IF (-1 "cat" &Animal) (NOT 0 &Rare)}.
+\noindent Moreover, any of these levels can be accessed in the same rule: e.g. \texttt{SELECT noun IF (-1 "cat" §Animal) (NOT 0 §Rare)}. 
+In other words, we may use syntactic or semantic features to help in morphological disambiguation, and vice versa.
 
+This lack of deep structure is intentional in the design of CG.
+\cite{karlsson1995constraint} justifies the choice with a number of
+theoretical principles: that language is open-ended and grammars are
+bound to leak, and that necessary information for the syntactic analysis
+comes from the morphology, hence morphology is ``the cornerstone of
+syntax''. 
+In addition, \cite{karlsson1995constraint} argues CG to be a reasonable 
+psycholinguistic hypothesis; indeed, CG has been used in psycholinguistic research.
+\todo{cite some paper by CLEAR people} find CG appealing especially because all levels are accessible at the same time, from lexicon and morphology to semantics.
 
-
-
-
-
-\paragraph{Low abstraction} 
+% In a CG, one has access to all levels at the same time,
+% ranging from morphology to syntax or dependency labels, or even
+% semantics, if one wants to introduce semantic roles in the
+% tagset. One can have a rule such as \texttt{REMOVE ... IF (+1 "bear" <noun>
+%   @Object §Patient)}, followed by a second rule which only considers the POS of the
+% context word.
 
 
 % \cite{karlsson1995constraint}
@@ -303,91 +319,58 @@ As a result, readings may look like the following:
 
 
 
-% CG has a more lightweight task than e.g.~a phrase structure grammar: a
-% successful disambiguation can depend on just a local context, in a
-% window of 1-3 words left or right. To demonstrate the the difference,
-% let us take the same the example sentence \emph{the bear sleeps}, and a
-% context-free grammar with the following productions:
+\paragraph{Low abstraction} 
 
-
-% \begin{verbatim}
-% S   -> NP VP
-% VP  -> V NP
-% NP  -> Det N
-% Det -> "the"
-% N   -> "bear" | "sleeps"
-% V   -> "bear" | "sleeps"
-% \end{verbatim}
-
-% There is no way to reach \texttt{S} if \emph{bear} is analysed as
-% \texttt{V} and \emph{sleeps} as \texttt{N}; thus we get the individual
-% words disambiguated thanks to the parser, which introduces a structure
-% to the whole sentence. If one of the words was out of vocabulary, say
-% \emph{the bear warbles}, there would be no analysis for \emph{the} or
-% \emph{bear} either. In CG, an unrecognised verb would be no problem at
-% all in disambiguating the previous words.
-
-Contrasting with phrase-structure or dependency grammars, the rules in
-CG are often on a lower level of abstraction. 
+As for the level of abstraction, CG rules lie somewhere between 
+traditional grammar formalisms, such as HPSG, and purely statistical methods.
+The rules do not usually handle long-distance dependencies; 
+they operate on a unit of a few words, nor do they abstract away from surface features such as word order.
 The rule that tells to remove verb reading after a determiner
-does not describe the whole abstract category ``''noun phrase; we need a second
-rule to remove a verb after a determiner and an adjective (\emph{the happy
-bear sleeps}), and a third rule to remove verb after a possessive
-pronoun (\emph{my bear sleeps}). A phenomenon that is expressed with one
-big rule in a deep formalism such as HPSG or categorial grammar, is
-split into many low-level rules.
+does not describe the whole abstract category ``noun phrase''; we need a second
+rule to remove a verb after a determiner and an adjective (\emph{the happy bear}) 
+or an adjectival phrase (\emph{the very happy bear}).
+Some rules may be purely lexical, and some rules may target the whole class of nouns or determiners; these decisions are motivated by what is needed for disambiguating real-life texts, rather than formulating the most elegant and concise rules possible.
+%A phenomenon that is expressed with one big rule in a deep formalism is split into many low-level rules.
 
-The rules do not usually handle 
-long-distance dependencies; they operate on a unit of a few words, and
-don't abstract away from surface features such as word order.
-You need to define rules separately for stuff like ``select noun if -1
-determiner'' and ``select noun if -2 determiner -1 adjective''.
 
-Whereas a generative grammar could fail to produce any analysis, if even one of the words is unknown or misspelt, CG would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
 
 \paragraph{Independence of rules}
 The rules are self-contained and independent.
-On the one hand, th
+On the one hand, this provides no guarantee that a grammar is internally consistent.
 On the other hand, these features provide flexibility that is hard to mimic by a deeper formalism.
-For instance, rules can target individual words
+As we have seen in the previous sections, rules can target individual words
 % (select \texttt{noun} if the word form is \emph{bear})
 or other properties that are not generalisable to a whole word class,
 such as verbs that express cognitive processes.
 Introducing a subset of verbs, even if they are used only in one rule,
 is very cheap and does not create a complicated taxonomy of different verb types.
-We can introduce a similar granularity in other systems, for instance,
-a grammar in Grammatical Framework, which would include the functions
-\texttt{GenVP} for whichever verbs and \texttt{CogVP} for cognitive verbs:
+
+Most importantly, the independence of rules makes CG highly robust.
+If one of the words is unknown or misspelt, a generative grammar would fail to produce any analysis. 
+CG would, at worst, just leave that part ambiguous, and do as good a job it can elsewhere in the sentence.
+
+% We can introduce a similar granularity in other systems, for instance,
+% a grammar in Grammatical Framework, which would include the functions
+% \texttt{GenVP} for whichever verbs and \texttt{CogVP} for cognitive verbs:
 
 
-\begin{verbatim}
-GenVP : V2    -> NP -> VP ;
-CogVP : CogV2 -> NP -> VP ;
-\end{verbatim}
+% \begin{verbatim}
+% GenVP : V2    -> NP -> VP ;
+% CogVP : CogV2 -> NP -> VP ;
+% \end{verbatim}
 
-In order to parse as much text as without the subcategorisation, the
-grammar writer would have to add \texttt{CogV*} counterparts all
-functions that exist for \texttt{V*}, which duplicates code; or add
-coercion functions from  \texttt{CogV*} to \texttt{V*}, which increases ambiguity.
-In case of multiple parses, likely the one with more information
-would be preferred, but the CG solution gives more flexibility. If a
-rule which matches \texttt{CogV} is introduced before (more on
-ordering in the following section) a rule which matches \texttt{V}, it
-is applied before, and vice versa. This allows for very fine control,
-for example combining the semantic properties of the verb and the
-animacy of the arguments.
+% In order to parse as much text as without the subcategorisation, the
+% grammar writer would have to add \texttt{CogV*} counterparts all
+% functions that exist for \texttt{V*}, which duplicates code; or add
+% coercion functions from  \texttt{CogV*} to \texttt{V*}, which increases ambiguity.
+% In case of multiple parses, likely the one with more information
+% would be preferred, but the CG solution gives more flexibility. If a
+% rule which matches \texttt{CogV} is introduced before (more on
+% ordering in the following section) a rule which matches \texttt{V}, it
+% is applied before, and vice versa. This allows for very fine control,
+% for example combining the semantic properties of the verb and the
+% animacy of the arguments.
 
-\paragraph{Theoretical principles after all these practical examples} This lack of deep structure is intentional in the design of CG.
-\cite{karlsson1995constraint} justifies the choice with a number of
-theoretical principles: that language is open-ended and grammars are
-bound to leak, and that necessary information for the syntactic analysis
-comes from the morphology, hence morphology is ``the cornerstone of
-syntax''. In a CG, one has access to all levels at the same time,
-ranging from morphology to syntax or dependency labels, or even
-semantics, if one wants to introduce semantic roles in the
-tagset. One can have a rule such as \texttt{REMOVE ... IF (+1 "bear" <noun>
-  @Object §Patient)}, followed by a second rule which only considers the POS of the
-context word.
 %  From an engineering point of view, even an incomplete CG can
 % already disambiguate a lot, whereas an incomplete phrase structure
 % grammar is nearly useless.
@@ -570,8 +553,7 @@ the careful context.
 In a parallel execution, we have the initial context during the whole round.
 If we can do parallel with multiple runs, it should work. But not just with one round.
 
-How about strict & heuristic?
-It should 
+How about strict and heuristic?
 
 \paragraph{Note on termination} 
 Running the grammar multiple times is desirable: especially the rules
