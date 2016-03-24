@@ -382,7 +382,13 @@ However, in the two decades following the initial specification,
 several independent implementations have experimented with different ordering
 schemes. In the present section, we describe the different parameters of ordering and execution: \emph{strict vs. heuristic}, and \emph{sequential vs. parallel}.
 % Even Karlsson's original specifications differ as for the \emph{ordering} of the rules:
-% \cite{karlsson1990cgp} describes the CGP as executing the rules strictly in the order in which they appear, but \cite{karlsson1995constraint} states on page 17:
+% \cite{karlsson1990cgp} describes the CGP as executing the rules strictly in the order in which they appear:
+% \begin{quote}
+% There may be several mapping statements for the same morphological feature(s), e.g. ``N NOM''. Mapping statements with more narrowly specified contexts have precedence over more general statements. 
+% In the present implementation of CGP, the mapping statements apply in plain linear order. 
+% \end{quote}
+
+% but \cite{karlsson1995constraint} states on page 17:
 
 % \begin{quote} 
 % Each single statement is true when examined in isolation, either absolutely or with some degree of certainty, depending upon how careful the grammar writer has been. Furthermore, disregarding morphosyntactic mappings, the constraints are \emph{unordered}.
@@ -581,11 +587,11 @@ Input &         & Output & \\ \hline
 \label{sec:expressivity}
 As we have learnt, CG is not a generative grammar---it needs a list of alternatives to start removing some of them.
 In addition, different variants and implementations of CG behave differently; 
-it is not a meaningful question to define the expressivity of ``CG'', but rather CG-1 \cite{karlsson1995constraint}, CG-2 \cite{tapanainen}, VISLCG, VISL CG-3, or any other less mainstream implementation.
+it is not a meaningful question to define the expressivity of ``CG'', but rather CG-1 \cite{karlsson1995constraint}, CG-2 \cite{tapanainen1996}, VISLCG \todo{cite someone}, VISL CG-3 \cite{bick2015}, or any other less mainstream implementation.
 
 But can we emulate some kind of behaviour that would put it into the Chomsky hierarchy? 
 
-\cite{tapanainen99phd} defines finite-state constraint languages as having `` contextual tests that are expressed in terms of regular languages''.
+\cite{tapanainen1999phd} defines finite-state constraint languages as having `` contextual tests that are expressed in terms of regular languages''.
 Indeed, we can verify that in all implementations of CG, 
 the contextual tests must be regular: we cannot express in a single rule ``remove verb if the previous segment contains any well-nested parentheses''.
 But the whole rule set is capable of more than a single rule. 
