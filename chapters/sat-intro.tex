@@ -38,9 +38,9 @@ The objective is to find a \emph{model}: each variable is assigned a Boolean val
 
 
 \begin{quote}
-Satisfiability solving, the problem of deciding whether the variables of a propositional formula can be assigned in such a way that the formula evaluates to true, is one of the classic problems in computer science. It is of theoretical interest because it is the canonical NP-complete problem. It is of practical interest because modern SAT-solvers can be used to solve many important and practical problems.\end{quote} \\
--- Claessen et al, 200?
-
+Satisfiability solving, the problem of deciding whether the variables of a propositional formula can be assigned in such a way that the formula evaluates to true, is one of the classic problems in computer science. It is of theoretical interest because it is the canonical NP-complete problem. It is of practical interest because modern SAT-solvers can be used to solve many important and practical problems. \\
+-- Claessen et al, 2009
+\end{quote}
 
 
 \paragraph{Applications of SAT}
@@ -56,6 +56,6 @@ further.
 \paragraph{What does it help you to formulate something as a SAT-problem?}
 
 SAT-solving is all about searching.
-SAT-problems are in general NP-complete. However, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics \cite{claessen_al}.
+SAT-problems are in general NP-complete. However, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics \cite{claessen2009satpractice}.
 Formulating a search problem in SAT gives us access to decades of research into SAT-solving. 
 Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
