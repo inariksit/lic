@@ -14,10 +14,15 @@
 \def\pr{{\text{\em Pr}}}
 \def\prn{{\text{\em Prn}}}
 \def\det{{\text{\em Det}}}
+\def\notDet{{\neg \text{\em Det}}}
+\def\any{{\text{Any}}}
 
 
 \def\sobrePr{\sobre_\pr}
 \def\sobreN{\sobre_\n}
+
+\def\unaNotDet{\una_\notDet}
+\def\unaAny{\una_\any}
 \def\unaPrn{\una_\prn}
 \def\unaDet{\una_\det}
 \def\unaPrsPThree{\una_\vPrsPThree}
@@ -173,19 +178,35 @@ This is naturally represented as implications. We demonstrate both \textsc{remov
 %
 %
 \intertext{\cgrule{REMOVE adj IF (1C adj)} Careful context}
-\cientificaAdj \wedge \neg{}\cientificaN & \Rightarrow \masAdv \wedge \neg{}\masAdj \\
+\cientificaAdj \wedge \neg{}\cientificaN & \Rightarrow \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n)} Scanning}
 %
 %
-\sobreN \vee \aproximacionN & \Rightarrow \masAdv \wedge \neg{}\masAdj \\
+\sobreN \vee \aproximacionN & \Rightarrow  \neg{}\masAdj \\
 %
 %
-\intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier}
+\intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier. The variable $\sobreN$ only fulfils the requirement -1* n, if $\unaDet$ is not true.}
 %
 %
-(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \Rightarrow \masAdv \wedge \neg{}\masAdj 
+(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \Rightarrow \neg{}\masAdj 
+%
+\intertext{\cgrule{REMOVE adj IF (-1C* n)} Scanning with careful context}
+%
+%
+(\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \Rightarrow  \neg{}\masAdj \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1C* n BARRIER det)} Scanning with careful context, up to a barrier.}
+%
+%
+(\sobreN \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \Rightarrow \neg{}\masAdj 
+%
+\intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier. A careful barrier is effectful only if it is unambiguous. In this case, {\em una} fails to work as a barrier, if any of its other analyses (pronoun or verb) is true.}
+%
+\vspace{0.1cm} \intertext{Let $\unaAny$ denote the disjunction $\unaPrn \vee \unaPrsPThree \vee \unaPrsPOne \vee \unaImp$. Then we write the condition as follows.}
+(\sobreN \wedge \unaAny) \vee \aproximacionN & \Rightarrow \neg{}\masAdj 
 %
 \end{align}
 
