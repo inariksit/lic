@@ -542,6 +542,8 @@ as well as the ``CG-like'' system in \cite{lager98}.
 % the word \emph{what} is fully disambiguated as a determiner.
 
 
+\subsection{Expressivity}
+\label{sec:expressivity}
 
 \begin{figure}[t]
 \ttfamily
@@ -583,13 +585,24 @@ Input &         & Output & \\ \hline
 \label{fig:anbn}
 \end{figure}
 
-\subsection{Expressivity}
-\label{sec:expressivity}
-As we have learnt, CG is not a generative grammar---it needs a list of alternatives to start removing some of them.
-In addition, different variants and implementations of CG behave differently; 
+As we have learnt, CG is not a generative grammar---
+it needs a list of alternatives and finds the correct ones among them.
+The question ``what can CG express?'' depends completely on what is present in the initial input. 
+
+Take the example of central embedding; a feature known to require a context-free grammar. If a given generative grammar would analyse correctly an arbitrary number of central embeddings (e.g. \emph{the dog \emph{the cat bit} died}), this would suggest that the grammar is (at least) context-free. In order to translate such requirement to CG, we have two questions to ask: 
+\begin{inparaenum}
+\item Can a CG grammar correctly disambiguate a sentence with arbitrary number of central embeddings?
+\item If such grammar can be written, does it mean that CG is context-free?
+\end{inparaenum}
+In addition, there are different variants and implementations of CG: 
 it is not a meaningful question to define the expressivity of ``CG'', but rather CG-1 \cite{karlsson1995constraint}, CG-2 \cite{tapanainen1996}, VISLCG \todo{cite someone}, VISL CG-3 \cite{bick2015}, or any other less mainstream implementation.
 
-But can we emulate some kind of behaviour that would put it into the Chomsky hierarchy? 
+Despite these difficulties, we argue that it is possible to emulate some kind of behaviour that would put CG into the Chomsky hierarchy.
+
+%Assume we have a rule, which can disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V'', as a simple, local pattern matching task. 
+%This rule will perform the correct disambiguation for the pronoun, even if the relative clause is centrally embedded; a feature known to not be regular. If all the other rules are successful, then the grammar has chosen a correct analysis for a sentence, which is not context-free.
+
+ 
 
 \cite{tapanainen1999phd} defines finite-state constraint languages as having `` contextual tests that are expressed in terms of regular languages''.
 Indeed, we can verify that in all implementations of CG, 
