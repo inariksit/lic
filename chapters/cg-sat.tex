@@ -77,12 +77,10 @@ targetet reading is selected or removed; and
 
 
 To show a concrete example, the following shows the two rules in the specified order:
-\begin{inparaenum}[\itshape a\upshape)]
-\def\labelenumi{\arabic{enumi}.}
-\itemsep1pt\parskip0pt\parsep0pt
-\item \texttt{REMOVE verb IF (-1 det)}; and
-\item  \texttt{REMOVE noun IF (-1 noun)}
-\end{inparaenum}.
+\begin{enumerate}
+\item[] \texttt{REMOVE verb IF (-1 det) ;}
+\item[]  \texttt{REMOVE noun IF (-1 noun) ;}
+\end{enumerate}.
 
 \begin{align*}
 \text{{\sc pos}$^1$(P, [det])} \  &\Leftarrow \  \text{word(P, the)} \\
@@ -565,8 +563,6 @@ We experimented with both ordered and unordered rules, and found the
 ordered scheme to work better with previously written grammars.
 For future direction, we intend to concentrate on grammar analysis,
 especially finding conflicts in constraint grammars.
-
-\input{chapters/sat-appendix}
 
 
 % Also, the SAT-solver requires less rules, and these rules are simpler. 

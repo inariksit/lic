@@ -24,12 +24,24 @@
 \usepackage[english]{babel}
 
 \usepackage{fontspec}
+
+%\setmainfont{texgyrepagella} 
+% \setmainfont{palatino} 
+% [ Extension      = .otf 
+% , UprightFont    = *-regular 
+% , BoldFont       = *-bold 
+% , ItalicFont     = *-italic 
+% , BoldItalicFont = *-bolditalic 
+% , Ligatures      = {Common,TeX} 
+% , Numbers        = OldStyle ]
+% \setmathfont[Ligatures=TeX]{texgyrepagella-math.otf}
+
 \newcommand{\mainfontfamily}{Palatino}
 \setmainfont[
   Ligatures=TeX,
   Scale=0.9,
 ]{\mainfontfamily}
-\newfontfamily\scshape[Letters=SmallCaps, Numbers=Uppercase] % {Myriad Pro} % {TeX Gyre Pagella}
+\newfontfamily\scshape[Letters=SmallCaps, Numbers=Uppercase]{Palatino} %{TeX Gyre Pagella}
 
 \newcommand{\monofontfamily}{Monaco} % Courier
 \setmonofont[Scale=0.7]{\monofontfamily}
@@ -58,7 +70,11 @@
 \usepackage[bf]{caption} \renewcommand{\captionfont}{\small}
 \usepackage{subcaption} % for subfigures
 
+%\usepackage{enumitem}
 \usepackage{paralist}
+\usepackage{mathtools}
+\usepackage{multicol}
+\setlength{\multicolsep}{0pt}
 
 \usepackage{fancyhdr}
 \fancyhead[LE,RO]{\leftmark}
@@ -167,6 +183,18 @@
 \newtheorem{corollary}{Corollary}
 
 
+% Appendix after chapter 3
+\usepackage{appendix}
+\usepackage{chngcntr}
+\usepackage{etoolbox}
+\AtBeginEnvironment{subappendices}{
+  \chapter*{Appendix}
+  \addcontentsline{toc}{chapter}{Appendices}
+  \counterwithin{figure}{section}
+  \counterwithin{table}{section}
+}
+
+
 %= DOCUMENT ==================================================================
 
 \begin{document}
@@ -201,10 +229,15 @@
 
   \include{chapters/background}
   \include{chapters/cg-sat}
+
+\begin{subappendices}
+  \include{chapters/sat-appendix}
+\end{subappendices}  
+
   \include{chapters/cg-analysis}
 %  \include{chapters/conclusion}
 
-% \appendix
+
 
 \backmatter
  % \include{glossary}
