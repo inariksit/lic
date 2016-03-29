@@ -35,7 +35,7 @@
 \def\cientificaN{\cientifica_\n}
 
 \def\cgrule#1{\noindent {\sc \bf #1 }}
-
+\def\eqdef{\Coloneqq}
 
 %%%%%%%%%%%%%%%
 
@@ -61,8 +61,9 @@
 
 %%%%%%%%%%%%%%%
 
-\appendix
-\chapter{SAT-encoding}
+%\chapter{SAT-encoding}
+
+\section{SAT-encoding}
 
 In this appendix, we show the translation of different rule types in detail. 
 A reader who wants a general overview can read Section~\todo{write that section}.
@@ -77,13 +78,13 @@ We demonstrate the SAT-encoding with a concrete segment in Spanish:  \emph{sobre
 \ttfamily
 \centering
 \begin{tabular}{ll @{\hspace{1.5cm}} ll}
-"<sobre>"  &                     &  "<aproximación>"  &                         \\
-           & "sobre" pr          &                    & "aproximación" n f sg   \\
-           & "sobre" n m sg      &                    &                         \\
+"<sobre>"  &                     &                    &                         \\ 
+           & "sobre" pr          &  "<aproximación>"  &                         \\
+           & "sobre" n m sg      &                    & "aproximación" n f sg   \\
 "<una>"    &                     &   "<más>"          &                         \\
            & "uno" prn tn f sg   &                    & "más" adv               \\
            & "uno" det ind f sg  &                    & "más" adj mf sp         \\
-           & "unir" v prs p3 sg  & "<científica>"     &                         \\
+           & "unir" v prs p3 sg  &  "<científica>"    &                         \\
            & "unir" v prs p1 sg  &                    & "científico" adj f sg   \\
            & "unir" v imp p3 sg  &                    & "científico" n f sg     \\
 
@@ -115,6 +116,7 @@ To ensure that each cohort contains at least one true variable, we add the follo
 \masAdv \vee \masAdj \\
 \cientificaAdj \vee \cientificaN \\
 \end{array}
+\label{eq:atleastOneTrue}
 \end{equation}
 
 \noindent The word \emph{aproximación} is already unambiguous, thus the clause $\aproximacionN$ is a unit clause, and the respective variable is trivially assigned $True$. 
@@ -190,7 +192,6 @@ A rule can target one or multiple readings in a cohort. We demonstrate the case 
 
 Rules with contextual tests apply to the target, if the conditions hold. 
 This is naturally represented as implications. We demonstrate both \textsc{remove} and {\sc select} rules with a single condition; the rest of the variants only with {\sc remove}. All rule types can be changed to {\sc select} by changing the consequent.
-%Whereas a positive condition out of scope simply does not match and creates no clause, a negated condition does. 
 
 
 \begin{equation}
@@ -259,48 +260,30 @@ Let $\unaAny$ denote the disjunction $\unaPrn \vee \unaPrsPThree \vee \unaPrsPOn
 \end{align}
 
 
-\subsection{Negated conditions}
+\subsubsection{Inverted conditions}
 
-The keyword NOT negates a single contextual test, and NEGATE a whole conjunction of contextual tests. 
-There is a crucial difference about matching between positive and negative conditions.
-If a positive condition is out of scope or the tag is not present in the initial analysis, the rule simply does not match, and no clauses are created. For instance, the conditions `10 adj' or `-1 punct' in our example passage would not result in any action.
-In contrast, a negated condition out of scope makes the action happen unconditionally.
+We demonstrate the effect of two inversion operators in the following.
+The keyword NOT inverts a single contextual test, and NEGATE inverts a whole conjunction of contextual tests. 
+There is a crucial difference about matching between positive and inverted conditions.
+If a positive condition is out of scope or the tag is not present in the initial analysis, the rule simply does not match, and no clauses are created. For instance, the conditions `10 adj' or `-1 punct', matched against our example passage, would not result in any action.
+In contrast, when an inverted condition is out of scope or unapplicable, 
+that makes the action happen unconditionally.
 As per VISL CG-3, the condition `NOT 10 adj' applies to all sentences where there is no 10th word from target that is adjective; including the case where there is no 10th word at all.
 
-Negation cannot be applied to a BARRIER condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, a set complement operator must be used: \cgrule{(*) - bar}.
+Inversion cannot be applied to a BARRIER condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, a set complement operator must be used: \cgrule{(*) - bar}.
 
-We demonstrate the effect of the different negation operators in the following.
 
 \begin{align}
-\intertext{\cgrule{REMOVE adj IF (NOT 1 adj)} Single negated condition.}
+\intertext{\cgrule{REMOVE adj IF (NOT 1 adj)} Single inverted condition.}
 \neg \cientificaAdj & \Rightarrow  \neg{}\masAdj \\
 %
-\intertext{\cgrule{REMOVE adj IF (NOT 10 adj)} Single negated condition, out of scope. }
-    & \Rightarrow \neg{}\masAdj \\
-%
-%
- \intertext{\cgrule{REMOVE adj IF (NOT 1 punct)} Single negated condition, not present in initial analysis.}
-%
-    & \Rightarrow \neg{}\masAdj \\
-%
-%
-\intertext{\cgrule{REMOVE adj IF (NOT 1 adj) (NOT -1 n)} Conjunction of negated conditions.}
+\intertext{\cgrule{REMOVE adj IF (NOT 1 adj) (NOT -1 n)} Conjunction of inverted conditions.}
 \neg \cientificaAdj \wedge \neg \aproximacionN & \Rightarrow \neg{}\masAdj \\
-%
-%
-%%%%% \intertext{\cgrule{REMOVE adj IF (NOT 1 adj) (NOT -10 n)} Conjunction of negated conditions, one out of scope.}
-%%%% %
-%%%% \neg \cientificaAdj & \Rightarrow \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 det LINK 1 n)} Negation of a conjunction of conditions.}
 %
 \neg \sobrePr \vee \neg \unaDet \vee \neg \aproximacionN) & \Rightarrow \neg{}\masAdj \\
-%
-%
-\intertext{\cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 punct)} Negation of a conjunction of conditions, some not present in initial analysis.}
-%
-  & \Rightarrow \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NOT 1C adj)} Negated careful context. Condition cannot be unambiguously adjective.}
@@ -322,10 +305,135 @@ We demonstrate the effect of the different negation operators in the following.
 (\neg \sobreN \vee \unaAny) \wedge \neg \aproximacionN & \Rightarrow \neg{}\masAdj 
 %
 %
+%
 \end{align}
+
+\subsubsection{Non-matching inverted conditions}
+
+Here we demonstrate a number of inverted rules, in which the contextual test does not match the example sentence. As a result, the action is performed unconditionally.
+
+\cgrule{REMOVE adj IF (NOT 1 punct)} Single inverted condition, not present in initial analysis.
+%
+\cgrule{REMOVE adj IF (NOT 10 adj)} Single inverted condition, out of scope.
+\cgrule{REMOVE adj IF (NOT 1 adj) (NOT -10 n)} Conjunction of inverted conditions, one out of scope.
+\cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 punct)} Negation of a conjunction of conditions, some not present in initial analysis.
+
+\begin{equation}
+ \neg{}\masAdj 
+\end{equation}
+
+
+\subsubsection{Solving and conflict handling}
+
+The unordered scheme uses maximisation to 
+
 
 \subsection{Ordered scheme}
 
-We continue with the ordered scheme. In contrast to the unordered scheme, each time that a rule is applied to a target, a new variable for the target is created.
-This makes it possible to separate two cases: a variable assigned a value, because some rule targets it, or a variable is assigned a value, because it appears in the condition of some other rule. Most importantly, it allows us to model the effect of time.
+We continue with the ordered scheme. In contrast to the unordered scheme, ordering of the rules makes a difference: the following rule orders produce a different result.
 
+\begin{itemize}
+\item[] \begin{verbatim}
+REMOVE adv IF (-1 n) ;
+REMOVE adj IF (-1 n) ;
+\end{verbatim}
+\item[] \begin{verbatim}
+REMOVE adj IF (-1 n) ;
+REMOVE adv IF (-1 n) ;
+\end{verbatim}
+\end{itemize}
+
+In the unordered scheme, we simply translated every applicable rule into a clause, and asked the SAT-solver to find a model that satisfies all the clauses. 
+Now, we need to model a state of the sentence. The first rule accesses the initial input
+by the morphological analyser, and the $n^{th}$ rule accesses the sentence after the first $n-1$ rules have been run.
+Similarly to \cite{lager_nivre01}, we model this as a composition of clauses, each accessing the state produced by the previous clause.
+
+%each time that a rule is applied to a target, a new variable for the target is created.
+%This makes it possible to separate two cases: a variable assigned a value, because some rule targets it, or a variable is assigned a value, because it appears in the condition of some other rule. Most importantly, it allows us to model the effect of time.
+
+The following is not the only possible SAT-encoding to model an ordered execution of the rules. In fact, \cite{listenmaa_claessen2015} uses a different encoding; however, we changed into the one described in the following, because it generalises to grammar analysis (see Chapter~\ref{chapterCGana}).
+
+\subsubsection{Creating the sentence}
+
+The main difference is that the sentence starts off with all variables assigned $True$. Contrast \ref{eq:allStartTrue} with \ref{eq:atleastOneTrue}; 
+
+\begin{equation}
+\begin{array}{c}
+\sobrePr \wedge \sobreN \\
+\unaPrn \wedge \unaDet \wedge \unaPrsPThree \wedge \unaPrsPOne \wedge \unaImp \\
+\aproximacionN \\
+\masAdv \wedge \masAdj \\
+\cientificaAdj \wedge \cientificaN \\
+\end{array}
+\label{eq:allStartTrue}
+\end{equation}
+
+\noindent At each rule application, we create a new variable for each targeted reading. The new variable is $True$ iff 
+
+\begin{tabular}{l l}
+(a) the old variable was $True$, and & (b) the rule cannot apply: this can be because \\
+                                     & ~~~~-- its conditions do not hold, or \\
+                                     & ~~~~-- it would remove the last reading.
+\end{tabular}
+
+% \begin{inparaenum}
+ %      \item the old variable was true, and
+ %      \item the rule cannot apply, either because 
+ %        \begin{inparaenum} 
+ %          \item the conditions of the rule do not hold, or
+ %          \item applying the rule would remove the last reading.
+ %        \end{inparaenum}
+ %  \end{inparaenum}
+For subsequent rule applications, only the variables from the latest round are accessible: the $n^{th}$ rule may only access the variables that are created, or left unchanged, by the $n-1^{th}$ rule. 
+Even if a variable was true
+
+\begin{equation}
+\begin{array}{r @{~\eqdef~} l}
+\text{condsHold}     & c1 \vee c2 \vee c3 ... \\
+\text{someTrgIsTrue} & r1 \vee r2 \vee r3 ... \\
+\text{noOtherIsTrue} & \neg r4 \wedge \neg r5 ... \\
+\text{onlyTrgLeft}   & \text{someTrgIsTrue} \wedge \text{noOtherIsTrue} \\
+\text{cannotApply}   & \neg \text{condsHold} \vee \text{onlyTrgLeft} \\
+%
+\text{New variable } trg' &  trg \wedge \text{cannotApply}
+              %  [ andl s newTrgName [ oldTrgLit     --wN<a> was also true, and
+              %                      , cannotApply ] --rule cannot apply 
+              %     | oldTrgLit <- trgPos
+              %     , let newTrgName = show oldTrgLit ++ "'" ]
+\end{array}
+\end{equation}
+
+\subsubsection{No conditions} 
+
+
+\cgrule{REMOVE adj} Unconditionally removes all readings which contain the target.
+
+\begin{equation}
+\centering
+  %\begin{array}{r @{~\eqdef~} l}
+    % \mas{}'_\adj        & \text{New variable} \\
+    % \cientifica{}'_\adj &  \text{New variable} \\
+    % \multicolumn{2}{c}{\neg{}\mas{}'_\adj}  \\
+    % \multicolumn{2}{c}{\neg{}\cientifica{}'_\adj}
+%
+  \begin{array}{c}
+    \text{New variable } \mas{}'_\adj \\
+    \text{New variable } \cientifica{}'_\adj \\
+    \neg{}\mas{}'_\adj  \\
+    \neg{}\cientifica{}'_\adj
+  \end{array}
+\end{equation}
+
+\cgrule{SELECT adj} \textsc{select} variant. Unconditionally removes all other readings that appear in the same cohort with the target.
+
+\begin{equation}
+\begin{array}{r @{~\wedge~} l }
+\masAdj        & \neg{}\masAdv \\
+\cientificaAdj & \neg{}\cientificaN \\
+\end{array}
+\label{eq:slAdjUnordered}
+\end{equation}
+
+
+
+\subsubsection{Positive conditions}
