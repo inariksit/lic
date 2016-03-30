@@ -587,32 +587,54 @@ Input &         & Output & \\ \hline
 
 As we have learnt, CG is not a generative grammar---
 it needs a list of alternatives and finds the correct ones among them.
-The question ``what can CG express?'' depends completely on what is present in the initial input. 
-
-Take the example of central embedding; a feature known to require a context-free grammar. If a given generative grammar would analyse correctly an arbitrary number of central embeddings (e.g. \emph{the dog \emph{the cat bit} died}), this would suggest that the grammar is (at least) context-free. In order to translate such requirement to CG, we have two questions to ask: 
+The question ``what can CG express?'' depends on what is present in the initial input. 
+Take the example of central embedding; a feature known to require a context-free grammar. If a given generative grammar would analyse correctly an arbitrary number of central embeddings (e.g. \emph{the dog \emph{the cat bit} died}), this would suggest that the grammar is (at least) context-free. In order to translate such criterion to CG, we have two questions to ask: 
 \begin{inparaenum}
-\item Can a CG grammar correctly disambiguate a sentence with arbitrary number of central embeddings?
+\item Can a CG grammar correctly disambiguate a sentence with an arbitrary number of central embeddings?
 \item If such grammar can be written, does it mean that CG is context-free?
 \end{inparaenum}
 In addition, there are different variants and implementations of CG: 
 it is not a meaningful question to define the expressivity of ``CG'', but rather CG-1 \cite{karlsson1995constraint}, CG-2 \cite{tapanainen1996}, VISLCG \todo{cite someone}, VISL CG-3 \cite{bick2015}, or any other less mainstream implementation.
 
-Despite these difficulties, we argue that it is possible to emulate some kind of behaviour that would put CG into the Chomsky hierarchy.
+In the following, we look at existing approaches to define the expressivity of reductionist formalisms, 
+and suggest a way to emulate generation within (a variant of) CG.
 
-%Assume we have a rule, which can disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V'', as a simple, local pattern matching task. 
-%This rule will perform the correct disambiguation for the pronoun, even if the relative clause is centrally embedded; a feature known to not be regular. If all the other rules are successful, then the grammar has chosen a correct analysis for a sentence, which is not context-free.
 
- 
 
-\cite{tapanainen1999phd} defines finite-state constraint languages as having `` contextual tests that are expressed in terms of regular languages''.
+\paragraph{Expressivity of a rule vs. expressivity of a grammar}
+
+As defined in \cite{tapanainen1999phd}, the rules in finite-state constraint languages may include ``contextual tests that are expressed in terms of regular languages''. 
 Indeed, we can verify that in all implementations of CG, 
-the contextual tests must be regular: we cannot express in a single rule ``remove verb if the previous segment contains any well-nested parentheses''.
-But the whole rule set is capable of more than a single rule. 
+the contextual tests must be regular: we cannot write in a single rule ``remove verb if the previous segment contains only well-nested brackets''.
+Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations, such as $(\Sigma - N)*A(\Sigma - V)*N$ \todo{check this rule in CG-2 and CG-3}; in turn, CG-2 \cite{tapanainen1996} can express this, but not e.g. repeated patterns. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{bick2015} did not exist at the time, \cite{tapanainen1996} does not include it in the hierarchy of the constraint formalisms.
+
+The expressivity of a single rule is well defined. However, the expressivity of the whole rule set is harder to define; if we return to the question of central embedding, a CG has much more lightweight task than a generative grammar. The initial tokens, or symbols, come already with a list of alternatives.
+Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''. %This contextual test is regular without question.
+Now, this rule will perform the correct disambiguation for the pronoun, even if the relative clause is centrally embedded. If all the other rules are successful, then the grammar has chosen a correct analysis for a sentence, which is not context-free. Still, 
+all of the rules have only regular contextual tests.
+%none of the rules needs to address anything but a regular phenomenon.
+
+The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or \todo{a? damn indoeuropean languages with your articles} relative pronoun. Furthermore, it does not need to generate only correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
+
+This said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
+
+We draw inspiration from \cite{tapanainen1999phd}, who demonstrates the expressive power of another reductionist parsing formalism, Functional Dependency Grammar \todo{cite!!!}.
+Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language, and the context-sensitive $a^nb^nc^n$. 
+Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can make such leap quite easily. In order to do this, we need two 
+
+Assume that we start
+
+Tapanainen does not present similar constructs for CG-2, but we can express both of these languages in CG-3.
 
 We illustrate the power of CG rules with the context-free language $a^nb^n$.
 Assume that the input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma = \{a, b\}$, and some helper labels (such as $\{even, odd, start, end\}$). Then, if we can write a set of rules that ``disambiguates'' the input as shown in Figure~\ref{fig:anbn}, we can argue that CG can express context-free languages. The same argument goes for languages beyond context-free. \todo{Kokke and Listenmaa (unpublished)} show such grammars in VISL CG-3 for the languages $a^nb^n$ and $a^nb^nc^n$
 
+\begin{quote}
+Tapanainen 1999
+On the other hand, this ambiguity is restricted by the size of the tag set in the grammar, because the constraint grammar can not remove such readings one by one for which it does not have rules. If we redefine the size of the grammar     to be the amount of tag combinations in the gram- mar
 
+tapanainen reports an empirical running time of around n log n
+\end{quote}
 
 
 
