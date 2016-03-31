@@ -17,6 +17,7 @@ But the bat is very aggressive towards all herbivores, and the emu is afraid of 
 You need to decide on a subset of pets to buy---you love all animals, but realistically, you cannot have them all. You start calculating in your head: ``If I take the ant, I cannot take cat, dog, nor fox. How about I take the dog, then I must take the cat and the bat as well.''
 After some time, you decide on bat, cat, dog and fox, leaving the ant and the emu in the pet shop.
 
+\paragraph{Definition}
 
 This everyday situation is an example of a \emph{satisfiability (SAT) problem}.
 The animals translate into \emph{variables}, %$\{ant, bat, cat, dog, emu, fox\}$.
@@ -41,7 +42,7 @@ Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, 
  However, some problems have multiple solutions, and some are unsatisfiable, i.e. they have no solution at all.
 
  \begin{figure}[t]
-  $$\begin{array}{r | r @{~} l | c @{\quad \wedge \quad } c @{\quad \wedge \quad} c }
+  $$\begin{array}{r | r @{~} l | l @{\quad \wedge \quad } l @{\quad \wedge \quad} l }
    \textbf{Animal}
                 & \multicolumn{2}{l}{\textbf{Constraint}} 
                                         & \multicolumn{3}{l}{\textbf{Constraint in conjunctive normal form}} \\ \hline
@@ -54,6 +55,7 @@ Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, 
    \bat         & \bat &\Rightarrow \neg{}\ant \wedge \neg{}\emu
    								        & \neg{}\bat \vee \neg{}\ant 
                                         & \multicolumn{2}{l}{\neg{}\bat \vee \neg{}\emu} \\
+ %                                       & {\neg{}\bat \vee \neg{}\emu} \\
    \cat         & \cat &\Rightarrow \bat & \multicolumn{3}{l}{\neg{}\cat \vee \bat} \\
    \dog         & \dog &\Rightarrow \cat & \multicolumn{3}{l}{\neg{}\dog \vee \cat} \\
    \emu         & \emu &\Rightarrow \neg{}\ant \wedge \neg{}\bat
@@ -71,28 +73,18 @@ Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, 
 
 
 
-\paragraph{What it is and what it can do}
+
+\paragraph{History and applications}
+
+SAT-solving as a research area dates back to 19X0s \todo{cite}. Throughout its history, it has been of interest for both theoretical and practical purposes. 
+SAT was proven to be NP-complete in 19XX \todo{cite}. This means that we can express any problem in the complexity class NP, such as prime number factorisation, as a SAT-instance, and use a SAT-solver to solve it.
+As we know, problems in NP have an exponential worst-case complexity. However, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics \cite{claessen2009satpractice}.
 
 
-\begin{quote}
-Satisfiability solving, the problem of deciding whether the variables of a propositional formula can be assigned in such a way that the formula evaluates to true, is one of the classic problems in computer science. It is of theoretical interest because it is the canonical NP-complete problem. It is of practical interest because modern SAT-solvers can be used to solve many important and practical problems. \\
--- Claessen et al, 2009
-\end{quote}
+Since the 2000s, SAT-solving is widely used in practical applications \cite{marques_silva2010}. Much of the SAT research in the last two decades has been devoted to heuristic solving algorithms and more efficient ways of encoding various real-life problems into SAT.
+One of the biggest success stories for SAT application is model checking \todo{cite}, used in software and hardware verification. In addition, SAT has been used in domains such as computational biology \todo{cite} and \todo{example}.
 
+What kind of problems could benefit from an implementation in SAT?
+Formulating a search problem in SAT is an attractive approach: instead of developing search heuristics for an individual instance, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
 
-\paragraph{Applications of SAT}
-
-Model checking
-
-Since those works, SAT solving techniques have improved significantly \cite{marques_silva2010}, and they are used in domains such as microprocessor design and computational 
-biology---these problems easily match or exceed CG in complexity. 
-Thanks to these advances, we were able to revisit the idea and develop it
-further. 
-
-
-\paragraph{What does it help you to formulate something as a SAT-problem?}
-
-SAT-solving is all about searching.
-SAT-problems are in general NP-complete. However, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics \cite{claessen2009satpractice}.
-Formulating a search problem in SAT gives us access to decades of research into SAT-solving. 
-Instead of implementing our own search, we can exploit decades of research that has batn devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
+% Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
