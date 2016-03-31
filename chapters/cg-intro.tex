@@ -635,21 +635,12 @@ This said, CG is still a grammar formalism. For a moment, we ignore the practica
 
 We draw inspiration from \cite{tapanainen1999phd}, who demonstrates the expressive power of another reductionist parsing formalism, Functional Dependency Grammar \todo{cite!!!}.
 Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language, and the context-sensitive $a^nb^nc^n$. 
-Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can make such leap quite easily. In order to do this, we need two 
+Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can make such leap quite easily. In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading. We call the set of readings $\Sigma$. In addition, we may need some helper labels $\Sigma'$, such as $\{even, odd, start, end\}$. We add the additional requirement that the output of the grammar may only contain readings in $\Sigma$.
 
-Assume that we start
+\todo{Should I explain here how the $a^nb^n$ grammar works? Or just say ``if we can write such grammar in a variant of CG, we can argue that this variant of CG is at least context-free''?}
 
-Tapanainen does not present similar constructs for CG-2, but we can express both of these languages in CG-3.
-
-We illustrate the power of CG rules with the context-free language $a^nb^n$.
-Assume that the input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma = \{a, b\}$, and some helper labels (such as $\{even, odd, start, end\}$). Then, if we can write a set of rules that ``disambiguates'' the input as shown in Figure~\ref{fig:anbn}, we can argue that CG can express context-free languages. The same argument goes for languages beyond context-free. \todo{Kokke and Listenmaa (unpublished)} show such grammars in VISL CG-3 for the languages $a^nb^n$ and $a^nb^nc^n$
-
-\begin{quote}
-Tapanainen 1999
-On the other hand, this ambiguity is restricted by the size of the tag set in the grammar, because the constraint grammar can not remove such readings one by one for which it does not have rules. If we redefine the size of the grammar     to be the amount of tag combinations in the gram- mar
-
-tapanainen reports an empirical running time of around n log n
-\end{quote}
+%We illustrate the power of CG rules with the context-free language $a^nb^n$.
+%Assume that the input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma = \{a, b\}$, and some helper labels (such as $\{even, odd, start, end\}$). Then, if we can write a set of rules that ``disambiguates'' the input as shown in Figure~\ref{fig:anbn}, we can argue that CG can express context-free languages. The same argument goes for languages beyond context-free. \todo{Kokke and Listenmaa (unpublished)} show such grammars in VISL CG-3 for the languages $a^nb^n$ and $a^nb^nc^n$
 
 
 
@@ -685,74 +676,3 @@ However, specific implementations can freely add heuristics to stop
 this kind of behaviour from happening.
 
 
-\section{Summary}
-
-In this chapter, I've presented an introduction to Constraint Grammar,
-highlighting some key properties and contrasting it to other grammar
-formalisms.
-CG is relatively young, popularised 20 years ago, and throughout its
-history, it has been in favour of linguists more than computer
-scientists, which might explain why its formal background has not been
-studied extensively---notable exceptions being \cite{lager98} and \cite{lager_nivre01}.
- 
-Is CG a formalism? In order to be a grammar formalism, a candidate
-framework should discriminate between grammatical and ungrammatical
-sequences, and provide a structure to the grammatical sequences.
-Let us start from the latter criterion. Clearly a successful run of a
-high-quality rule set leaves us with more structure than we started
-with. In the beginning, we know that \emph{bear} could be a verb
-(infinitive or present tense, any number or person except 3rd
-singular) or a noun (subject, object, predicative, ...), and in the end, we
-will know the right analysis for it, given that the rule set is
-good. The requirement of a good rule set doesn't affect CG's status as
-a formalism or not; one could as well write a terrible context-free
-grammar that doesn't correspond to natural language at all.
-If POS tags are not enough to consider as a structure,
-CG can also be used to manipulate syntactic analyses and even to add
-dependency relations, using exactly the same mechanisms (``set parent to +1 if the word at 0 is \emph{bear} and -1 is a determiner'').
-
-CG seems to even have some interest as a tool for psycholinguistics research:
-there is a Russian being developed within the research group
- \href{https://uit.no/forskning/forskningsgrupper/gruppe?p_document_id=344365}{CLEAR
-} (Cognitive Linguistics: Empirical Approaches to Russian); accessing
-all levels from morphology to semantics at the same time is particularly attractive to cognitive linguists (personal communication).
-As for its descriptive power, we can again compare CG to CFG. If
-badly constructed, both CG and CFG can analyse almost everything,
-making it useless for language description. If we accept that a
-possibility to construct a bad grammar doesn't revoke CFG's status as
-a formalism, it shouldn't do so for CG either. One can always compare
-the relative ease of constructing a good grammar between formalisms,
-but that is another topic already.
-
-As a bottom line, CG provides a lightweight framework where already a
-moderate amount of rules can be useful (e.g. \cite{lene_trond2011} with 115
-rules), although high quality requires in general thousands of rules.
-Like any formalism, CG itself leaves the users with much freedom; a
-single grammar can be anything from completely ungrammatical rules to near-perfect description of language.
-
-% For example \cite{bick2015} mentions a ``mature morphosyntactic core
-% grammar'' which has 6000 rules. Assuming this is a typical number of
-% rules, one could compare the efforts of writing those rules to writing
-% a grammar of similar coverage and precision in another formalis
-
-
-% This lack of structure is intentional in the design of CG;
-% \cite{karlsson1995constraint} cites a number of theoretical principles,
-% including
-
-% \begin{quote}
-% Language is an open-ended system where there is no strict demarcation
-% line between grammatical and ungrammatical sentences. Therefore all
-% grammars are bound to leak.
-% \end{quote}
-
-% \begin{quote}
-% The cornerstone of syntax is morphology {[}--{]}. Syntactic rules are
-% generalisations telling a) how word-forms occur in particular word order
-% configurations, and b) what natural classes, ''syntactic functions'',
-% can be isolated and inferred in such configurations.
-% \end{quote}
-
-% The first point also justifies a reductionist approach in favour of
-% licencing; the second highlights that information comes from the
-% morphological analyses
