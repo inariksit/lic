@@ -1,37 +1,74 @@
+\def\ant{\text{\em ant}}
+\def\bat{\text{\em bat}}
+\def\cat{\text{\em cat}}
+\def\dog{\text{\em dog}}
+\def\emu{\text{\em emu}}
+\def\fox{\text{\em fox}}
+
+
 \section{Boolean satisfiability (SAT)}
 
 
-Imagine you are in a pet shop with the following selection of animals.
+Imagine you are in a pet shop with a selection of animals: {\em ant, bat, cat, dog, emu} and {\em fox}.
 
-{\center Ant, bee, cat, dog, elephant, f..., gorilla}
+These animals are very particular about each others' company. The dog has no teeth and needs the cat to chew its food. The cat, in turn, wants its best friend bat. 
+But the bat is very aggressive towards all herbivores, and the emu is afraid of anything lighter than 2 kilograms. The ant hates four-legged creatures, and the fox can only handle one flatmate with wings. 
 
-These animals are very picky about each others' company. The dog has no teeth and needs the cat to chew its food. The cat, in turn, wants its best friend f.... 
-But the bee is very aggressive towards all carnivores, and the elephant is afraid of anything lighter than 10 kilograms. The gorilla hates four-legged creatures, and the cat doesn't trust anything that stings. 
-
-You need to decide on a subset of pets to buy---you love all animals, but realistically, you cannot have them all. You start calculating in your head: ``If I take the gorilla, I cannot take cat, dog, nor elephant. How about I take the dog, I can take everything but the gorilla and the bee.''
-After some time, you decide on ant, cat, dog and f..., leaving the bee, the elephant and the gorilla in the pet shop.
+You need to decide on a subset of pets to buy---you love all animals, but realistically, you cannot have them all. You start calculating in your head: ``If I take the ant, I cannot take cat, dog, nor fox. How about I take the dog, then I must take the cat and the bat as well.''
+After some time, you decide on bat, cat, dog and fox, leaving the ant and the emu in the pet shop.
 
 
-This everyday situation is an example of a \emph{SAT-problem}.
-The animals translate into \emph{variables}: $\{ant, bee, cat, dog, elephant, f..., gorilla\}$.
-The lists of friends and enemies of each animal translate into \emph{clauses}.
-These clauses are disjunctions of \emph{literals}: either a variable ($cat$) or its negation ($\neg{}cat$).
-The literal $cat$ means that the animal comes with you, 
-and $\neg{}cat$ means it is left in the shop. 
-The clause $\neg{}dog \vee cat$ means ``I don't buy the dog or I buy the cat''. 
+This everyday situation is an example of a \emph{satisfiability (SAT) problem}.
+The animals translate into \emph{variables}, %$\{ant, bat, cat, dog, emu, fox\}$.
+and the lists of friends and enemies of each animal translate into \emph{clauses}.
+These clauses are disjunctions of \emph{literals}: either a variable, such as $cat$, or its negation, $\neg{}\cat$.
+A positive literal $cat$ means that the animal comes with you, 
+and conversely, $\neg{}\cat$ means it is left in the shop. 
+The clause $\neg{}\dog \vee \cat$ means ``I don't buy the dog or I buy the cat''. 
 Some examples of the clauses follow:
 
 \begin{center}
-$\neg{}elephant \vee ant \vee cat \vee bee$ \\
-$\neg{}dog \vee \neg{}gorilla$ \\
-$\neg{}dog \vee \neg{}bee$ \\
+$\neg{}\emu \vee \ant \vee \cat \vee \bat$ \\
+$\neg{}\dog \vee \neg{}\bat$ \\
 \end{center}
 
 The objective is to find a \emph{model}: each variable is assigned a Boolean value, such that all clauses evaluate into true. We can see that the assignment 
 
-{\center $\{ant=True, bee=False, cat=True, dog=True, elephant=False, f...=True, gorilla=False\}$ }
+$\{\ant=0, \bat=1, \cat=1, \dog=1, \emu=0, \fox=1\}$
+
 \noindent satisfies the animals' wishes.
-\todo{This model is the only solution to the animal problem}. However, some problems have multiple solutions, and some are unsatisfiable, i.e. they have no solution at all.
+Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, \fox=1\}$: you only choose the emu and the fox. 
+ However, some problems have multiple solutions, and some are unsatisfiable, i.e. they have no solution at all.
+
+ \begin{figure}[t]
+  $$\begin{array}{r | r @{~} l | c @{\quad \wedge \quad } c @{\quad \wedge \quad} c }
+   \textbf{Animal}
+                & \multicolumn{2}{l}{\textbf{Constraint}} 
+                                        & \multicolumn{3}{l}{\textbf{Constraint in conjunctive normal form}} \\ \hline
+
+    \ant        & \ant &\Rightarrow \neg{}\cat \wedge \neg{}\dog \wedge \neg{}\fox 
+    								    & \neg{}\ant \vee \neg{}\cat 
+                                        & \neg{}\ant \vee \neg{}\dog 
+                                        & \neg{}\ant \vee \neg{}\fox \\
+
+   \bat         & \bat &\Rightarrow \neg{}\ant \wedge \neg{}\emu
+   								        & \neg{}\bat \vee \neg{}\ant 
+                                        & \multicolumn{2}{l}{\neg{}\bat \vee \neg{}\emu} \\
+   \cat         & \cat &\Rightarrow \bat & \multicolumn{3}{l}{\neg{}\cat \vee \bat} \\
+   \dog         & \dog &\Rightarrow \cat & \multicolumn{3}{l}{\neg{}\dog \vee \cat} \\
+   \emu         & \emu &\Rightarrow \neg{}\ant \wedge \neg{}\bat
+   										& \neg{}\emu \vee \neg{}\ant 
+                                        & \multicolumn{2}{l}{\neg{}\emu \vee \neg{}\bat} \\
+   \fox         & \fox &\Rightarrow \neg (\bat \wedge \emu) 
+   									    & foo 
+   									    & bar
+   									    & baz \\
+
+  \end{array}$$
+  \caption{Animals' cohabiting constraints translated into a SAT-problem.}
+
+\end{figure}
+
 
 
 \paragraph{What it is and what it can do}
@@ -58,4 +95,4 @@ further.
 SAT-solving is all about searching.
 SAT-problems are in general NP-complete. However, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics \cite{claessen2009satpractice}.
 Formulating a search problem in SAT gives us access to decades of research into SAT-solving. 
-Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
+Instead of implementing our own search, we can exploit decades of research that has batn devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
