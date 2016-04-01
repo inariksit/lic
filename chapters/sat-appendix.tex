@@ -36,6 +36,8 @@
 
 \def\cgrule#1{\noindent {\sc \bf #1 }}
 \def\eqdef{\Coloneqq}
+\def\impl{\quad\Rightarrow\quad}
+
 
 %%%%%%%%%%%%%%%
 
@@ -197,112 +199,117 @@ This is naturally represented as implications. We demonstrate both \textsc{remov
 \begin{equation}
 \begin{array}{l @{\hspace{2.5cm}} l}
 \text{\cgrule{REMOVE adj IF (1 adj)}}   &  \text{\cgrule{SELECT adv IF (1 adj)}} \\
-\cientificaAdj \Rightarrow \neg{}\masAdj &  \cientificaAdj \Rightarrow \masAdv \wedge \neg{}\masAdj \\
+\cientificaAdj \impl \neg{}\masAdj &  \cientificaAdj \impl \masAdv \wedge \neg{}\masAdj \\
 \end{array}
 \end{equation}
 
 %
 % \intertext{\cgrule{REMOVE adj IF (1 adj)} Single condition, {\sc remove} variant.} 
-% \cientificaAdj & \Rightarrow  \neg{}\masAdj \\
+% \cientificaAdj & \impl  \neg{}\masAdj \\
 % %
 % %
 % \intertext{\cgrule{SELECT adv IF (1 adj)} Single condition, {\sc select} variant. Target is selected, and everything else in the reading is removed.} 
-% \cientificaAdj & \Rightarrow \masAdv \wedge \neg{}\masAdj \\
+% \cientificaAdj & \impl \masAdv \wedge \neg{}\masAdj \\
 %
 %
 \begin{align}
 \intertext{\cgrule{REMOVE adj IF (1 adj) (-1 n)} Conjunction of conditions.}
-\cientificaAdj \wedge \aproximacionN & \Rightarrow \neg{}\masAdj \\
+\cientificaAdj \wedge \aproximacionN & \impl \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF ((1 adj)  OR (-1 n))} Disjunction of conditions (template).}
-\cientificaAdj \vee \aproximacionN & \Rightarrow  \neg{}\masAdj \\
+\cientificaAdj \vee \aproximacionN & \impl  \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (1C adj)} Careful context. Condition must be must be unambiguously adjective.}
-\cientificaAdj \wedge \neg{}\cientificaN & \Rightarrow \neg{}\masAdj \\
+\cientificaAdj \wedge \neg{}\cientificaN & \impl \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n)} Scanning. Any noun before the target is a valid condition.}
 %
-\sobreN \vee \aproximacionN & \Rightarrow  \neg{}\masAdj \\
+\sobreN \vee \aproximacionN & \impl  \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier. Any noun before the target, up to a determiner, is a valid condition.
 %The noun reading of {\em sobre} is not a valid condition, if the determiner reading of {\em una} holds.
 $\sobreN$ is a valid condition only if $\unaDet$ is false.}
 %
-(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \Rightarrow \neg{}\masAdj 
+(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\masAdj 
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier.
 Any noun before the target, up to an unambiguous determiner, is a valid condition.
 %A careful barrier is effectful only if it is unambiguous. In this case, {\em una} fails to work as a barrier, if any of its other analyses (pronoun or verb) is true. \\
 %
 Let $\unaAny$ denote the disjunction $\unaPrn \vee \unaPrsPThree \vee \unaPrsPOne \vee \unaImp$.} %Then we write the condition as follows.}
-(\sobreN \wedge \unaAny) \vee \aproximacionN & \Rightarrow \neg{}\masAdj 
+(\sobreN \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\masAdj 
 %
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1C* n)} Scanning with careful context}
 %
-(\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \Rightarrow  \neg{}\masAdj \\
+(\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \impl  \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1C* n BARRIER det)} Scanning with careful context, up to a barrier.}
 %
 %
-(\sobreN \wedge \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \Rightarrow \neg{}\masAdj 
+(\sobreN \wedge \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\masAdj 
 %
 \intertext{\cgrule{REMOVE adj IF (-1C* n CBARRIER det)} Scanning with careful context, up to a careful barrier.}
 %
 %
-(\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN & \Rightarrow \neg{}\masAdj 
+(\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\masAdj 
 \end{align}
 
 
 \subsubsection{Inverted conditions}
 
-We demonstrate the effect of two inversion operators in the following.
+In the following, we demonstrate the effect of two inversion operators. 
 The keyword NOT inverts a single contextual test, and NEGATE inverts a whole conjunction of contextual tests. 
+The operators can be applied to a single condition, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}.
+Inversion cannot be applied to a BARRIER condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, `try to find a \emph{foo} until you see the first item that is not \emph{bar}' a set complement operator must be used: \cgrule{(*) - bar}.
+
 There is a crucial difference about matching between positive and inverted conditions.
 If a positive condition is out of scope or the tag is not present in the initial analysis, the rule simply does not match, and no clauses are created. For instance, the conditions `10 adj' or `-1 punct', matched against our example passage, would not result in any action.
 In contrast, when an inverted condition is out of scope or unapplicable, 
 that makes the action happen unconditionally.
-As per VISL CG-3, the condition `NOT 10 adj' applies to all sentences where there is no 10th word from target that is adjective; including the case where there is no 10th word at all.
+As per VISL CG-3, the condition \cgrule{NOT 10 adj} applies to all sentences where there is no 10th word from target that is adjective; including the case where there is no 10th word at all.
+If we need to actually have a 10th word to the right, but that word may not be an adjective, we can, again, use the set complement: \cgrule{IF (10 (*) - adj)}.
 
-Inversion cannot be applied to a BARRIER condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, a set complement operator must be used: \cgrule{(*) - bar}.
+
+
 
 
 \begin{align}
 \intertext{\cgrule{REMOVE adj IF (NOT 1 adj)} Single inverted condition.}
-\neg \cientificaAdj & \Rightarrow  \neg{}\masAdj \\
+\neg \cientificaAdj & \impl  \neg{}\masAdj \\
 %
 \intertext{\cgrule{REMOVE adj IF (NOT 1 adj) (NOT -1 n)} Conjunction of inverted conditions.}
-\neg \cientificaAdj \wedge \neg \aproximacionN & \Rightarrow \neg{}\masAdj \\
+\neg \cientificaAdj \wedge \neg \aproximacionN & \impl \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 det LINK 1 n)} Negation of a conjunction of conditions.}
 %
-\neg \sobrePr \vee \neg \unaDet \vee \neg \aproximacionN) & \Rightarrow \neg{}\masAdj \\
+\neg \sobrePr \vee \neg \unaDet \vee \neg \aproximacionN) & \impl \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NOT 1C adj)} Negated careful context. Condition cannot be unambiguously adjective.}
 %
-\cientificaN & \Rightarrow \neg{}\masAdj \\
+\cientificaN & \impl \neg{}\masAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NOT -1* n)} Scanning. There must be no nouns before the target.}
 %
-\neg \sobreN \wedge \neg \aproximacionN & \Rightarrow  \neg{}\masAdj \\
+\neg \sobreN \wedge \neg \aproximacionN & \impl  \neg{}\masAdj \\
 %
 \intertext{\cgrule{REMOVE adj IF (NOT -1* n BARRIER det)} Scanning up to a barrier. There must be no nouns before the target, up to a determiner.}
 %
-(\neg \sobreN \vee \unaDet) \wedge \neg \aproximacionN & \Rightarrow \neg{}\masAdj 
+(\neg \sobreN \vee \unaDet) \wedge \neg \aproximacionN & \impl \neg{}\masAdj 
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier.}
 %
-(\neg \sobreN \vee \unaAny) \wedge \neg \aproximacionN & \Rightarrow \neg{}\masAdj 
+(\neg \sobreN \vee \unaAny) \wedge \neg \aproximacionN & \impl \neg{}\masAdj 
 %
 %
 %
@@ -315,7 +322,9 @@ Here we demonstrate a number of inverted rules, in which the contextual test doe
 \cgrule{REMOVE adj IF (NOT 1 punct)} Single inverted condition, not present in initial analysis.
 %
 \cgrule{REMOVE adj IF (NOT 10 adj)} Single inverted condition, out of scope.
+
 \cgrule{REMOVE adj IF (NOT 1 adj) (NOT -10 n)} Conjunction of inverted conditions, one out of scope.
+
 \cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 punct)} Negation of a conjunction of conditions, some not present in initial analysis.
 
 \begin{equation}
@@ -325,23 +334,44 @@ Here we demonstrate a number of inverted rules, in which the contextual test doe
 
 \subsubsection{Solving and conflict handling}
 
-The unordered scheme uses maximisation to 
 
+The unordered scheme has a strong advantage compared to the ordered one: it can start disambiguating, even if none of the rules on its own was able to act. In addition, 
+
+However, ignoring the order means that we miss significant information. In the unordered scheme, the different rule orders in Figure~\ref{fig:orderMatters} would be treated the same. 
+Without order, they would be both applied to the word \mas, and that would cause a conflict: we cannot remove both.
+With order, the problem is trivial: whichever is mentioned first, gets to apply, and removes the target. After that, the second one would not even be considered, because of the default rule, which prohibits removing the last reading.
+
+Can we use an alternative way to handle conflicts in the unordered scheme?
+Recall the notion of heuristic rule order from Section~\ref{sec:ordering}: the rules are chosen based on how well they match the context. A longer rule is a more exact match than a shorter rule, and thus preferred. The heuristic rule order is still an order, though; it does not tell us what to do, when the two rules have already created clauses.
+
+Heuristic order asks the question ``out of all the rules that target this cohort, which one is the most exact match?'' If the competitors are \cgrule{REMOVE adj IF (-1 n)} and \cgrule{REMOVE adv IF (-1 n) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:orderMatters}, we need to resort to mere guessing, or picking the one which is mentioned first in the rule set.
+
+For an unordered analogue, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
+With a SAT-solver, we can answer this question. Recall that each rule application produces a formula, which is a conjunction of clauses, and in an ideal case, the whole formula is satisfiable. However, if the whole formula is unsatisfiable, we may still ask the question: give an assignment that satisfies the maximum number of the clauses. 
+If the grammar is good, we hope that the interaction between the appropriate
+rules would make a large set of clauses that fit together, and the
+inapplicable rule would not ``fit in''.
+In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
+
+
+
+\paragraph{Difference between ``condition didn't hold in the first place'' and ``two rules have the same condition and conflicting action''}
+
+
+\begin{figure}
+  \begin{itemize}
+   \item[] \begin{verbatim}REMOVE adv IF (-1 n) ;
+REMOVE adj IF (-1 n) ;\end{verbatim}
+   \item[] \begin{verbatim}REMOVE adj IF (-1 n) ;
+REMOVE adv IF (-1 n) ;\end{verbatim}
+   \end{itemize}
+   \caption{Two rules that target the same reading, in different orders.}
+   \label{fig:orderMatters}
+\end{figure}
 
 \subsection{Ordered scheme}
 
-We continue with the ordered scheme. In contrast to the unordered scheme, ordering of the rules makes a difference: the following rule orders produce a different result.
-
-\begin{itemize}
-\item[] \begin{verbatim}
-REMOVE adv IF (-1 n) ;
-REMOVE adj IF (-1 n) ;
-\end{verbatim}
-\item[] \begin{verbatim}
-REMOVE adj IF (-1 n) ;
-REMOVE adv IF (-1 n) ;
-\end{verbatim}
-\end{itemize}
+We continue with the ordered scheme. In contrast to the unordered scheme, ordering of the rules makes a difference: the two rule orders in Figure~\ref{fig:orderMatters} produce a different result.
 
 In the unordered scheme, we simply translated every applicable rule into a clause, and asked the SAT-solver to find a model that satisfies all the clauses. 
 Now, we need to model a state of the sentence. The first rule accesses the initial input
