@@ -25,23 +25,12 @@
 
 \usepackage{fontspec}
 
-%\setmainfont{texgyrepagella} 
-% \setmainfont{palatino} 
-% [ Extension      = .otf 
-% , UprightFont    = *-regular 
-% , BoldFont       = *-bold 
-% , ItalicFont     = *-italic 
-% , BoldItalicFont = *-bolditalic 
-% , Ligatures      = {Common,TeX} 
-% , Numbers        = OldStyle ]
-% \setmathfont[Ligatures=TeX]{texgyrepagella-math.otf}
-
 \newcommand{\mainfontfamily}{Palatino}
 \setmainfont[
   Ligatures=TeX,
   Scale=0.9,
 ]{\mainfontfamily}
-\newfontfamily\scshape[Letters=SmallCaps, Numbers=Uppercase]{Palatino} %{TeX Gyre Pagella}
+\newfontfamily\scshape[Letters=SmallCaps, Numbers=Uppercase]{texgyrepagella-regular.otf}%{TeX Gyre Pagella}
 
 \newcommand{\monofontfamily}{Monaco} % Courier
 \setmonofont[Scale=0.7]{\monofontfamily}
