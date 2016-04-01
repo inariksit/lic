@@ -9,37 +9,32 @@
 \section{Boolean satisfiability (SAT)}
 
 
-Imagine you are in a pet shop with a selection of animals: {\em ant, bat, cat, dog, emu} and {\em fox}.
+Imagine you are in a pet shop with a selection of animals: \ant, {\em bat, cat, dog, emu} and \fox.
 
 These animals are very particular about each others' company. The dog has no teeth and needs the cat to chew its food. The cat, in turn, wants its best friend bat. 
-But the bat is very aggressive towards all herbivores, and the emu is afraid of anything lighter than 2 kilograms. The ant hates four-legged creatures, and the fox can only handle one flatmate with wings. 
+But the bat is very aggressive towards all herbivores, and the emu is afraid of anything lighter than 2 kilograms. The ant hates all four-legged creatures, and the fox can only handle one flatmate with wings. 
 
 You need to decide on a subset of pets to buy---you love all animals, but realistically, you cannot have them all. You start calculating in your head: ``If I take the ant, I cannot take cat, dog, nor fox. How about I take the dog, then I must take the cat and the bat as well.''
 After some time, you decide on bat, cat, dog and fox, leaving the ant and the emu in the pet shop.
 
 \paragraph{Definition}
 
-This everyday situation is an example of a \emph{satisfiability (SAT) problem}.
+This everyday situation is an example of \emph{Boolean satisfiability (SAT)} problem.
 The animals translate into \emph{variables}, %$\{ant, bat, cat, dog, emu, fox\}$.
 and the lists of friends and enemies of each animal translate into \emph{clauses}.
-These clauses are disjunctions of \emph{literals}: either a variable, such as $cat$, or its negation, $\neg{}\cat$.
+These clauses are disjunctions of \emph{literals}: either a variable, such as $cat$, or its negation, $\neg{}cat$.
 A positive literal $cat$ means that the animal comes with you, 
-and conversely, $\neg{}\cat$ means it is left in the shop. 
-The clause $\neg{}\dog \vee \cat$ means ``I don't buy the dog or I buy the cat''. 
-Some examples of the clauses follow:
+and conversely, $\neg{}cat$ means it is left in the shop. 
+The clause $\neg{}dog \vee cat$ means ``I don't buy the dog or I buy the cat''. 
+All the clauses are shown in Figure~\ref{fig:animalCohabitingProblem}.
 
-\begin{center}
-$\neg{}\emu \vee \ant \vee \cat \vee \bat$ \\
-$\neg{}\dog \vee \neg{}\bat$ \\
-\end{center}
 
-The objective is to find a \emph{model}: each variable is assigned a Boolean value, such that all clauses evaluate into true. We can see that the assignment 
+The objective is to find a \emph{model}: each variable is assigned a Boolean value, such that the conjunction of all clauses evaluates into true. A program called \emph{SAT-solver} takes the set of variables and clauses, and performs a search, like the mental calculations of the animal-lover in the shop.
 
-$\{\ant=0, \bat=1, \cat=1, \dog=1, \emu=0, \fox=1\}$
-
-\noindent satisfies the animals' wishes.
+We can see that the assignment $\{\ant=0, \bat=1, \cat=1, \dog=1, \emu=0, \fox=1\}$
+satisfies the animals' wishes.
 Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, \fox=1\}$: you only choose the emu and the fox. 
- However, some problems have multiple solutions, and some are unsatisfiable, i.e. they have no solution at all.
+Some problems have a single solution, some problems have multiple solutions, and some are unsatisfiable, i.e. no combination of assignments can make the formula true.
 
  \begin{figure}[t]
   $$\begin{array}{r | r @{~} l | l @{\quad \wedge \quad } l @{\quad \wedge \quad} l }
@@ -55,7 +50,6 @@ Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, 
    \bat         & \bat &\Rightarrow \neg{}\ant \wedge \neg{}\emu
    								        & \neg{}\bat \vee \neg{}\ant 
                                         & \multicolumn{2}{l}{\neg{}\bat \vee \neg{}\emu} \\
- %                                       & {\neg{}\bat \vee \neg{}\emu} \\
    \cat         & \cat &\Rightarrow \bat & \multicolumn{3}{l}{\neg{}\cat \vee \bat} \\
    \dog         & \dog &\Rightarrow \cat & \multicolumn{3}{l}{\neg{}\dog \vee \cat} \\
    \emu         & \emu &\Rightarrow \neg{}\ant \wedge \neg{}\bat
@@ -66,9 +60,10 @@ Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, 
    									    & bar
    									    & baz \\
 
-  \end{array}$$
-  \caption{Animals' cohabiting constraints translated into a SAT-problem.}
+  \end{array}$$ \\
 
+  \caption{Animals' cohabiting constraints translated into a SAT-problem.}
+  \label{fig:animalCohabitingProblem}
 \end{figure}
 
 
@@ -76,8 +71,8 @@ Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, 
 
 \paragraph{History and applications}
 
-SAT-solving as a research area dates back to 19X0s \todo{cite}. Throughout its history, it has been of interest for both theoretical and practical purposes. 
-SAT was proven to be NP-complete in 19XX \todo{cite}. This means that we can express any problem in the complexity class NP, such as prime number factorisation, as a SAT-instance, and use a SAT-solver to solve it.
+SAT-solving as a research area dates back to 1970s. Throughout its history, it has been of interest for both theoretical and practical purposes. 
+SAT is a well-known NP-complete \cite{cook1971complexity}. This means that we can express any problem in the complexity class NP, such as prime number factorisation, as a SAT-instance, and use a SAT-solver to solve it.
 As we know, problems in NP have an exponential worst-case complexity. However, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics \cite{claessen2009satpractice}.
 
 
@@ -85,6 +80,6 @@ Since the 2000s, SAT-solving is widely used in practical applications \cite{marq
 One of the biggest success stories for SAT application is model checking \todo{cite}, used in software and hardware verification. In addition, SAT has been used in domains such as computational biology \todo{cite} and \todo{example}.
 
 What kind of problems could benefit from an implementation in SAT?
-Formulating a search problem in SAT is an attractive approach: instead of developing search heuristics for an individual instance, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
+Formulating a decision problem in SAT is an attractive approach: instead of developing search heuristics independently, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
 
 % Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.

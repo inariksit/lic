@@ -6,9 +6,13 @@ In this chapter, we present the two components of this thesis: Constraint Gramma
 
 \input{chapters/sat-intro}
 
+
 \section{Summary}
 
-In this section, we have presented an introduction to Constraint Grammar, a formalism for writing disambiguation rules, and SAT, a framework or something for something.
+In this section, we have presented the theoretical background used in this thesis. 
+We have introduced Constraint Grammar: a formalism for writing disambiguation rules; and Boolean satisfiability: methods for solving whether a given propositional formula can evaluate to true.
+
+In the following chapters, we will connect the two branches. First, we look into existing research in connecting CG to logic, and formulate a SAT-instance for two varieties of CG. After establishing a SAT-encoding, we use it, much in the spirit of software verification, to show interesting properties of a given grammar. 
 
 
 %highlighting some key properties and relating it to other grammar formalisms.
@@ -28,11 +32,11 @@ In this section, we have presented an introduction to Constraint Grammar, a form
 % the relative ease of constructing a good grammar between formalisms,
 % but that is another topic already.}
 
-As a bottom line, CG provides a lightweight framework where already a
-moderate amount of rules can be useful (e.g. \cite{lene_trond2011} with 115
-rules), although high quality requires in general thousands of rules.
-Like any formalism, CG itself leaves the users with much freedom; a
-single grammar can be anything from completely ungrammatical rules to near-perfect description of language.
+% As a bottom line, CG provides a lightweight framework where already a
+% moderate amount of rules can be useful (e.g. \cite{lene_trond2011} with 115
+% rules), although high quality requires in general thousands of rules.
+% Like any formalism, CG itself leaves the users with much freedom; a
+% single grammar can be anything from completely ungrammatical rules to near-perfect description of language.
 
-In the following chapter, we look into existing research in connecting CG to logic, and formulate a SAT-instance for two varieties of CG.
+
 
