@@ -1,8 +1,8 @@
 \def\sobre{\text{\em sobre}}
 \def\una{\text{\em una}}
+\def\aproximacion{\text{ \em aproximaci\'{o}n}}
 \def\mas{\text{\em m\'{a}s}}
 \def\cientifica{\text{\em cient\'{\i}fica}}
-\def\aproximacion{\text{ \em aproximaci\'{o}n}}
 
 
 \def\vPrsPThree{\text{\em PrsP3}}
@@ -34,9 +34,9 @@
 \def\cientificaAdj{\cientifica_\adj}
 \def\cientificaN{\cientifica_\n}
 
-\def\cgrule#1{\noindent {\sc \bf #1 }}
+\def\cgrule#1{\noindent {\bf  #1 }}
 \def\eqdef{\Coloneqq}
-\def\impl{\quad\Rightarrow\quad}
+\def\impl{\quad\Longrightarrow\quad}
 
 
 %%%%%%%%%%%%%%%
@@ -65,9 +65,8 @@
 
 %\chapter{SAT-encoding}
 
-\section{SAT-encoding}
 
-In this appendix, we show the translation of different rule types in detail. 
+\noindent In this appendix, we show the SAT-encoding of different rule types in detail. 
 A reader who wants a general overview can read Section~\todo{write that section}.
 The operations in this appendix are independent of the implementation of the software SAT-CG; it does not describe how the sentence is processed in order to find the variables.
 The only purpose is to demonstrate what kind of clauses are constructed.
@@ -76,7 +75,7 @@ The only purpose is to demonstrate what kind of clauses are constructed.
 
 We demonstrate the SAT-encoding with a concrete segment in Spanish:  \emph{sobre una aproximación más científica}. It has the virtue of being ambiguous in nearly every word: for instance, \emph{sobre} is either a preposition (`above' or `about') or a noun (`envelope'); \emph{una} can be a pronoun, determiner or a verb. The full analysis, with the initial ambiguities, is shown in Figure~\ref{fig:satEncodingSpanishExample}. 
 
-\begin{figure}[h]
+\begin{figure}[t]
 \ttfamily
 \centering
 \begin{tabular}{ll @{\hspace{1.5cm}} ll}
@@ -107,8 +106,11 @@ We demonstrate the SAT-encoding with a concrete segment in Spanish:  \emph{sobre
 \end{array}
 \end{equation}
 
-\noindent CG rules may not remove the last reading, even if the conditions hold otherwise.
-To ensure that each cohort contains at least one true variable, we add the following clauses:
+CG rules may not remove the last reading, even if the conditions hold otherwise.
+To ensure that each cohort contains at least one true variable, we add the clauses in \ref{eq:atleastOneTrue}. 
+The word \emph{aproximación} is already unambiguous, thus the clause $\aproximacionN$ is a unit clause, and the respective variable is trivially assigned $True$. 
+The final assignment of the other variables depends on the constraint rules.
+
 
 \begin{equation}
 \begin{array}{c}
@@ -121,8 +123,6 @@ To ensure that each cohort contains at least one true variable, we add the follo
 \label{eq:atleastOneTrue}
 \end{equation}
 
-\noindent The word \emph{aproximación} is already unambiguous, thus the clause $\aproximacionN$ is a unit clause, and the respective variable is trivially assigned $True$. 
-The final assignment of the other variables depends on the constraint rules.
 
 \section{SAT-encoding of rules}
 
@@ -134,12 +134,13 @@ We try to craft rules that make sense for this segment; however, some variants a
 
 \subsection{Unordered scheme}
 
-We begin by introducing the unordered scheme. For basic rules, this corresponds to the encoding in \cite{lager98}; each analysis is given a single variable, and the rule application is unordered. In addition, we add rule types that \cite{lager98} does not consider.
+We begin by introducing the unordered scheme. For basic rules, this corresponds to the encoding in \cite{lager98}; each analysis is given a single variable, and the rule application is unordered. 
+%In addition, we add rule types that \cite{lager98} does not consider.
 
 \subsubsection{No conditions} 
 
 The simplest rule types remove or select a target in all cases. 
-A rule can target one or multiple readings in a cohort. We demonstrate the case with one target in rules~\ref{eq:rmAdj}--\ref{eq:slAdj}, and multiple target in rules~\ref{eq:rmVb}--\ref{eq:slVb}
+A rule can target one or multiple readings in a cohort. We demonstrate the case with one target in rules~\ref{eq:rmAdj}--\ref{eq:slAdj}, and multiple target in rules~\ref{eq:rmVb}--\ref{eq:slVb}. \\
 
 
 \cgrule{REMOVE adj} Unconditionally removes all readings which contain the target.
@@ -152,7 +153,7 @@ A rule can target one or multiple readings in a cohort. We demonstrate the case 
 \label{eq:rmAdj}
 \end{equation}
 
-\cgrule{SELECT adj} \textsc{select} variant. Unconditionally removes all other readings that appear in the same cohort with the target.
+\cgrule{SELECT adj} Unconditionally removes all other readings which are in the same cohort with the target.
 
 \begin{equation}
 \begin{array}{r @{~\wedge~} l }
@@ -170,6 +171,8 @@ A rule can target one or multiple readings in a cohort. We demonstrate the case 
 % \end{array}
 % \label{eq:rmN}
 % \end{equation}
+
+\newpage
 
 \cgrule{REMOVE verb} As \ref{eq:rmAdj}, but matches multiple readings in a cohort. All targets are negated.
 
@@ -193,14 +196,15 @@ A rule can target one or multiple readings in a cohort. We demonstrate the case 
 \subsubsection{Positive conditions} 
 
 Rules with contextual tests apply to the target, if the conditions hold. 
-This is naturally represented as implications. We demonstrate both \textsc{remove} and {\sc select} rules with a single condition; the rest of the variants only with {\sc remove}. All rule types can be changed to {\sc select} by changing the consequent.
+This is naturally represented as implications. We demonstrate both \textsc{remove} and {\sc select} rules with a single condition in \ref{eq:singleCondition}; the rest of the variants only with {\sc remove}. All rule types can be changed to {\sc select} by changing the consequent. %from $\neg{}\masAdj$ to $\masAdv \wedge \neg{}\masAdj$.
 
 
 \begin{equation}
 \begin{array}{l @{\hspace{2.5cm}} l}
-\text{\cgrule{REMOVE adj IF (1 adj)}}   &  \text{\cgrule{SELECT adv IF (1 adj)}} \\
-\cientificaAdj \impl \neg{}\masAdj &  \cientificaAdj \impl \masAdv \wedge \neg{}\masAdj \\
+\text{\cgrule{REMOVE adj IF (1 adj)}}   &  \text{\cgrule{SELECT adj IF (1 adj)}} \\
+\cientificaAdj \Longrightarrow \neg{}\masAdj &  \cientificaAdj \Longrightarrow \masAdj \wedge \neg{}\masAdv \\
 \end{array}
+\label{eq:singleCondition}
 \end{equation}
 
 %
@@ -230,7 +234,7 @@ This is naturally represented as implications. We demonstrate both \textsc{remov
 \sobreN \vee \aproximacionN & \impl  \neg{}\masAdj \\
 %
 %
-\intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier. Any noun before the target, up to a determiner, is a valid condition.
+\intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier. Any noun before the target, up to a determiner, is a valid condition:
 %The noun reading of {\em sobre} is not a valid condition, if the determiner reading of {\em una} holds.
 $\sobreN$ is a valid condition only if $\unaDet$ is false.}
 %
@@ -238,8 +242,7 @@ $\sobreN$ is a valid condition only if $\unaDet$ is false.}
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier.
 Any noun before the target, up to an unambiguous determiner, is a valid condition.
-%A careful barrier is effectful only if it is unambiguous. In this case, {\em una} fails to work as a barrier, if any of its other analyses (pronoun or verb) is true. \\
-%
+The variable $\unaDet$ fails to work as a barrier, if any of the other analyses of $\una$ is true.
 Let $\unaAny$ denote the disjunction $\unaPrn \vee \unaPrsPThree \vee \unaPrsPOne \vee \unaImp$.} %Then we write the condition as follows.}
 (\sobreN \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\masAdj 
 %
@@ -265,11 +268,10 @@ Let $\unaAny$ denote the disjunction $\unaPrn \vee \unaPrsPThree \vee \unaPrsPOn
 \subsubsection{Inverted conditions}
 
 In the following, we demonstrate the effect of two inversion operators. 
-The keyword NOT inverts a single contextual test, and NEGATE inverts a whole conjunction of contextual tests. 
-The operators can be applied to a single condition, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}.
-Inversion cannot be applied to a BARRIER condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, `try to find a \emph{foo} until you see the first item that is not \emph{bar}' a set complement operator must be used: \cgrule{(*) - bar}.
+The keyword NOT inverts a single contextual test, uch as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}. The keyword NEGATE inverts a whole conjunction of contextual tests, which may have any polarity: \cgrule{IF (NEGATE -2 det LINK NOT 1 noun)} means ``there may not be a determiner followed by a not-noun''; thus, ``det noun'' would be fine, or ``prn adj'', but not ``det adj''. %a sequence which matches the whole``
+Inversion cannot be applied to a BARRIER condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, that is, ``try to find a \emph{foo} until you see the first item that is not \emph{bar}'', a set complement operator must be used: \cgrule{(*) - bar}.
 
-There is a crucial difference about matching between positive and inverted conditions.
+There is a crucial difference between matching positive and inverted conditions.
 If a positive condition is out of scope or the tag is not present in the initial analysis, the rule simply does not match, and no clauses are created. For instance, the conditions `10 adj' or `-1 punct', matched against our example passage, would not result in any action.
 In contrast, when an inverted condition is out of scope or unapplicable, 
 that makes the action happen unconditionally.
@@ -320,7 +322,7 @@ If we need to actually have a 10th word to the right, but that word may not be a
 Here we demonstrate a number of inverted rules, in which the contextual test does not match the example sentence. As a result, the action is performed unconditionally.
 
 \cgrule{REMOVE adj IF (NOT 1 punct)} Single inverted condition, not present in initial analysis.
-%
+
 \cgrule{REMOVE adj IF (NOT 10 adj)} Single inverted condition, out of scope.
 
 \cgrule{REMOVE adj IF (NOT 1 adj) (NOT -10 n)} Conjunction of inverted conditions, one out of scope.
@@ -334,6 +336,7 @@ Here we demonstrate a number of inverted rules, in which the contextual test doe
 
 \subsubsection{Solving and conflict handling}
 
+\todo{Move some of this long explanation to the main chapter}
 
 The unordered scheme has a strong advantage compared to the ordered one: it can start disambiguating, even if none of the rules on its own was able to act. In addition, 
 
@@ -346,7 +349,7 @@ Recall the notion of heuristic rule order from Section~\ref{sec:ordering}: the r
 
 Heuristic order asks the question ``out of all the rules that target this cohort, which one is the most exact match?'' If the competitors are \cgrule{REMOVE adj IF (-1 n)} and \cgrule{REMOVE adv IF (-1 n) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:orderMatters}, we need to resort to mere guessing, or picking the one which is mentioned first in the rule set.
 
-For an unordered analogue, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
+For an unordered scheme, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
 With a SAT-solver, we can answer this question. Recall that each rule application produces a formula, which is a conjunction of clauses, and in an ideal case, the whole formula is satisfiable. However, if the whole formula is unsatisfiable, we may still ask the question: give an assignment that satisfies the maximum number of the clauses. 
 If the grammar is good, we hope that the interaction between the appropriate
 rules would make a large set of clauses that fit together, and the
@@ -354,16 +357,13 @@ inapplicable rule would not ``fit in''.
 In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
 
 
-
-\paragraph{Difference between ``condition didn't hold in the first place'' and ``two rules have the same condition and conflicting action''}
+\todo{Difference between ``condition didn't hold in the first place'' and ``two rules have the same condition and conflicting action''}
 
 
 \begin{figure}
   \begin{itemize}
-   \item[] \begin{verbatim}REMOVE adv IF (-1 n) ;
-REMOVE adj IF (-1 n) ;\end{verbatim}
-   \item[] \begin{verbatim}REMOVE adj IF (-1 n) ;
-REMOVE adv IF (-1 n) ;\end{verbatim}
+   \item[] \begin{verbatim}REMOVE adv IF (-1 n) ;          REMOVE adj IF (-1 n) ;
+REMOVE adj IF (-1 n) ;          REMOVE adv IF (-1 n) ;\end{verbatim}
    \end{itemize}
    \caption{Two rules that target the same reading, in different orders.}
    \label{fig:orderMatters}
@@ -415,7 +415,8 @@ The main difference is that the sentence starts off with all variables assigned 
  %        \end{inparaenum}
  %  \end{inparaenum}
 For subsequent rule applications, only the variables from the latest round are accessible: the $n^{th}$ rule may only access the variables that are created, or left unchanged, by the $n-1^{th}$ rule. 
-Even if a variable was true
+
+\todo{Koen, you can stop reading here, this is still crap!}
 
 \begin{equation}
 \begin{array}{r @{~\eqdef~} l}
