@@ -488,42 +488,42 @@ We treat ``{\sc select} target'' rules as ``{\sc remove} all but target'', and c
 \intertext{\cgrule{REMOVE adj IF (1 adj)} Single condition.} 
 \text{New variable } \mas{}'_\adj 
       & \eqdef \masAdj\ 
-        \wedge ( \; \ob{\neg\cientificaAdj}^{\invConds} 
+        \wedge\: ( \; \ob{\neg\cientificaAdj}^{\invConds} 
         \vee  \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (1 adj) (-1 n)} Conjunction of conditions.}
 \text{New variable } \mas{}'_\adj 
       & \eqdef \masAdj\ 
-       \wedge ( \; \ob{\neg\cientificaAdj \vee \neg\aproximacionN}^{\invConds} 
+       \wedge\: ( \; \ob{\neg\cientificaAdj \vee \neg\aproximacionN}^{\invConds} 
        \vee  \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (1C adj)} Careful context.} %If $\cientificaN$ is true, the condition \cgrule{1C adj} does not hold.}
   \text{New variable } \mas{}'_\adj 
      & \eqdef \masAdj\ 
-     \wedge ( \ob{\cientificaN}^{\invConds} 
+     \wedge\: ( \ob{\cientificaN}^{\invConds} 
      \vee \ob{\neg\masAdv}^{\onlyTrgLeft}  ) \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n)} Scanning.}
   \text{New variable } \mas{}'_\adj 
      & \eqdef \masAdj\ 
-     \wedge ( \; \ob{\neg\cientificaN \wedge \neg\sobreN}^{\invConds} 
+     \wedge\: ( \; \ob{\neg\cientificaN \wedge \neg\sobreN}^{\invConds} 
      \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
 %
 %
-\intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier.}
+\intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier. }
   \text{New variable } \mas{}'_\adj 
      & \eqdef \masAdj\ 
-     \wedge ( \; \ob{\neg\cientificaN \wedge (\neg\sobreN \vee \unaDet)}^{\invConds} 
+     \wedge\: ( \; \ob{\neg\cientificaN \wedge \neg(\sobreN \wedge \neg\unaDet)}^{\invConds} 
      \vee \ob{\neg\masAdv}^{\onlyTrgLeft} )  \\
 %
 %
-\intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier.}
+\intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier. }
   \text{New variable } \mas{}'_\adj 
      & \eqdef \masAdj\ 
-     \wedge ( \; \ob{\neg\cientificaN \wedge (\neg\sobreN \vee \unaDet \wedge \neg\unaAny)}^{\invConds} 
+     \wedge\: ( \; \ob{\neg\cientificaN \wedge \neg(\sobreN \wedge \unaAny)}^{\invConds} 
      \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) 
 \end{align}
 
