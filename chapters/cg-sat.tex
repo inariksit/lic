@@ -1,3 +1,21 @@
+\def\la{\text{\em la}}
+\def\casa{\text{\em casa}}
+\def\grande{\text{\em grande}}
+
+\def\det{{\text{\ttfamily Det}}}
+\def\prn{{\text{\ttfamily Prn}}}
+\def\n{{\text{\ttfamily N}}}
+\def\v{{\text{\ttfamily V}}}
+\def\adj{{\text{\ttfamily Adj}}}
+
+\def\laDet{\la_\det}
+\def\laPrn{\la_\prn}
+\def\casaN{\casa_\n}
+\def\casaV{\casa_\v}
+\def\grandeAdj{\grande_\adj}
+
+
+
 \chapter{CG as a SAT-problem}
 \label{chapterCGSAT}
 
@@ -18,6 +36,7 @@ Applying logic to reductionist grammars has been explored earlier by \cite{lager
 % ; logic programming was too slow to be used for tagging or parsing. 
 Since those works, SAT-solving techniques have improved significantly \cite{marques_silva2010}, and they are used in domains such as microprocessor design and computational 
 biology---these problems easily match or exceed CG in complexity. 
+In addition, SAT
 Thanks to these advances, we were able to revisit the idea and develop it
 further. 
 
@@ -34,22 +53,85 @@ Other changes to the content are just added detail.
 \input{chapters/cg-sat-relatedwork}
 
 
-
 \section{CG as a SAT-problem}
-Let us demonstrate our approach with the following example in Spanish.
+\label{sec:CGSAT}
 
-\begin{verbatim}
-"<la>"
-        "el" det def f sg
-        "lo" prn p3 f sg
-"<casa>"
-        "casa" n f sg
-        "casar" v pri p3 sg
-        "casar" v imp p2 sg
-\end{verbatim}
+First we present the preliminaries: Input=ambiguous clauses; Each reading = variable; Apply rule = create implications on those variables; Goal: find a solution!
 
-The ambiguous passage can be either a noun phrase, \emph{la}\texttt{<det>} \emph{casa}\texttt{<n>} 
-`the house'  or a verb phrase \emph{la}\texttt{<prn>}  \emph{casa}\texttt{<v><pri><p3>} `(he/she) marries her'. 
+Then, we explain different ordering schemes, and discuss conflict handling.
+
+Finally, we evaluate SAT-CG against VISL CG-3, for both F-score and running time.
+%: for F-score, we use a 20,000--word Spanish gold standard corpus, and for running time, we use.
+
+\subsection{Preliminaries}
+
+%We have seen in Section~\ref{sec:SAT-intro} how to transform a simple decision task into a SAT-problem. 
+%:each animal was represented as a variable, and their restrictions for cohabiting were expressed as clauses; ``if dog, then cat''.
+In the following, we translate the disambiguation of a sentence into a SAT-problem.
+We demonstrate our encoding with an example in Spanish, shown in Figure~\ref{fig:laCasaGrande}: {\em la casa grande}. % (`the big house'). 
+The first word, {\em la}, is ambiguous between a definite article (`the') or an object pronoun (`her'), and the second word, {\em casa}, can be a noun (`house') or a verb form (`marries').
+The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$ 
+`the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'. 
+However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whole segment into a noun phrase: `the big house'.
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{l @{~} l | c | c c c }
+\multicolumn{2}{c}{\textbf{Original analysis}}
+
+                             & \textbf{Variables}
+                             & \multicolumn{3}{c}{\textbf{Cohorts}} \\ \hline
+"<la>" &                     &        & $\laDet$  & $\casaN$ & $\grandeAdj$ \\
+       & "el" det def f sg   & $\laDet$ & $\laPrn$  & $\casaV$ &              \\
+       & "lo" prn p3 f sg    & $\laPrn$ & & & \\
+"<casa>" &                   &        & & & \\
+       & "casa" n f sg       & $\casaN$ & & & \\
+       & "casar" v pri p3 sg & $\casaV$ & & & \\
+"<grande>" &                 &        & & & \\
+       & "grande" adj mf sg  & $\grandeAdj$ & & & 
+\end{tabular}
+\caption{Ambiguous segment in Spanish.}
+\label{fig:laCasaGrande}
+\end{figure}
+
+
+% \begin{figure}[h]
+% \centering
+% \begin{verbatim}
+% "<la>"
+%         "el" det def f sg
+%         "lo" prn p3 f sg
+% "<casa>"
+%         "casa" n f sg
+%         "casar" v pri p3 sg
+% "<grande>"
+%         "grande" adj mf sg
+% \end{verbatim}
+% \caption{Ambiguous segment in Spanish.}
+% \label{fig:laCasaGrande}
+% \end{figure}
+
+\paragraph{Reading}
+The readings of the word forms make a good candidate for variables.
+%Our first task is to find variables. Looking at the ambiguous passage, a reading seems like a suitable unit.
+We can think of \texttt{"<la>" ["el" det def f sg]} as ``the hypothesis that {\em la} is a determiner'' and \texttt{"<la>" ["lo" prn p3 f sg]} as ``the hypothesis that {\em la} is a pronoun''.
+Each reading is thus translated into a variable. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
+
+\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction to model, for instance, {\sc select} rules and cautious context: ``select $\casaN$'' means in effect ``remove $\casaV$'', and ``if -1C prn'' means ``if $\laPrn$ is true and $\laDet$ false''.
+
+
+% \begin{tabular}{c c c}
+% $\laDet$  & $\casaN$ & $\grandeAdj$ \\
+% $\laPrn$  & $\casaV$ &            
+% \end{tabular}
+
+\paragraph{Sentence}
+A sentence 
+In order to match conditions against analyses, the input needs to be structured as a sentence.
+
+
+
+
 We add the following rules:
 
 \begin{itemize}
@@ -295,6 +377,7 @@ For evaluation, we measure the performance against the state-of-the-art CG parse
 % both in terms of accuracy and execution time.
 SAT-CG fares slightly worse for accuracy, and significantly worse for execution time.
 The results are presented in more detail in the following sections.
+We include evaluation for three schemes: the original unordered, the original ordered, and the updated ordered.
 
 %This suggests that our implementation should not compete with existing
 %state-of-the-art, but rather it has value as a way of relating the CG
