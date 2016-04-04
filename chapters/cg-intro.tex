@@ -13,6 +13,11 @@ constraint rules which can select or remove a potential analysis (called \emph{r
 for a target word, depending on the context words around it. 
 Together these rules disambiguate the whole text.
 
+%CG provides a lightweight framework where already a
+%moderate amount of rules can be useful (e.g. \cite{lene_trond2011} with 115
+%rules), although high quality requires in general thousands of rules.
+%\cite{bick_barebones} experiments using CG without a morphological analyser, and reports F-scores over 90 \%.
+
 In the example below, we show an initially ambiguous sentence ``the bear
 sleeps''. 
 It contains three word forms, such as ``<bear>'', each followed by its \emph{readings}.
@@ -501,8 +506,7 @@ Parallel execution may have uses in more marginal cases: for instance, if we hav
  \end{quote}
 
 Perhaps unsurprisingly, nearly all of the existing CG implementations are sequential.
-A notable exception is the system proposed in \cite{koskenniemi90}, known by the names Finite-State Intersection Grammar (FSIG) or Parallel Constraint Grammar (PCG). 
-As per \cite{koskenniemi97}, we use the latter term. 
+A notable exception is the system proposed in \cite{koskenniemi90}, known by the names Finite-State Intersection Grammar (FSIG) or Parallel Constraint Grammar (PCG) \cite{koskenniemi97}---in this thesis, we use the name FSIG. 
 In addition, a variant of the CG engine in \cite{listenmaa_claessen2015} is parallel,
 as well as the ``CG-like'' system in \cite{lager98}.
 
