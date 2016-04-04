@@ -14,6 +14,9 @@
 \def\casaV{\casa_\v}
 \def\grandeAdj{\grande_\adj}
 
+\def\t#1{\texttt{#1}}
+
+\def\defRule{``do not remove the last reading''}
 
 
 \chapter{CG as a SAT-problem}
@@ -75,24 +78,24 @@ However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whol
 
 \begin{figure}[h]
 \centering
-\begin{tabular}{p{0.6cm} l | c | c c c }
-\multicolumn{2}{c}{\textbf{Original analysis}}
-
-                             & \textbf{Variables}
-                             & \multicolumn{3}{c}{\textbf{Sentence}} \\ \hline
-\texttt{"<la>"} &            &           & 1         & 2        & 3 \\
-       & \texttt{"el" det def f sg}   
-                             & $\laDet$  & $\laDet$  & $\casaN$ & $\grandeAdj$ \\
-       & \texttt{"lo" prn p3 f sg}
-                             & $\laPrn$  & $\laPrn$  & $\casaV$ &              \\
-\texttt{"<casa>"} &          &           & & & \\
-       & \texttt{"casa" n f sg}
-                             & $\casaN$  & \multicolumn{3}{c}{\todo{fancy multirow thing}} \\
-       & \texttt{"casar" v pri p3 sg}
-                             & $\casaV$  & & & \\
-\texttt{"<grande>"} &        &           & & & \\
-       & \texttt{"grande" adj mf sg}
-                          & $\grandeAdj$ & & & 
+\begin{tabular}{p{0.6cm} l | c | c }
+%\multicolumn{2}{c}{}
+   & \textbf{Original~analysis} 
+                & \textbf{Variables}
+                              & \textbf{Default rule} \\ \hline
+\t{"<la>"}   &   &            &  {\small \defRule} \\
+  & \t{"el" 
+  det def f sg}  & $\laDet$   &  \\
+  & \t{"lo" 
+  prn p3 f sg}   & $\laPrn$   &   $\laDet \vee \laPrn$ \\
+\t{"<casa>"} &   &            &   \\
+  & \t{"casa" 
+  n f sg}        & $\casaN$   &  \\
+  & \t{"casar"
+   v pri p3 sg}  & $\casaV$   & $\casaN \vee \casaV$  \\
+\t{"<grande>"} & &            & \\
+  & \t{"grande" 
+  adj mf sg}   & $\grandeAdj$ & $\grandeAdj$
 \end{tabular}
 \caption{Ambiguous segment in Spanish: translation into SAT-variables.}
 \label{fig:laCasaGrande}
@@ -117,72 +120,117 @@ However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whol
 
 \paragraph{Reading}
 The readings of the word forms make a natural basis for variables.
-We can think of \texttt{"<la>" ["el" det def f sg]} as ``the hypothesis that {\em la} is a determiner'' and \texttt{"<la>" ["lo" prn p3 f sg]} as ``the hypothesis that {\em la} is a pronoun''.
-Each reading is thus translated into a variable. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
+We translate a combination of a word form and a reading, such as \texttt{"<la>" ["el" det def f sg]}, into a variable $\laDet$, which represents the possibility that \la{} is a determiner. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
 
-\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context: ``select $\casaN$'' means in effect ``remove $\casaV$'', and ``if -1C prn'' means ``if $\laPrn$ is true and $\laDet$ false''. Most importantly, however, we need to make sure that the last reading is not removed
+\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context: 
+\t{SELECT "casa" n} means, in effect, ``remove $\casaV$'', and \t{IF (-1C prn)} means ``if $\laPrn$ is true and $\laDet$ false''. 
+%
+Most importantly, we need to make sure that the last reading is not removed. Hence we add the default rule, \defRule, as shown in the third column of \ref{fig:laCasaGrande}. 
+These disjunctions ensure that at least one variable in each cohort must be true.
 
 
-% \begin{tabular}{c c c}
-% $\laDet$  & $\casaN$ & $\grandeAdj$ \\
-% $\laPrn$  & $\casaV$ &            
-% \end{tabular}
 
 \paragraph{Sentence}
-In order to match conditions against analyses, the input needs to be structured as a sentence: the cohorts must follow each other like in the original input, and they need to be indexed. Thus we know that applying \texttt{REMOVE v IF (-1 det)} to the cohort $[\casaN , \casaV]$, the condition will match on $\laDet$.
+In order to match conditions against analyses, the input needs to be structured as a sentence: the cohorts must follow each other like in the original input, indexed by their absolute position in the sentence. Thus when we apply \texttt{REMOVE v IF (-1 det)} to the cohort $2 \rightarrow [\casaN , \casaV]$, the condition will match on $\laDet$ in cohort 1.
 
 
 \paragraph{Rule}
 
-
-
-
-\subsection{Applying a rule}
-
-We add the following rules:
-
-\begin{itemize}
-\item [] \texttt{REMOVE prn IF (1 n) ;} \\
-             \texttt{REMOVE det IF (1 v) ;}
-\end{itemize}
-
-Standard CG will apply one  of the rules to the word \emph{la}; 
-either the one that comes first, or by some other heuristic. 
-The other rule will not fire, because it would remove the last
-reading. 
-If we use the cautious mode (\texttt{1C n} or \texttt{1C v}), which
- requires the word in the context to be fully disambiguated, 
-neither of the rules will be applied.
-In any case, all readings of \emph{casa} are left untouched by these rules.
-
-The SAT solver performs a search, 
-and starts building possible models that satisfy both constraints. 
-In addition to the given constraints, we have default rules to emulate
-the CG principles: an analysis is true if no rule affects it,
-and at least one analysis for each word is true---the notion of
-``last'' is not applicable.
-
-With these constraints, we get two solutions. The interaction of the
-rules regarding \emph{la}  disambiguates the part of speech of
-\emph{casa} for free, and the order of the rules does not matter. 
+Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1 det)}, is a template for forming an implication; when given a concrete sentence, it will pick concrete variables by the following algorithm.
 
 \begin{enumerate}
-\item [\texttt{1)}]
-\begin{verbatim}
-"<la>"
-        "el" det def f sg
-"<casa>"
-        "casa" n f sg
-\end{verbatim}
-\item [\texttt{2)}]
-\begin{verbatim}
-"<la>"
-        "lo" prn p3 f sg
-"<casa>"
-        "casar" v pri p3 sg
-        "casar" v imp p2 sg
-\end{verbatim}
-\end{enumerate} 
+\item Try rule to all cohorts
+ \begin{itemize}
+    \item[\la:] No target found
+    \item[\casa:] Target found in $\casaV$, try to match conditions
+      \begin{itemize}
+       \item Condition found in previous cohort, $\laDet$
+       \item Create a clause: $\laDet \Rightarrow \neg \casaV \ $ `if \la{} is a determiner, \casa{} is not a verb'
+      \end{itemize}
+    \item[\grande:] No target found
+  \end{itemize}
+\item Solve: given the clauses by default rule, and clauses formed by rule application.
+\end{enumerate}
+
+\paragraph{Disambiguation}
+
+Finally, we want to see the model given by the SAT-solver: the disambiguated sentence. We started off with all the variables in place, but did not actually give them values: just required that at least one variable in each cohort must be true.
+In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$. We can see with bare eye that this problem will have a solution; in fact, multiple ones. 
+The verb analysis is removed in the first two columns, as required by the presence of $\laDet$. However, the rule may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in columns 3--4. 
+We see a third interpretation in column 5: $\laDet \Rightarrow \neg \casaV$ is, after all, only implication, hence nothing prevents $\casaV$ being removed even without the presence of $\laDet$. 
+
+\begin{figure}[h]
+\centering
+$$\begin{array}{ c | c | c | c | c}
+ 1 & 2 & 3 & 4 & 5 \\ \hline
+ \laDet   &  \laDet  &         &        &        \\
+          &  \laPrn  & \laPrn  & \laPrn & \laPrn \\
+ \casaN   &  \casaN  & \casaN  &        & \casaN \\
+          &          & \casaV  & \casaV &         \\
+\grandeAdj & \grandeAdj & \grandeAdj & \grandeAdj & \grandeAdj \\
+
+\end{array}$$
+\caption{Ambiguous segment in Spanish: all possible models.}
+\label{fig:laCasaGrandeSolved}
+\end{figure}
+
+Reader may notice that this is not a particularly exciting result. A standard CG would just do what it is told, not give 5 different interpretations of a single rule.
+
+This is a minimal description of SAT-based implementation. 
+Many details are left vague: Do we enforce that all readings that are not targeted by rules will resolve to true? How do we treat multiple rules 
+
+
+
+
+
+\subsection{Rule application revisited}
+
+All the fancy properties! Flipped rules..... woo-oo, flipp...ed rules. (That doesn't work.)
+
+% We add the following rules:
+
+% \begin{itemize}
+% \item [] \texttt{REMOVE prn IF (1 n) ;} \\
+%              \texttt{REMOVE det IF (1 v) ;}
+% \end{itemize}
+
+% Standard CG will apply one  of the rules to the word \emph{la}; 
+% either the one that comes first, or by some other heuristic. 
+% The other rule will not fire, because it would remove the last
+% reading. 
+% If we use the cautious mode (\texttt{1C n} or \texttt{1C v}), which
+%  requires the word in the context to be fully disambiguated, 
+% neither of the rules will be applied.
+% In any case, all readings of \emph{casa} are left untouched by these rules.
+
+% The SAT solver performs a search, 
+% and starts building possible models that satisfy both constraints. 
+% In addition to the given constraints, we have default rules to emulate
+% the CG principles: an analysis is true if no rule affects it,
+% and at least one analysis for each word is true---the notion of
+% ``last'' is not applicable.
+
+% With these constraints, we get two solutions. The interaction of the
+% rules regarding \emph{la}  disambiguates the part of speech of
+% \emph{casa} for free, and the order of the rules does not matter. 
+
+% \begin{enumerate}
+% \item [\texttt{1)}]
+% \begin{verbatim}
+% "<la>"
+%         "el" det def f sg
+% "<casa>"
+%         "casa" n f sg
+% \end{verbatim}
+% \item [\texttt{2)}]
+% \begin{verbatim}
+% "<la>"
+%         "lo" prn p3 f sg
+% "<casa>"
+%         "casar" v pri p3 sg
+%         "casar" v imp p2 sg
+% \end{verbatim}
+% \end{enumerate} 
 
 % Without more context or additional rules we cannot fully disambiguate the passage,
 % but unlike with standard CG, we get only legal combinations in one solution.
