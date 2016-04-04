@@ -2,11 +2,11 @@
 \def\casa{\text{\em casa}}
 \def\grande{\text{\em grande}}
 
-\def\det{{\text{\ttfamily Det}}}
-\def\prn{{\text{\ttfamily Prn}}}
-\def\n{{\text{\ttfamily N}}}
-\def\v{{\text{\ttfamily V}}}
-\def\adj{{\text{\ttfamily Adj}}}
+\def\det{{\text{\sc Det}}}
+\def\prn{{\text{\sc  Prn}}}
+\def\n{{\text{\sc N}}}
+\def\v{{\text{\sc V}}}
+\def\adj{{\text{\sc Adj}}}
 
 \def\laDet{\la_\det}
 \def\laPrn{\la_\prn}
@@ -32,13 +32,12 @@ So far, we have presented CG and SAT as separate success stories: CG is easy to 
 But is there a reason to combine the two? 
 
 %CG lends itself well to a logical representation. It's all about expressing what is true (`SELECT') and false (`REMOVE'), under certain conditions (`IF').
-Applying logic to reductionist grammars has been explored earlier by \cite{lager98,lager_nivre01}, but there has not been, to our knowledge, a full logic-based CG implementation.
-% ; logic programming was too slow to be used for tagging or parsing. 
+Applying logic to reductionist grammars has been explored earlier by \cite{lager98,lager_nivre01}, but there has not been, to our knowledge, a full logic-based CG implementation; at the time, logic programming was too slow to be used for tagging or parsing. 
 Since those works, SAT-solving techniques have improved significantly \cite{marques_silva2010}, and they are used in domains such as microprocessor design and computational 
 biology---these problems easily match or exceed CG in complexity. 
-In addition, SAT
-Thanks to these advances, we were able to revisit the idea and develop it
-further. 
+In addition, SAT-solving brings us more practical tools
+
+Thanks to these advances, we were able to revisit the idea and develop it further. 
 
 
 The content in this chapter is based on \cite{listenmaa_claessen2015}; 
@@ -76,21 +75,26 @@ However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whol
 
 \begin{figure}[h]
 \centering
-\begin{tabular}{l @{~} l | c | c c c }
+\begin{tabular}{p{0.6cm} l | c | c c c }
 \multicolumn{2}{c}{\textbf{Original analysis}}
 
                              & \textbf{Variables}
-                             & \multicolumn{3}{c}{\textbf{Cohorts}} \\ \hline
-"<la>" &                     &        & $\laDet$  & $\casaN$ & $\grandeAdj$ \\
-       & "el" det def f sg   & $\laDet$ & $\laPrn$  & $\casaV$ &              \\
-       & "lo" prn p3 f sg    & $\laPrn$ & & & \\
-"<casa>" &                   &        & & & \\
-       & "casa" n f sg       & $\casaN$ & & & \\
-       & "casar" v pri p3 sg & $\casaV$ & & & \\
-"<grande>" &                 &        & & & \\
-       & "grande" adj mf sg  & $\grandeAdj$ & & & 
+                             & \multicolumn{3}{c}{\textbf{Sentence}} \\ \hline
+\texttt{"<la>"} &            &           & 1         & 2        & 3 \\
+       & \texttt{"el" det def f sg}   
+                             & $\laDet$  & $\laDet$  & $\casaN$ & $\grandeAdj$ \\
+       & \texttt{"lo" prn p3 f sg}
+                             & $\laPrn$  & $\laPrn$  & $\casaV$ &              \\
+\texttt{"<casa>"} &          &           & & & \\
+       & \texttt{"casa" n f sg}
+                             & $\casaN$  & \multicolumn{3}{c}{\todo{fancy multirow thing}} \\
+       & \texttt{"casar" v pri p3 sg}
+                             & $\casaV$  & & & \\
+\texttt{"<grande>"} &        &           & & & \\
+       & \texttt{"grande" adj mf sg}
+                          & $\grandeAdj$ & & & 
 \end{tabular}
-\caption{Ambiguous segment in Spanish.}
+\caption{Ambiguous segment in Spanish: translation into SAT-variables.}
 \label{fig:laCasaGrande}
 \end{figure}
 
@@ -112,12 +116,11 @@ However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whol
 % \end{figure}
 
 \paragraph{Reading}
-The readings of the word forms make a good candidate for variables.
-%Our first task is to find variables. Looking at the ambiguous passage, a reading seems like a suitable unit.
+The readings of the word forms make a natural basis for variables.
 We can think of \texttt{"<la>" ["el" det def f sg]} as ``the hypothesis that {\em la} is a determiner'' and \texttt{"<la>" ["lo" prn p3 f sg]} as ``the hypothesis that {\em la} is a pronoun''.
 Each reading is thus translated into a variable. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
 
-\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction to model, for instance, {\sc select} rules and cautious context: ``select $\casaN$'' means in effect ``remove $\casaV$'', and ``if -1C prn'' means ``if $\laPrn$ is true and $\laDet$ false''.
+\paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context: ``select $\casaN$'' means in effect ``remove $\casaV$'', and ``if -1C prn'' means ``if $\laPrn$ is true and $\laDet$ false''. Most importantly, however, we need to make sure that the last reading is not removed
 
 
 % \begin{tabular}{c c c}
@@ -126,11 +129,15 @@ Each reading is thus translated into a variable. This example segment gives us f
 % \end{tabular}
 
 \paragraph{Sentence}
-A sentence 
-In order to match conditions against analyses, the input needs to be structured as a sentence.
+In order to match conditions against analyses, the input needs to be structured as a sentence: the cohorts must follow each other like in the original input, and they need to be indexed. Thus we know that applying \texttt{REMOVE v IF (-1 det)} to the cohort $[\casaN , \casaV]$, the condition will match on $\laDet$.
+
+
+\paragraph{Rule}
 
 
 
+
+\subsection{Applying a rule}
 
 We add the following rules:
 
