@@ -68,14 +68,19 @@
 %\chapter{SAT-encoding}
 
 
-\noindent In this appendix, we show the SAT-encoding of different rule types in detail. 
-A reader who wants a general overview can read Section~\todo{write that section}.
-The operations in this appendix are independent of the implementation of the software SAT-CG; it does not describe how the sentence is processed in order to find the variables.
-The only purpose is to demonstrate what kind of clauses are constructed.
+\noindent In this appendix, we show the SAT-encoding for all the rule types that 
+SAT-CG supports: {\sc remove} and {\sc select} rules, with various operations in the conditions. We show both unordered and ordered variants of SAT-CG.
+
+The encoding in this appendix is independent of the implementation of the software SAT-CG; it does not describe how the sentence is processed in order to find the variables.
+
+The purpose of this appendix is to give a full description of the different rule types; the method is introduced with more pedagogical focus in Section~\ref{sec:CGSAT}. 
+%However, the examples in this appendix are self-contained; if you know my previous stuff and want to be bored, just read this!
+
 
 \section{SAT-encoding of sentences}
 
-We demonstrate the SAT-encoding with a concrete segment in Spanish:  \emph{sobre una aproximación más científica}. It has the virtue of being ambiguous in nearly every word: for instance, \emph{sobre} is either a preposition (`above' or `about') or a noun (`envelope'); \emph{una} can be a pronoun, determiner or a verb. The full analysis, with the initial ambiguities, is shown in Figure~\ref{fig:satEncodingSpanishExample}. 
+As in Section~\ref{sec:CGSAT}, we demonstrate the SAT-encoding with a concrete segment in Spanish:  \emph{sobre una aproximación más científica}. 
+It has the virtue of being ambiguous in nearly every word: for instance, \emph{sobre} is either a preposition (`above' or `about') or a noun (`envelope'); \emph{una} can be a pronoun, determiner or a verb. The full analysis, with the initial ambiguities, is shown in Figure~\ref{fig:satEncodingSpanishExample}. 
 
 \begin{figure}[t]
 \ttfamily
@@ -526,6 +531,8 @@ We treat ``{\sc select} target'' rules as ``{\sc remove} all but target'', and c
      \wedge\: ( \; \ob{\neg\cientificaN \wedge \neg(\sobreN \wedge \unaAny)}^{\invConds} 
      \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) 
 \end{align}
+
+Actually, there is a bit of parallelism left. How I handle BARRIER now is that 
 
 
 
