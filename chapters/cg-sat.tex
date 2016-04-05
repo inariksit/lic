@@ -15,6 +15,7 @@
 \def\grandeAdj{\grande_\adj}
 
 \def\t#1{\texttt{#1}}
+\def\ob#1{\overbrace{ #1 \rule{0pt}{2ex}}}
 
 \def\defRule{``do not remove the last reading''}
 
@@ -149,7 +150,9 @@ Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1
       \end{itemize}
     \item[\grande:] No target found
   \end{itemize}
-\item Solve: given the clauses by default rule, and clauses formed by rule application.
+\item Solve with all clauses: 
+  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{given by default rule}}, \ 
+      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
 \end{enumerate}
 
 \paragraph{Disambiguation}
@@ -164,7 +167,7 @@ the presence of $\laDet$.
 \begin{figure}[h]
 \centering
 $$\begin{array}{ c | c | c | c | c}
- 1 & 2 & 3 & 4 & 5 \\ \hline
+ 1        & 2        & 3       & 4      & 5 \\ \hline
  \laDet   &  \laDet  &         &        &        \\
           &  \laPrn  & \laPrn  & \laPrn & \laPrn \\
  \casaN   &  \casaN  & \casaN  &        & \casaN \\
@@ -172,22 +175,40 @@ $$\begin{array}{ c | c | c | c | c}
 \grandeAdj & \grandeAdj & \grandeAdj & \grandeAdj & \grandeAdj \\
 
 \end{array}$$
-\caption{Ambiguous segment in Spanish: all possible models.}
-\label{fig:laCasaGrandeSolved}
+\caption{Possible models for \t{REMOVE v IF (-1 det)}.}
+\label{fig:modelsOneRule}
 \end{figure}
 
 The reader may notice that this is not a particularly exciting result. A standard CG would just do what it is told and remove the verb, not give 5 different interpretations for a single rule.
 
-But there is power to this property. Now, imagine we add a second rule: \texttt{REMOVE n IF (-1 prn)}. \todo{all the magic that happens in the NODALIDA paper \cite{listenmaa_claessen2015}. Also tell that this is exactly what FSIG does, and what \cite{lager98} does. And that we will do more!}
+But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN \ $. This clause, together with the previous one, $\laDet \Rightarrow \neg \casaV$, prohibits combinations \t{det + v} and \t{prn + n}. The disambiguation is as follows:
+
+\begin{figure}[h]
+\centering
+$$\begin{array}{ c | c }
+ 1        & 2        \\ \hline
+ \laDet   &          \\
+          &  \laPrn  \\
+ \casaN   &          \\
+          &  \casaV   \\
+\grandeAdj & \grandeAdj \\
+
+\end{array}$$
+\caption{Possible models for \t{REMOVE v IF (-1 det)} and \t{REMOVE n IF (-1 prn)}.}
+\label{fig:modelsTwoRules}
+\end{figure}
+
+In contrast, a standard, sequential CG would have just applied the first rule and stopped there. If, later on, the determiner is removed, there is no way to restore the verb. If we add one more rule, \t{REMOVE v IF (1 adj)}, then we will only get the model in column 1 of Figure~\ref{fig:modelsTwoRules}. Notice that none of the rules has targeted the word \la{}; still it has become unambiguous.
+
+ \todo{all the magic that happens in the NODALIDA paper \cite{listenmaa_claessen2015}. Also tell that this is exactly what FSIG does, and what \cite{lager98} does. And that we will do more!}
 
 We have given a minimal description of SAT-based implementation. 
 Many details are left vague: Do we enforce that all readings that are not targeted by rules will resolve to true? How do we treat ordering? 
 
 
-
-
-
 \subsection{Unordered scheme}
+
+The unordered scheme corresponds to Finite State Intersection Grammar (FSIG) \cite{koskenniemi90}, or Parallel Constraint Grammar (PCG), introduced in Section~\ref{sec:ordering}.
 
 \subsection{Ordered scheme}
 
