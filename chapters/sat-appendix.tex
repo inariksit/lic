@@ -5,16 +5,16 @@
 \def\cientifica{\text{\em cient\'{\i}fica}}
 
 
-\def\vPrsPThree{\text{\em PrsP3}}
-\def\vPrsPOne{\text{\em PrsP1}}
-\def\vImpPThree{\text{\em ImpP3}}
-\def\adj{{\text{\em Adj}}}
-\def\adv{{\text{\em Adv}}}
-\def\n{\text{\em N}}
-\def\pr{{\text{\em Pr}}}
-\def\prn{{\text{\em Prn}}}
-\def\det{{\text{\em Det}}}
-\def\notDet{{\neg \text{\em Det}}}
+\def\vPrsPThree{\text{\sc PrsP3}}
+\def\vPrsPOne{\text{\sc PrsP1}}
+\def\vImpPThree{\text{\sc ImpP3}}
+\def\adj{{\text{\sc Adj}}}
+\def\adv{{\text{\sc Adv}}}
+\def\n{\text{\sc N}}
+\def\pr{{\text{\sc Pr}}}
+\def\prn{{\text{\sc Prn}}}
+\def\det{{\text{\sc Det}}}
+\def\notDet{{\neg \text{\sc Det}}}
 \def\any{{\text{Any}}}
 
 
@@ -504,11 +504,11 @@ We treat ``{\sc select} target'' rules as ``{\sc remove} all but target'', and c
        \vee  \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
 %
 %
-\intertext{\cgrule{REMOVE adj IF (1C adj)} Careful context.} %If $\cientificaN$ is true, the condition \cgrule{1C adj} does not hold.}
+\intertext{\cgrule{REMOVE adj IF (1C adj)} Careful context. The condition for \cgrule{1C adj} is $\cientificaAdj \wedge \neg \cientificaN$; we know by the default rule that one of them must be true, so just making $\cientificaN$ positive, we negate this} %If $\cientificaN$ is true, the condition \cgrule{1C adj} does not hold.}
   \text{New variable } \mas{}'_\adj 
      & \eqdef \masAdj\ 
      \wedge\: ( \ob{\cientificaN}^{\invConds} 
-     \vee \ob{\neg\masAdv}^{\onlyTrgLeft}  ) \\
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft}  )  \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n)} Scanning.}
@@ -529,10 +529,23 @@ We treat ``{\sc select} target'' rules as ``{\sc remove} all but target'', and c
   \text{New variable } \mas{}'_\adj 
      & \eqdef \masAdj\ 
      \wedge\: ( \; \ob{\neg\cientificaN \wedge \neg(\sobreN \wedge \unaAny)}^{\invConds} 
-     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1C* n)} Scanning with careful context. The presence of $\sobrePr$, regardless of $\sobreN$, is enough to invalidate the C condition.}
+  \text{New variable } \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg\cientificaN \wedge \sobrePr}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} ) \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1C* n BARRIER det)} Scanning with careful context, up to a barrier.}
+  \text{New variable } \mas{}'_\adj 
+     & \eqdef \masAdj\ 
+     \wedge\: ( \; \ob{\neg\cientificaN \wedge \neg(TODO)}^{\invConds} 
+     \vee \ob{\neg\masAdv}^{\onlyTrgLeft} )  \\
 \end{align}
 
-Actually, there is a bit of parallelism left. How I handle BARRIER now is that 
 
 
 
