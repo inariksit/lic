@@ -352,28 +352,28 @@ Here we demonstrate a number of inverted rules, in which the contextual test doe
 
 \subsubsection{Solving and conflict handling}
 
-\todo{Move some of this long explanation to the main chapter}
-
-The unordered scheme has a strong advantage compared to the ordered one: it can start disambiguating, even if none of the rules on its own was able to act. In addition, 
-
-However, ignoring the order means that we miss significant information. In the unordered scheme, the different rule orders in Figure~\ref{fig:orderMatters} would be treated the same. 
-Without order, they would be both applied to the word \mas, and that would cause a conflict: we cannot remove both.
-With order, the problem is trivial: whichever is mentioned first, gets to apply, and removes the target. After that, the second one would not even be considered, because of the default rule, which prohibits removing the last reading.
-
-Can we use an alternative way to handle conflicts in the unordered scheme?
-Recall the notion of heuristic rule order from Section~\ref{sec:ordering}: the rules are chosen based on how well they match the context. A longer rule is a more exact match than a shorter rule, and thus preferred. The heuristic rule order is still an order, though; it does not tell us what to do, when the two rules have already created clauses.
-
-Heuristic order asks the question ``out of all the rules that target this cohort, which one is the most exact match?'' If the competitors are \cgrule{REMOVE adj IF (-1 n)} and \cgrule{REMOVE adv IF (-1 n) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:orderMatters}, we need to resort to mere guessing, or picking the one which is mentioned first in the rule set.
-
-For an unordered scheme, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
-With a SAT-solver, we can answer this question. Recall that each rule application produces a formula, which is a conjunction of clauses, and in an ideal case, the whole formula is satisfiable. However, if the whole formula is unsatisfiable, we may still ask the question: give an assignment that satisfies the maximum number of the clauses. 
-If the grammar is good, we hope that the interaction between the appropriate
-rules would make a large set of clauses that fit together, and the
-inapplicable rule would not ``fit in''.
-In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
 
 
-\todo{Difference between ``condition didn't hold in the first place'' and ``two rules have the same condition and conflicting action''}
+% The unordered scheme has a strong advantage compared to the ordered one: it can start disambiguating, even if none of the rules on its own was able to act. In addition, 
+
+% However, ignoring the order means that we miss significant information. In the unordered scheme, the different rule orders in Figure~\ref{fig:orderMatters} would be treated the same. 
+% Without order, they would be both applied to the word \mas, and that would cause a conflict: we cannot remove both.
+% With order, the problem is trivial: whichever is mentioned first, gets to apply, and removes the target. After that, the second one would not even be considered, because of the default rule, which prohibits removing the last reading.
+
+% Can we use an alternative way to handle conflicts in the unordered scheme?
+% Recall the notion of heuristic rule order from Section~\ref{sec:ordering}: the rules are chosen based on how well they match the context. A longer rule is a more exact match than a shorter rule, and thus preferred. The heuristic rule order is still an order, though; it does not tell us what to do, when the two rules have already created clauses.
+
+% Heuristic order asks the question ``out of all the rules that target this cohort, which one is the most exact match?'' If the competitors are \cgrule{REMOVE adj IF (-1 n)} and \cgrule{REMOVE adv IF (-1 n) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:orderMatters}, we need to resort to mere guessing, or picking the one which is mentioned first in the rule set.
+
+% For an unordered scheme, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
+% With a SAT-solver, we can answer this question. Recall that each rule application produces a formula, which is a conjunction of clauses, and in an ideal case, the whole formula is satisfiable. However, if the whole formula is unsatisfiable, we may still ask the question: give an assignment that satisfies the maximum number of the clauses. 
+% If the grammar is good, we hope that the interaction between the appropriate
+% rules would make a large set of clauses that fit together, and the
+% inapplicable rule would not ``fit in''.
+% In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
+
+
+% \todo{Difference between ``condition didn't hold in the first place'' and ``two rules have the same condition and conflicting action''}
 
 
 \begin{figure}

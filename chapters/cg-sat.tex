@@ -16,6 +16,7 @@
 
 \def\t#1{\texttt{#1}}
 \def\ob#1{\overbrace{ #1 \rule{0pt}{2ex}}}
+\def\cgrule#1{\noindent {\bf  #1 }}
 
 \def\defRule{``do not remove the last reading''}
 
@@ -157,17 +158,20 @@ Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1
 
 \paragraph{Disambiguation}
 
-Finally, we want to see the model given by the SAT-solver: the disambiguated sentence. We started off with all the variables unassigned, and required at least one variable in each cohort to be true.
-In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$. We can see with bare eye that this problem will have a solution; in fact, multiple ones, shown in Figure~\ref{fig:modelsOneRule}.
-The verb analysis is removed in the first two columns, as required by the presence of $\laDet$. However, the implication may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in columns 3--4. 
-We see a third interpretation in column 5: $\laDet \Rightarrow \neg \casaV$ is only an 
+Finally, we get the model given by the SAT-solver: the disambiguated sentence. 
+We started off with all the variables unassigned, and required at least one variable 
+in each cohort to be true. In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$.
+We can see with bare eye that this problem will have a solution; in fact, multiple ones, 
+shown in Figure~\ref{fig:modelsOneRule}.
+The verb analysis is removed in the first two models, as required by the presence of $\laDet$. However, the implication may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in Models 3--4. 
+We see a third interpretation in Model 5: $\laDet \Rightarrow \neg \casaV$ is only an 
 implication, not an equivalence; this means that $\casaV$ may be removed even without 
 the presence of $\laDet$. 
 
 \begin{figure}[h]
 \centering
 $$\begin{array}{ c | c | c | c | c}
- 1        & 2        & 3       & 4      & 5 \\ \hline
+\textbf{Model 1}  & \textbf{Model 2}  & \textbf{Model 3} & \textbf{Model 4} & \textbf{Model 5} \\ \hline
  \laDet   &  \laDet  &         &        &        \\
           &  \laPrn  & \laPrn  & \laPrn & \laPrn \\
  \casaN   &  \casaN  & \casaN  &        & \casaN \\
@@ -179,13 +183,13 @@ $$\begin{array}{ c | c | c | c | c}
 \label{fig:modelsOneRule}
 \end{figure}
 
-The reader may notice that this is not a particularly exciting result. A standard CG would just do what it is told and remove the verb, not give 5 different interpretations for a single rule.
-But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN \ $. This clause, together with the previous one, $\laDet \Rightarrow \neg \casaV$, prohibits combinations \t{det + v} and \t{prn + n}. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
+\paragraph{Rule interaction} The reader may notice that this is not a particularly exciting result. A standard CG would just do what it is told and remove the verb, not give 5 different interpretations for a single rule.
+But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN \ $. This clause, together with $\laDet \Rightarrow \neg \casaV$, prohibits the combinations $\laDet \ \casaV$  and $\laPrn \ \casaN$; this rules out three models out of five. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
 
 \begin{figure}[h]
 \centering
 $$\begin{array}{ c | c }
- 1        & 2        \\ \hline
+ \textbf{Model 1}  & \textbf{Model 2}  \\ \hline
  \laDet   &          \\
           &  \laPrn  \\
  \casaN   &          \\
@@ -199,24 +203,69 @@ $$\begin{array}{ c | c }
 
 After two rules, we only have two models: one with $\laDet \ \casaN$ and other with $\laPrn \ \casaV$. 
 %This behaviour corresponds to FSIG: 
-In fact, we have accidentally just implemented FSIG \cite{koskenniemi90}: the rules act in parallel, and if the sentence cannot be fully disambiguated, the remaining uncertainty is modelled as a disjunction of all possible combinations of readings.
-In contrast, a sequential CG applies each rule individually, and it cannot handle disjunction; its only operation is to remove\footnote{or add, in CG-3} readings from a cohort. A standard CG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
+In fact, we have accidentally just implemented FSIG \cite{koskenniemi90}, introduced in Section~\ref{sec:ordering}: the rules act in parallel, and if the sentence cannot be fully disambiguated, the remaining uncertainty is modelled as a disjunction of all possible combinations of readings.
+In contrast, a sequential CG engine applies each rule individually, and it cannot handle disjunction; its only operation is to remove\footnote{or add, in CG-3} readings from a cohort. The CG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
 
-To finish our FSIG If we add one more rule, \t{REMOVE v IF (1 adj)}, then we will only get the model in column 1 of Figure~\ref{fig:modelsTwoRules}. Notice that none of the rules has targeted the word \la{}; still it has become unambiguous. 
+To finish our FSIG example, let us add one more rule: \t{REMOVE v IF (1 adj)}, and the corresponding clause $\grandeAdj \Rightarrow \neg \casaV$. This clause will rule out Model~2 of Figure~\ref{fig:modelsTwoRules}, and we will get Model~1 as the unique solution. 
+As an added bonus, none of the three rules has targeted the word \la{}; still it has become unambiguous. 
 
 Now, the reader may notice that this is all very nice, but the present thesis is not called ``Analysing FSIG with a SAT-solver''. 
-
- \todo{all the magic that happens in the NODALIDA paper \cite{listenmaa_claessen2015}. Also tell that this is exactly what FSIG does, and what \cite{lager98} does. And that we will do more!}
-
-We have given a minimal description of SAT-based implementation. 
-Many details are left vague: Do we enforce that all readings that are not targeted by rules will resolve to true? How do we treat ordering? 
+However, understanding the translation of rules to implications is vital to the rest of this thesis, and FSIG provides, arguably, a simpler starting point.
+In the following sections, we discuss the concepts of conflict resolution and ordering of the rules. We will show a way to handle conflicts in pure FSIG, and consider two ways of emulating rule ordering in the SAT-encoding.
 
 
-\subsection{Unordered scheme}
+% We have given a minimal description of SAT-based implementation. 
+% Many details are left vague: Do we enforce that all readings that are not targeted by rules will resolve to true? How do we treat ordering? 
 
-The unordered scheme corresponds to Finite State Intersection Grammar (FSIG) \cite{koskenniemi90}, or Parallel Constraint Grammar (PCG), introduced in Section~\ref{sec:ordering}.
+
+\subsection{Solving conflicts}
+
+The parallel FSIG has an advantage compared to the sequential CG: it can start disambiguating, even if none of the rules is able to act on its own. 
+In addition, the order of the rules does not matter. This prevents too hasty decisions, such as removing $\casaV$ before we know the status of \la{}. 
+However, ignoring the order means that we miss significant information in the rule set. 
+The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The following rule sequence---taken from an actual grammar\footnote{\url{http://link.to/grammar}}---will be well-behaved in a strict and sequential CG. Its behaviour will be less clear in a strict and heuristic CG, but in FSIG, it will definitely cause a conflict, rendering the whole grammar useless.
+
+\begin{itemize}
+\item[]
+   \begin{verbatim}
+   SECTION:good_rules
+   REMOVE baz IF (-1 bar) ;
+
+   SECTION:heuristic   
+   REMOVE quux ;
+   \end{verbatim}
+\end{itemize}
+
+The order clearly demonstrates the course of action: ``if \todo{Foo} is preceded by \todo{Bar}, then remove/select \todo{Baz}; then, move on to other rules; finally, if \todo{Foo} is still ambiguous, select/remove \todo{Quux}.'' 
+From the success of CG, as opposed to FSIG, one may speculate that the strictly sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to FSIG, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
+If two rules target the same cohort, the first mentioned gets to apply, and removes the target. After that, the second one would not even be considered, because of the default rule, which prohibits removing the last reading.
+
+% In the carefully crafted examples, we have ignored the careful mode: \t{IF (-1C det)} `if the previous word is unambiguously determiner'. 
+Ideally, both ways of grammar writing should yield similar results:
+sequential CG rules are more imperative, and FSIG rules are more declarative.
+The problem of conflicts in FSIG still remains---can we use an alternative way to handle conflicts in the unordered scheme?
+
+% Recall the notion of heuristic rule order from Section~\ref{sec:ordering}: the rules are chosen based on how well they match the context. A longer rule is a more exact match than a shorter rule, and thus preferred. The heuristic rule order is still an order, though; it does not tell us what to do, when the two rules have already created clauses.
+
+Recall the heuristic rule order from Section~\ref{sec:ordering}: a heuristic order asks the question ``out of all the rules that target this cohort, which one is the most exact match?'' If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or pick the one which is mentioned first in the rule set.
+
+For an unordered scheme, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
+With a SAT-solver, we can answer this question. Each rule application produces a formula, which is a conjunction of clauses, and in an ideal case, the whole formula is satisfiable. However, if the whole formula is unsatisfiable, we may still ask for an assignment that satisfies the maximum number of the clauses. 
+If the grammar is good, we hope that the interaction between the appropriate
+rules would make a large set of clauses that fit together, and the
+inapplicable rule would not ``fit in''.
+In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
+
+\paragraph{Maximisation}
+
+
+
+\todo{Difference between ``condition didn't hold in the first place'' and ``two rules have the same condition and conflicting action''}
+
 
 \subsection{Ordered scheme}
+
+
 
 
 % We add the following rules:
@@ -350,14 +399,9 @@ and a rule that removes verb reading, if the word is followed by an adjective:
 % The SAT solver has already the clauses produced by the previous rules.
 % \emph{casa}\texttt{<n>} $\Rightarrow$ $\neg$\emph{la}\texttt{<prn>}
 % and   \emph{casa}\texttt{<v>} $\Rightarrow$ $\neg$\emph{la}\texttt{<det>}
-The new rule adds the implication
- \emph{grande}\texttt{<adj>} $\Rightarrow$
- $\neg$\emph{casa}\texttt{<v>}, which will
-disambiguate  \emph{casa} to a noun\footnote{Assuming that
-  \texttt{adj} is the only reading for \emph{grande}, it must be true,
-  because of the restriction that at least one analysis for each word
-  is true. Then the implication has a true antecedent (\emph{grande}\texttt{<adj>}), thus its
-  consequent ($\neg$\emph{casa}\texttt{<v>}) will hold.}. 
+The new rule adds the implication 
+\emph{grande}\texttt{<adj>} $\Rightarrow \ \neg$\emph{casa}\texttt{<v>}, 
+which will disambiguate  \emph{casa} to a noun. 
 As the status of \emph{casa} is resolved, the SAT solver can now
 discard the model where \emph{casa} is a verb and \emph{la} is a
 pronoun
