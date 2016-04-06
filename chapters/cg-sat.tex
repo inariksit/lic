@@ -16,7 +16,7 @@
 
 \def\t#1{\texttt{#1}}
 \def\ob#1{\overbrace{ #1 \rule{0pt}{2ex}}}
-\def\cgrule#1{\noindent {\bf  #1 }}
+\def\cgrule#1{{\ttfamily  #1 }}
 
 \def\defRule{``do not remove the last reading''}
 
@@ -152,13 +152,15 @@ Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1
     \item[\grande:] No target found
   \end{itemize}
 \item Solve with all clauses: 
-  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{given by default rule}}, \ 
+  $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{given by the default rule}}, \ 
       \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
 \end{enumerate}
 
-\paragraph{Disambiguation}
+\subsection{Applying a rule}
 
-Finally, we get the model given by the SAT-solver: the disambiguated sentence. 
+%Finally, we have all we need to solve the disambiguation problem. Given the clauses presented in step 2, SAT-solver returns a model---this is our disambiguated sentence. 
+
+Finally, we have all we need to disambiguate the segment: the cohorts and the constraints encoded as SAT-variables and clauses. The SAT-solver returns a model that satisfies all the clauses presented in step 2.
 We started off with all the variables unassigned, and required at least one variable 
 in each cohort to be true. In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$.
 We can see with bare eye that this problem will have a solution; in fact, multiple ones, 
@@ -183,10 +185,12 @@ $$\begin{array}{ c | c | c | c | c}
 \label{fig:modelsOneRule}
 \end{figure}
 
-\paragraph{Rule interaction} The reader may notice that this is not a particularly exciting result. A standard CG would just do what it is told and remove the verb, not give 5 different interpretations for a single rule.
-But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN \ $. This clause, together with $\laDet \Rightarrow \neg \casaV$, prohibits the combinations $\laDet \ \casaV$  and $\laPrn \ \casaN$; this rules out three models out of five. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
+The reader may notice that this is not a particularly exciting result. A standard CG would just do what it is told and remove the verb, not give 5 different interpretations for a single rule.
+But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN$. The new clause
+%, together with $\laDet \Rightarrow \neg \casaV$, 
+prohibits the combination $\laPrn \ \casaN$, which rules out three models out of five. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \centering
 $$\begin{array}{ c | c }
  \textbf{Model 1}  & \textbf{Model 2}  \\ \hline
@@ -201,10 +205,13 @@ $$\begin{array}{ c | c }
 \label{fig:modelsTwoRules}
 \end{figure}
 
+
 After two rules, we only have two models: one with $\laDet \ \casaN$ and other with $\laPrn \ \casaV$. 
 %This behaviour corresponds to FSIG: 
 In fact, we have accidentally just implemented FSIG \cite{koskenniemi90}, introduced in Section~\ref{sec:ordering}: the rules act in parallel, and if the sentence cannot be fully disambiguated, the remaining uncertainty is modelled as a disjunction of all possible combinations of readings.
-In contrast, a sequential CG engine applies each rule individually, and it cannot handle disjunction; its only operation is to remove\footnote{or add, in CG-3} readings from a cohort. The CG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
+In contrast, a sequential CG engine applies each rule individually, and it cannot handle disjunction; its only operation is to manipulate readings in a cohort.
+%remove \footnote{In CG-3, we can also add readings to a cohort, and cohorts to a sentence.} readings from a cohort. 
+The CG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
 
 To finish our FSIG example, let us add one more rule: \t{REMOVE v IF (1 adj)}, and the corresponding clause $\grandeAdj \Rightarrow \neg \casaV$. This clause will rule out Model~2 of Figure~\ref{fig:modelsTwoRules}, and we will get Model~1 as the unique solution. 
 As an added bonus, none of the three rules has targeted the word \la{}; still it has become unambiguous. 
@@ -218,12 +225,15 @@ In the following sections, we discuss the concepts of conflict resolution and or
 % Many details are left vague: Do we enforce that all readings that are not targeted by rules will resolve to true? How do we treat ordering? 
 
 
-\subsection{Solving conflicts}
+\subsection{Solving conflicts in the parallel scheme}
 
-The parallel FSIG has an advantage compared to the sequential CG: it can start disambiguating, even if none of the rules is able to act on its own. 
-In addition, the order of the rules does not matter. This prevents too hasty decisions, such as removing $\casaV$ before we know the status of \la{}. 
+The parallel FSIG behaves differently than the sequential CG: 
+the rules are connected to each other, and the order does not matter.
+%it can start disambiguating, even if none of the rules is able to act on its own. 
+%In addition, the order of the rules does not matter. 
+This prevents too hasty decisions, such as removing $\casaV$ before we know the status of \la{}. 
 However, ignoring the order means that we miss significant information in the rule set. 
-The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The following rule sequence---taken from an actual grammar\footnote{\url{http://link.to/grammar}}---will be well-behaved in a strict and sequential CG. Its behaviour will be less clear in a strict and heuristic CG, but in FSIG, it will definitely cause a conflict, rendering the whole grammar useless.
+The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The following rule sequence---taken from an actual grammar\footnote{\url{http://link.to/grammar}}---will be well-behaved in a strict and sequential CG. Its behaviour will be less clear in a heuristic and sequential CG, but in FSIG, it will definitely cause a conflict, rendering the whole grammar useless.
 
 \begin{itemize}
 \item[]
@@ -237,17 +247,18 @@ The truth is that pure FSIG is very brittle: each and every rule in the set must
 \end{itemize}
 
 The order clearly demonstrates the course of action: ``if \todo{Foo} is preceded by \todo{Bar}, then remove/select \todo{Baz}; then, move on to other rules; finally, if \todo{Foo} is still ambiguous, select/remove \todo{Quux}.'' 
-From the success of CG, as opposed to FSIG, one may speculate that the strictly sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to FSIG, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
-If two rules target the same cohort, the first mentioned gets to apply, and removes the target. After that, the second one would not even be considered, because of the default rule, which prohibits removing the last reading.
+Comparing the success of CG to FSIG, one may speculate that the strictly sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to FSIG, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
+If two rules target the same cohort, the first mentioned gets to apply, and removes the target. When the first rule has acted, the second rule is not even considered, because it would remove the last reading.
+%After that, the second one would not even be considered, because of the default rule, which prohibits removing the last reading.
 
 % In the carefully crafted examples, we have ignored the careful mode: \t{IF (-1C det)} `if the previous word is unambiguously determiner'. 
 Ideally, both ways of grammar writing should yield similar results:
 sequential CG rules are more imperative, and FSIG rules are more declarative.
 The problem of conflicts in FSIG still remains---can we use an alternative way to handle conflicts in the unordered scheme?
-
+%
 % Recall the notion of heuristic rule order from Section~\ref{sec:ordering}: the rules are chosen based on how well they match the context. A longer rule is a more exact match than a shorter rule, and thus preferred. The heuristic rule order is still an order, though; it does not tell us what to do, when the two rules have already created clauses.
-
-Recall the heuristic rule order from Section~\ref{sec:ordering}: a heuristic order asks the question ``out of all the rules that target this cohort, which one is the most exact match?'' If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or pick the one which is mentioned first in the rule set.
+%
+Recall the heuristic rule order from Section~\ref{sec:ordering}. The heuristic order is asking: ``out of all the rules that target this cohort, which one is the most exact match?'' If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or pick the one which is mentioned first in the rule set.
 
 For an unordered scheme, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
 With a SAT-solver, we can answer this question. Each rule application produces a formula, which is a conjunction of clauses, and in an ideal case, the whole formula is satisfiable. However, if the whole formula is unsatisfiable, we may still ask for an assignment that satisfies the maximum number of the clauses. 
@@ -258,15 +269,19 @@ In the SAT-world, this means that the largest number of satisfiable clauses woul
 
 \paragraph{Maximisation}
 
+Here, we present the maximisation.
 
-
-\todo{Difference between ``condition didn't hold in the first place'' and ``two rules have the same condition and conflicting action''}
 
 
 \subsection{Ordered scheme}
 
+We have different options how to handle order. 
 
+Option 1: Like in \cite{lager_nivre01}, but if all the variables start off as True, it's not a SAT-problem, just a logical reconstruction, and done in 2001.
+(Spoiler: we will use a variant of this later.)
 
+Another option is to solve in a parallel way, but starting with a prefix of all rules.
+If there is a solution for rules 1--$n$, but adding $n+1$ to the mix causes a conflict, we assume that the earliest rules are correct, and simply ignore the $n+t^{th}$ rule.
 
 % We add the following rules:
 
