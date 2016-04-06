@@ -22,8 +22,8 @@ Together these rules disambiguate the whole text.
 
 In the example below, we show an initially ambiguous sentence ``the bear
 sleeps''. 
-It contains three word forms, such as ``<bear>'', each followed by its \emph{readings}.
-A reading contains one lemma, such as ``bear'', and a list of morphological tags, such as \emph{noun sg}.
+It contains three word forms, such as \t{"<bear>"}, each followed by its \emph{readings}.
+A reading contains one lemma, such as \t{"bear"}, and a list of morphological tags, such as \t{noun sg}.
 %Additional lemmas within one word form, such as clitic pronouns, are represented as \emph{subreadings}; each indented one more tab.
 A word form together with its readings is called a \emph{cohort}. A cohort is ambiguous, if it contains more than one reading.
 
@@ -126,8 +126,8 @@ The syntactic tags can also indicate some dependency structure. For
 instance, \emph{the} could get a tag such as
 \texttt{DN\textgreater}, to indicate that it is a determiner whose
 head is to the right. A phrase such as \emph{the little dog} could get
-tagged as  $the_{@DN>}$ $little_{@AN>}$ $dog_{@HEAD-N}$.
-Using \texttt{\textless{}TAG} and \texttt{TAG\textgreater} can identify
+tagged as  \emph{the}$_{\text{\sc @dn>}}$ \emph{little}$_{\text{\sc @an>}}$ \emph{dog}$_{\text{\sc @head-n}$.
+Using \textsc{\textless{}tag} and \textsc{tag\textgreater} can identify
 chunks, as long as they are not disconnected.
 
 With the introduction of CG-3, it is possible to add full-fledged dependency
@@ -278,7 +278,7 @@ an ungrammatical sequence and leave all tags intact---in that case,
 its performance would not differ from a grammar that simply does not have many rules.
 %The difference lies in that a generative grammar starts building structure from scratch---there are no errors in an empty tree, and i
 %In contrast, CG has to assign structure for any input, including grammatically incorrect.
-The sequence \verb!en<det><utr> bord<noun><neutr>! is undeniably ungrammatical; however, the alternative \verb!en<noun><utr> bord<noun><neutr>! would be even ``more wrong'' for the purpose of analysing the text.
+The sequence \emph{en}$_{\textsc{Det Utr}}$~\emph{bord}$_{\textsc{N Neutr}}$ is undeniably ungrammatical; however, the alternative \emph{en}$_{\textsc{N Utr}}$~\emph{bord}$_{\textsc{N Neutr}}$  would be even ``more wrong'' for the purpose of analysing the text.
 
 % If we define \emph{grammatical sequences} to be sequences of POS tags,
 % then the question is somewhat easier to answer: \verb!<det><utr> <noun><neutr>! is ungrammatical, and CG does not raise an alarm that there is something wrong; hence we can say that CG ``accepts'' ungrammatical sequences. However, the alternative \verb!<noun><utr>! \verb!<noun><neutr>! would be even ``more wrong'' for the purpose of analysing the text; same goes for the option with no disambiguation at all.
@@ -471,23 +471,18 @@ time, using their initial, ambiguous context. Both ``remove verb after determine
 ``remove noun after pronoun'' would match \emph{question}, because the original 
 input from the morphological analyser contains both determiner and pronoun as the 
 preceding word. Then, the final decision depends on any another rule that resolves \emph{what}.
-
 To give a minimal example, assume we have a single rule, \texttt{REMOVE verb IF (-1 verb)}, and the three words \emph{w1--w3}, shown below. 
 In parallel execution, both \emph{w2} and \emph{w3} lose their verb tag; in sequential only \emph{w2}.
 
 %Parallel and sequential would return a different result for the following passage: 
 
-\begin{verbatim}
-"<w1>"
-        "w1" noun
-        "w1" verb
-"<w2>"
-        "w2" noun
-        "w2" verb
-"<w3>"
-        "w3" noun
-        "w3" verb
-\end{verbatim}
+
+\begin{tabular}{p{0.5cm} l   p{0.5cm} l    p{0.5cm} l}
+\t{"<w1>"}      &  & \t{"<w2>"}    & & \t{"<w3>"}      & \\
+   & \t{"w1" noun} & & \t{"w2" noun} & & \t{"w3" noun}   \\
+   & \t{"w1" verb} & & \t{"w2" verb} & & \t{"w3" verb} 
+
+\end{tabular}
 
 
 Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
@@ -623,7 +618,7 @@ and suggest a way to emulate generation within (a variant of) CG.
 As defined in \cite{tapanainen1999phd}, the rules in finite-state constraint languages may include ``contextual tests that are expressed in terms of regular languages''. 
 Indeed, we can verify that in all implementations of CG, 
 the contextual tests must be regular: we cannot write in a single rule ``remove verb if the previous segment contains only well-nested brackets''.
-Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations, such as $(\Sigma - N)*A(\Sigma - V)*N$ \todo{check this rule in CG-2 and CG-3}; in turn, CG-2 \cite{tapanainen1996} can express this, but not e.g. repeated patterns. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{bick2015} did not exist at the time, \cite{tapanainen1996} does not include it in the hierarchy of the constraint formalisms.
+Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations, such as $(\Sigma - N)*A(\Sigma - V)*N$ \todo{check this rule in CG-2 and CG-3}; in turn, CG-2 \cite{tapanainen1996} can express this, but not e.g. repeated patterns. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{bick2015} did not exist at the time, \cite{tapanainen1999phd} does not include it in the hierarchy of the constraint formalisms.
 
 The expressivity of a single rule is well defined. However, the expressivity of the whole rule set is harder to define; if we return to the question of central embedding, a CG has much more lightweight task than a generative grammar. The initial tokens, or symbols, come already with a list of alternatives.
 Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''. %This contextual test is regular without question.
@@ -631,7 +626,7 @@ Now, this rule will perform the correct disambiguation for the pronoun, even if 
 all of the rules have only regular contextual tests.
 %none of the rules needs to address anything but a regular phenomenon.
 
-The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or \todo{a? damn indoeuropean languages with your articles} relative pronoun. Furthermore, it does not need to generate only correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
+The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or a relative pronoun. Furthermore, it does not need to generate only correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
 
 This said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
 
