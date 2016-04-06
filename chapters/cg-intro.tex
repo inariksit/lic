@@ -1,3 +1,5 @@
+\def\t#1{\texttt{#1}}
+
 \section{Introduction to CG}
  
 
@@ -407,28 +409,24 @@ schemes. In the present section, we describe the different parameters of orderin
 % There may be several mapping statements for the same morphological feature(s), e.g. ``N NOM''. Mapping statements with more narrowly specified contexts have precedence over more general statements. 
 % In the present implementation of CGP, the mapping statements apply in plain linear order. 
 % \end{quote}
-
+%
 % but \cite{karlsson1995constraint} states on page 17:
-
+%
 % \begin{quote} 
 % Each single statement is true when examined in isolation, either absolutely or with some degree of certainty, depending upon how careful the grammar writer has been. Furthermore, disregarding morphosyntactic mappings, the constraints are \emph{unordered}.
 % \end{quote}
-
+%
 % The execution of the rules depends on the following parameters: strict vs. heuristic ordering, and sequential vs. parallel execution. These parameters may combine freely: strict and sequential, strict and parallel, heuristic and sequential, or heuristic and parallel. 
 Throughout the section, we will apply the rules to the following ambiguous passage:
 
-\begin{verbatim}
-"<what>"
-        "what" determiner
-        "what" pronoun                                        
- "<question>"
-        "question" noun
-        "question" verb
- "<is>"
-        "be" verb
- "<this>"
-        "this" determiner
-\end{verbatim}
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l}
+\t{"<what>"}     &                      &  \t{"<is>"}           & \\
+                 & \t{"what" det}       & &      \t{"be" verb}    \\
+                 & \t{"what" pron}      &                       & \\
+\t{"<question>"} &                      & \t{"<that>"}         & \\
+                 & \t{"question" noun}  & &      \t{"that" det}   \\
+                 & \t{"question" verb}  & &      \t{"that" rel}
+\end{tabular}
 
 \paragraph{Strict vs. heuristic}
 
