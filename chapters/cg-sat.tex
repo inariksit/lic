@@ -157,9 +157,9 @@ Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1
 
 \paragraph{Disambiguation}
 
-Finally, we want to see the model given by the SAT-solver: the disambiguated sentence. We started off with all the variables in place, but did not actually give them values: just required that at least one variable in each cohort must be true.
-In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$. We can see with bare eye that this problem will have a solution; in fact, multiple ones. 
-The verb analysis is removed in the first two columns, as required by the presence of $\laDet$. However, the rule may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in columns 3--4. 
+Finally, we want to see the model given by the SAT-solver: the disambiguated sentence. We started off with all the variables unassigned, and required at least one variable in each cohort to be true.
+In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$. We can see with bare eye that this problem will have a solution; in fact, multiple ones, shown in Figure~\ref{fig:modelsOneRule}.
+The verb analysis is removed in the first two columns, as required by the presence of $\laDet$. However, the implication may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in columns 3--4. 
 We see a third interpretation in column 5: $\laDet \Rightarrow \neg \casaV$ is only an 
 implication, not an equivalence; this means that $\casaV$ may be removed even without 
 the presence of $\laDet$. 
@@ -180,8 +180,7 @@ $$\begin{array}{ c | c | c | c | c}
 \end{figure}
 
 The reader may notice that this is not a particularly exciting result. A standard CG would just do what it is told and remove the verb, not give 5 different interpretations for a single rule.
-
-But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN \ $. This clause, together with the previous one, $\laDet \Rightarrow \neg \casaV$, prohibits combinations \t{det + v} and \t{prn + n}. The disambiguation is as follows:
+But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN \ $. This clause, together with the previous one, $\laDet \Rightarrow \neg \casaV$, prohibits combinations \t{det + v} and \t{prn + n}. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
 
 \begin{figure}[h]
 \centering
@@ -198,7 +197,14 @@ $$\begin{array}{ c | c }
 \label{fig:modelsTwoRules}
 \end{figure}
 
-In contrast, a standard, sequential CG would have just applied the first rule and stopped there. If, later on, the determiner is removed, there is no way to restore the verb. If we add one more rule, \t{REMOVE v IF (1 adj)}, then we will only get the model in column 1 of Figure~\ref{fig:modelsTwoRules}. Notice that none of the rules has targeted the word \la{}; still it has become unambiguous.
+After two rules, we only have two models: one with $\laDet \ \casaN$ and other with $\laPrn \ \casaV$. 
+%This behaviour corresponds to FSIG: 
+In fact, we have accidentally just implemented FSIG \cite{koskenniemi90}: the rules act in parallel, and if the sentence cannot be fully disambiguated, the remaining uncertainty is modelled as a disjunction of all possible combinations of readings.
+In contrast, a sequential CG applies each rule individually, and it cannot handle disjunction; its only operation is to remove\footnote{or add, in CG-3} readings from a cohort. A standard CG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
+
+To finish our FSIG If we add one more rule, \t{REMOVE v IF (1 adj)}, then we will only get the model in column 1 of Figure~\ref{fig:modelsTwoRules}. Notice that none of the rules has targeted the word \la{}; still it has become unambiguous. 
+
+Now, the reader may notice that this is all very nice, but the present thesis is not called ``Analysing FSIG with a SAT-solver''. 
 
  \todo{all the magic that happens in the NODALIDA paper \cite{listenmaa_claessen2015}. Also tell that this is exactly what FSIG does, and what \cite{lager98} does. And that we will do more!}
 
