@@ -401,23 +401,33 @@ The following is not the only possible SAT-encoding to model an ordered executio
 
 \subsubsection{Creating the sentence}
 
-The main difference is that the sentence starts off with all variables assigned $True$. Contrast \ref{eq:allStartTrue} with \ref{eq:atleastOneTrue}; 
+\todo{This is not actually SAT: all variables start as True, and new variables are computed as Boolean expressions, hence there is no search happening.
+But if all variables start as unassigned, then it is a SAT-problem.}
 
-\begin{equation}
-\begin{array}{c}
-\sobrePr \wedge \sobreN \\
-\unaPrn \wedge \unaDet \wedge \unaPrsPThree \wedge \unaPrsPOne \wedge \unaImp \\
-\aproximacionN \\
-\masAdv \wedge \masAdj \\
-\cientificaAdj \wedge \cientificaN \\
-\end{array}
-\label{eq:allStartTrue}
-\end{equation}
+% The main difference is that the sentence starts off with all variables assigned $True$. Contrast \ref{:allStartTrue} with \ref{eq:atleastOneTrue}; 
 
-\noindent At each rule application, we create a new variable for each targeted reading. The new variable is $True$ iff 
+% \begin{equation}
+% \begin{array}{c}
+% \sobrePr \wedge \sobreN \\
+% \unaPrn \wedge \unaDet \wedge \unaPrsPThree \wedge \unaPrsPOne \wedge \unaImp \\
+% \aproximacionN \\
+% \masAdv \wedge \masAdj \\
+% \cientificaAdj \wedge \cientificaN \\
+% \end{array}
+% \label{eq:allStartTrue}
+% \end{equation}
+
+\def\newVar{$\text{\em word}'_\textsc{ RD}$}
+\def\oldVar{$\text{\em word}_\textsc{\,RD}$}
+
+\noindent 
+As described in Section~\todo{write that section}, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
+At each rule application, we create a new variable \newVar for each targeted reading \oldVar.
+The new variable \newVar is $True$ iff 
 
 \begin{tabular}{l l}
-(a) the old variable was $True$, and & (b) the rule cannot apply: this can be because \\
+(a) \oldVar was $True$, and 
+                             & (b) the rule cannot apply: this can be because \\
                                      & ~~~~-- its conditions do not hold, or \\
                                      & ~~~~-- it would remove the last reading.
 \end{tabular}
@@ -430,6 +440,21 @@ The main difference is that the sentence starts off with all variables assigned 
  %          \item applying the rule would remove the last reading.
  %        \end{inparaenum}
  %  \end{inparaenum}
+
+ After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. A sentence vector may look like following after two rules which target verbs and one which targets nouns:
+
+\begin{equation}
+\begin{array}{l @{~\rightarrow~} l}
+1 & \{\sobrePr, \sobre{}'_\n \} \\
+2 & \{\unaPrn, \unaDet, \una{}''_\vPrsPThree, \una{}''_\vPrsPOne, \una{}''_\vImpPThree \} \\
+3 & \{ \aproximacion{}'_\n \} \\
+% \masAdv \wedge \masAdj \\
+% \cientificaAdj \wedge \cientificaN \\
+\end{array}
+\label{eq:after3Rules}
+\end{equation}
+
+
 For subsequent rule applications, only the variables from the latest round are accessible: the $n^{th}$ rule may only access the variables that are created, or left unchanged, by the $n-1^{th}$ rule. 
 
 We treat ``{\sc select} target'' rules as ``{\sc remove} all but target'', and create new variables for everything but the target. Recall that all the variables start off as true, so we need no changes in the variables to be selected. The general procedure for rules with a single condition is explained in Section~\todo{write that section}; here we show the process for all rule types, as in the unordered scheme.
