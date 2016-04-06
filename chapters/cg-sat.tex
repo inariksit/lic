@@ -264,7 +264,7 @@ Recall the heuristic rule order from Section~\ref{sec:ordering}. The heuristic o
 For an unordered scheme, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
 Answering this is beyond the means of previous FSIG engines \todo{is this so?}, but with a SAT-solver, we can answer this question. 
 
-\paragraph{Maximisation}
+\paragraph{Maximisation} aka. ``FSIG as a MaxSAT-problem''
 
 Each rule application to a concrete cohort produces a clause, 
  which is a conjunction of clauses, and in an ideal case, the whole formula is satisfiable. However, if the whole formula is unsatisfiable, we may still ask for an assignment that satisfies the maximum number of the clauses. 
@@ -273,7 +273,43 @@ rules would make a large set of clauses that fit together, and the
 inapplicable rule would not ``fit in''.
 In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
 
+This corresponds loosely to the common design pattern in
+CGs, where there is a number of rules with the same target, ordered
+such that more secure rules come first,
+with a catch-all rule with no condition as the last resort, to be
+applied if none of the previous has fired.
+The order-based heuristic in the traditional CG is replaced by a more
+holistic behaviour: if the rules conflict, discard the one that seems
+like an outlier.
 
+Assuming our rules are \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}, the revised algorithm goes as follows:
+
+\begin{enumerate}
+\item Apply \t{REMOVE v IF (-1 det)}
+ \begin{itemize}
+    \item Create a clause: $\laDet \Rightarrow \neg \casaV$
+ \end{itemize}
+\item Apply \t{REMOVE v IF (1 adj)} 
+ \begin{itemize}
+    \item Create a clause: $\grandeAdj \Rightarrow \neg \casaV$
+ \end{itemize}
+\item Apply \t{REMOVE n}
+ \begin{itemize}
+    \item Create a clause: $\neg \casaN$
+ \end{itemize}
+
+\item Solve with all clauses:
+  $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
+      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
+      \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
+      \ob{\neg \casaN}^{\t{REMOVE n}} \}$
+\item No solution for all clauses: try to find a solution that satisfies maximally many clauses.
+\end{enumerate}
+
+If a rule matches multiple cohorts, but causes a conflict in only one of them---say, we have another potential noun in the sentence, but it is not ambiguous with a verb, this is no problem. Since each instance of a rule application creates a clause, we can discard only the conflicting instances: we disallow \t{REMOVE n} from applying to $\casaN$, not globally.
+
+
+\todo{What is SAT+ actually doing? Some theory here.}
 
 
 \subsection{Ordered scheme}
@@ -285,7 +321,7 @@ We have different options how to handle order.
 \paragraph{Prefix of rules} We keep the parallel base: the cohorts are encoded as vectors of variables, and the rules form implications at each application.
 The benefits of parallel execution still hold: the three rules, which all target \emph{casa} may still disambiguate \emph{la}, without \emph{la} ever being the target.
 Now, we establish the order by introducing the clauses to the SAT-solver one by one. 
-Assuming our rules are \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}, the revised algorithm goes as follows:
+Again, we have the same rule set: \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}. Now the procedure goes as follows:
 
 \begin{enumerate}
 \item Apply \t{REMOVE v IF (-1 det)}
@@ -316,74 +352,26 @@ Assuming our rules are \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{R
  \end{itemize}
 \end{enumerate}
 
-If a rule matches multiple cohorts, but causes a conflict in only one of them---say, we have another potential noun in the sentence, but it is not ambiguous with a verb, this is no problem. Since each instance of a rule application creates a clause, we can discard only the conflicting instances: we disallow \t{REMOVE n} from applying to $\casaN$, not globally.
-
-
-, but starting with a prefix of all rules.
-If there is a solution for the first $n$ rules, but adding $n+1$ to the mix causes a conflict, we assume that the earliest rules are correct, and simply ignore the $n+1^{th}$ rule, then try with $n+2^{th}$.
+The SAT-solver starts out with a prefix of rules, attempts to solve, and if it succeeds, only then it commits to the latest rule.
+Similarly to the maximisation-based scheme, we create a clause for each instance of the rule application, and in the case of a conflict, we can only discard the clause targeting the offending cohort, not the whole sentence.
 
 
 
-\paragraph{State of the sentence} For the second option, we give up the parallel encoding. Like in \cite{lager_nivre01}, but if all the variables start off as True, it's not a SAT-problem, just a logical reconstruction, and done in 2001.
+\paragraph{State of the sentence} aka. ``CG as a task of manipulating Boolean expressions''
+
+For the second option, we give up the parallel encoding. Like in \cite{lager_nivre01}, but if all the variables start off as True, it's not a SAT-problem, just a logical reconstruction, and done in 2001.
 
 This scheme is much closer to the standard, sequential CG.
+
+\todo{Does any of the flipping happen here?}
+
 (Spoiler: we will use a variant of this later.)
 
 
-% We add the following rules:
 
-% \begin{itemize}
-% \item [] \texttt{REMOVE prn IF (1 n) ;} \\
-%              \texttt{REMOVE det IF (1 v) ;}
-% \end{itemize}
+\subsection{Main differences between SAT-CG/FSIG/Lager98-almost-CG and good old sequential CG}
 
-% Standard CG will apply one  of the rules to the word \emph{la}; 
-% either the one that comes first, or by some other heuristic. 
-% The other rule will not fire, because it would remove the last
-% reading. 
-% If we use the cautious mode (\texttt{1C n} or \texttt{1C v}), which
-%  requires the word in the context to be fully disambiguated, 
-% neither of the rules will be applied.
-% In any case, all readings of \emph{casa} are left untouched by these rules.
-
-% The SAT solver performs a search, 
-% and starts building possible models that satisfy both constraints. 
-% In addition to the given constraints, we have default rules to emulate
-% the CG principles: an analysis is true if no rule affects it,
-% and at least one analysis for each word is true---the notion of
-% ``last'' is not applicable.
-
-% With these constraints, we get two solutions. The interaction of the
-% rules regarding \emph{la}  disambiguates the part of speech of
-% \emph{casa} for free, and the order of the rules does not matter. 
-
-% \begin{enumerate}
-% \item [\texttt{1)}]
-% \begin{verbatim}
-% "<la>"
-%         "el" det def f sg
-% "<casa>"
-%         "casa" n f sg
-% \end{verbatim}
-% \item [\texttt{2)}]
-% \begin{verbatim}
-% "<la>"
-%         "lo" prn p3 f sg
-% "<casa>"
-%         "casar" v pri p3 sg
-%         "casar" v imp p2 sg
-% \end{verbatim}
-% \end{enumerate} 
-
-% Without more context or additional rules we cannot fully disambiguate the passage,
-% but unlike with standard CG, we get only legal combinations in one solution.
-
-
-
-\noindent The most important differences between the traditional and
-the SAT-based approach are described in the following sections.
-
-\subsection{Rules disambiguate more}
+\paragraph{Rules disambiguate more}
 Considering our example phrase and rules, the standard CG implementation
 can only remove readings from the target word (\texttt{prn} or
 \texttt{det}). The SAT-based implementation interprets the rules as
@@ -391,8 +379,7 @@ can only remove readings from the target word (\texttt{prn} or
 
 This behaviour is explained by simple properties of logical formulae.
 When the rules are applied to the text, they are translated into
-implications: \texttt{REMOVE prn IF (1 n)} becomes
- \emph{casa}\texttt{<n>} $\Rightarrow$ $\neg$\emph{la}\texttt{<prn>},
+implications: \texttt{REMOVE prn IF (1 n)} becomes $\casaN \Rightarrow \neg \laPrn$,
  which reads ``if the \texttt{n} reading for \emph{casa} is true, then
  discard the \texttt{prn} reading for \emph{la}''.
 Any implication $a\,\Rightarrow\,b$ can be represented as a disjunction
@@ -400,9 +387,9 @@ $\neg a\,\vee\,b$; intuitively, either the antecedent is false
 and the consequent can be anything, or the consequent is true and the
 antecedent can be anything.
 Due to this property, our rule translates into the disjunction 
-$\neg$\emph{casa}\texttt{<n>} $\vee$ $\neg$\emph{la}\texttt{<prn>},
+$\neg\casaN  \vee  \neg \laPrn$,
 which is also equivalent to another implication, 
- \emph{la}\texttt{<prn>} $\Rightarrow$ $\neg$\emph{casa}\texttt{<n>}.
+$\laPrn \Rightarrow \neg \casaN$.
 This means that the rules are logically flipped: \texttt{REMOVE prn IF
   (1 n)} translates into the same logical formula as  \texttt{REMOVE n
   IF (-1 prn)}. 
@@ -420,18 +407,9 @@ taking its turn to be the target. % of removal or selection.
 
 %Rules with more conditions translate into many rules; rules with negation become complements (\texttt{(*)-X} for \texttt{NOT X}). Rules which require the condition to be unambiguously tagged, don't have an equivalent flip in the standard CG.
 % We did not expect much practical benefits, save for realising that some rules are bad by having to think further what it implies,
-%Out of interest, we manually flipped a small grammar and tested it against the original.
-% \todo{The results show  }
-%\begin{itemize}
-%\item []          \texttt{SL Inf IF (-2 V-MOD) (-1 "not");} \\
-%$\rightarrow$\texttt{SL V-MOD   IF (1 "not") (2 INF);} \\
-%$\rightarrow$\texttt{SL "not" IF (-1 V-MOD) (1 Inf);}
-%\item []           \texttt{SL Foo IF (NOT 1 Bar)} \\
-%$\rightarrow$\texttt{SL (*)-Foo if (-1 Bar)}
-%\end{itemize}
 
 
-\subsection{Cautious context is irrelevant}
+\paragraph{Cautious context is irrelevant}
 % Rather than waiting for a word to get disambiguated, the SAT solver starts by 
 % making assumptions (e.g. ``\emph{casa} is a noun'') and working under them,
 % discarding the assumption if it doesn't lead to a model that satisfies
@@ -447,49 +425,11 @@ In SAT-CG, the notion of cautious context is irrelevant. Instead of
 removing readings immediately,  each rule generates a  number of
 implications, and the SAT solver tries to find a model that will satisfy them. 
 
-
-Let us continue with the earlier example. 
-We can add a word to the input:
-\begin{itemize}
-\item [] \emph{la casa grande} `the big house'
-\end{itemize}
-and a rule that removes verb reading, if the word is followed by an adjective:
-\begin{itemize}
-\item [] \texttt{REMOVE v IF (1 adj) ;}
-\end{itemize}
-
-% The SAT solver has already the clauses produced by the previous rules.
-% \emph{casa}\texttt{<n>} $\Rightarrow$ $\neg$\emph{la}\texttt{<prn>}
-% and   \emph{casa}\texttt{<v>} $\Rightarrow$ $\neg$\emph{la}\texttt{<det>}
-The new rule adds the implication 
-\emph{grande}\texttt{<adj>} $\Rightarrow \ \neg$\emph{casa}\texttt{<v>}, 
-which will disambiguate  \emph{casa} to a noun. 
-As the status of \emph{casa} is resolved, the SAT solver can now
-discard the model where \emph{casa} is a verb and \emph{la} is a
-pronoun
-%---all these decisions are connected---
-and we get a unique solution with \texttt{det n adj}.
-% Now \emph{casa}\texttt{<n>} is true, so \emph{la}\texttt{<prn>} must be false. 
-%Because \emph{la}\texttt{<prn>} is false,  \emph{casa} cannot
-% be a \texttt{v}, and we get a unique solution with \texttt{det n adj}.
-
-Contrast this with the behaviour of the standard CG.
-With the new rule, standard CG will also remove the verb reading from \emph{casa}, 
-but it is in no way connected to the choice for \emph{la}. It all
-depends on the order of the two rules; if the \texttt{det} reading of
-\emph{la} is removed first, then we are stuck with that choice.
-If we made the first rules cautious, that is, keeping the determiner
-open until \emph{casa} is disambiguated, then we get the same
-result as with the SAT solver.
-Ideally, both ways of grammar writing should yield similar results;
-traditional CG rules are more imperative, and SAT-CG
-rules are more declarative.
-
-% The SAT-based approach only removes readings after it has enough
-% evidence to do that. From the grammar writer perspective, this removes
-% a burden of having to decide whether the rule should be cautious or
-% not---the SAT solver will only take action the surrounding context
-% supports the decision.
+The SAT-based approach only removes readings after it has enough
+evidence to do that. From the grammar writer perspective, this removes
+a burden of having to decide whether the rule should be cautious or
+not---the SAT solver will only take action the surrounding context
+supports the decision.
 
 % \todo{Unordered rules: also not applicable anymore to apply rules
 % iteratively; there's no ``this rule doesn't fire now but will after
@@ -498,69 +438,6 @@ rules are more declarative.
 % peacefully to the same input.}
 
 
-\subsection{Rules can be unordered}
-\label{sec:unord}
-
-As hinted by the previous property, the SAT solver does not need a fixed
-order of the rules.
-Applying a rule to a sentence produces a number of clauses,
-and those clauses are fed into the SAT solver.
-However, in the unordered scheme, some information is lost: the
-following rule sets would be treated identically, whereas in the
-traditional CG, only the first would be considered as a bad order.
-
-\begin{itemize}
-\item [\texttt{1)}] \texttt{SELECT v ;} \\
-         \texttt{REMOVE v IF (-1 det) ;} 
-\item [\texttt{2)}] \texttt{REMOVE v IF (-1 det) ;} \\
-         \texttt{SELECT v ;}
-\end{itemize}
-
-Without order, both of these rule sets will conflict, if applied to an
-input that has sequence \texttt{det v}.
-The SAT solver is given clauses that tell to select a verb and remove a
-verb, and it cannot build a model that satisfies all of those clauses.
-To solve this problem, we create a variable for every instance of rule application, and request a solution where maximally many of these variables are true.
-If there is no conflict, then the maximal solution is one where all of
-these variables are true; that is, all rules take action.
-
-
-In case of a conflict, the SAT solver makes it possible to discard only
-minimal amount of rule applications. Continuing with the example,
-it is not clear which instances would be discarded, but if the rules
-were part of a larger rule set, and in the context the \textsc{remove} rule was
-the right one to choose, it is likely that the interaction between the desired
-rules would make a large set of clauses that fit together, and the
-\textsc{select} rule would not fit in, hence it would be discarded. 
-
-This corresponds loosely to the common design pattern in
-CGs, where there is a number of rules with the same target, ordered
-such that more secure rules come first,
-with a catch-all rule with no condition as the last resort, to be
-applied if none of the previous has fired.
-The order-based heuristic in the traditional CG is replaced by a more
-holistic behaviour: if the rules conflict, discard the one that seems
-like an outlier.
-
-
-We can also emulate order with SAT-CG. To do that, we enter clauses
-produced by each rule one by one, and assume the solver state reached
-so far is correct. If a new clause introduces a conflict with
-previous clauses, we discard it and move on to the next rule.
-By testing against gold standard, we see that this scheme works better
-with ready-made CGs, which are written with ordering in mind.
-It also runs slightly faster than the unordered version.
-\\
-
-
-
-\noindent These three features influence the way rules are written. 
-We predict that less rules are needed; whether this holds in the order
-of thousands of rules remains to be tested. On the one hand, getting rid
-of ordering and cautious context could ease the task of the grammar
-writer, since it removes the burden of estimating the best sequence of
-rules and whether to make them cautious. On the other
-hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
 
 
 \section{Experiments}
@@ -599,34 +476,6 @@ by  VISL CG-3 achieves F-score of 82.6 \%, ordered SAT-CG 81.5 \%  and
 unordered SAT-CG 79.2 \%. 
 We did not test with other languages or text genres due to the lack of
 available gold standard.
-%This result suggests that that when running grammars that are written
-%with the traditional CG in mind, SAT-CG loses with both ordering
-%strategies, but emulating order fares better.
-
-We also tested whether SAT-CG outperforms traditional CG with a
-small rule set. With our best performing and most concise
-grammar\footnote{\url{https://github.com/inariksit/cgsat/blob/master/data/spa\_smallset.rlx}}
-of only 19 rules, both SAT-CG and VISL CG-3  achieve a F-score of
-around 85 \%. This experiment is very small and might be explained by
-overfitting or mere chance, but it seems to indicate that rules that
-work well with SAT-CG are also good for traditional CG.
-% It was possible to attain a rule set for which the unordered SAT-CG
-% works better (\textless0.5 \%), but it required trying
-% subsequences of the 19-rule set in a brute force manner---this hardly
-% presents any real life use case.
-
-
-
-% Similar patterns were observed with small (\textless{}20) rule sets
-% written by the authors; depending on the subset, SAT-CG and VISL CG-3 had
-% a difference of at most $\Mypm$ 1.5 \%. 
-% Introducing rules one by one up to 19, the
-% performance improved in a very similar rate, with less than 0.5 \%
-% difference between the systems at each new rule.
-% We did not evaluate on other languages or text genres, due to lack of suitable test data.
-
-% Additional tests could include plugging SAT-CG into Apertium
-% translation pipeline, and comparing the translation quality.
 
 \subsection{Execution time}
 
@@ -670,8 +519,43 @@ proof-of-concept implementation with no optimisations.
 
 \subsection{Effect on grammar writing}
 
-Wrote a small (20-rule) grammar with SAT-CG in mind.  
-It still performs almost the same (+- 1%) as VISL CG-3.  
+Throughout the implementation of SAT-CG, we have predicted that the more declarative features would influence the way rules are written. 
+Lacking an actual CG writer, it is hard to say whether this prediction holds or not.
+We predict that less rules are needed; whether this holds in the order of thousands of rules remains to be tested. On the one hand, getting rid of ordering and cautious context could ease the task of the grammar writer, since it removes the burden of estimating the best sequence of rules and whether to make them cautious. On the other hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
+
+
+The results in Table~\todo{make such table} suggests that that when running grammars that are written
+with the traditional CG in mind, SAT-CG loses with both ordering
+strategies, but emulating order fares better.
+
+We also tested whether SAT-CG outperforms traditional CG with a
+small rule set. With our best performing and most concise
+grammar\footnote{\url{https://github.com/inariksit/cgsat/blob/master/data/spa\_smallset.rlx}}
+of only 19 rules, both SAT-CG and VISL CG-3  achieve a F-score of
+around 85 \%. This experiment is very small and might be explained by
+overfitting or mere chance, but it seems to indicate that rules that
+work well with SAT-CG are also good for traditional CG.
+It was possible to attain a rule set for which the unordered SAT-CG
+works better (\textless0.5 \%), but it required trying
+subsequences of the 19-rule set in a brute force manner---this hardly
+presents any real life use case.
+
+
+Out of interest, we also manually flipped a small grammar and tested it against the original.
+The personal experiences of doing this was that ``wow, people don't really mean what they write''. Like if you're drawing a portrait, try to flip your paper upside down or look at it as a mirror image; it is easier to see if the ears are wonky or the eyes are all over the place.
+
+
+% Similar patterns were observed with small (\textless{}20) rule sets
+% written by the authors; depending on the subset, SAT-CG and VISL CG-3 had
+% a difference of at most $\Mypm$ 1.5 \%. 
+% Introducing rules one by one up to 19, the
+% performance improved in a very similar rate, with less than 0.5 \%
+% difference between the systems at each new rule.
+% We did not evaluate on other languages or text genres, due to lack of suitable test data.
+
+% Additional tests could include plugging SAT-CG into Apertium
+% translation pipeline, and comparing the translation quality.
+
 
 Personal experiences about transparency (or lack thereof) and expressiveness.
 
@@ -684,68 +568,19 @@ sentence as input.
 As a downside, there is no way to know which part comes directly from the
 raw input and which part from applying previous rules.
 
-SAT-CG  can start disambiguating, even if none of the rules is able to act on its own. 
-
-
-\section{Applications and future work}
-\label{sec:apps}
-%As demonstrated in Section~\ref{sec:eval}, our implementation is not
-%competitive with the state of the art. 
-%VISL CG-3 is efficient, reliable and widely used, and
-Instead of trying to compete with the state of the art, we plan to use SAT-CG for grammar analysis\footnote{We thank Eckhard Bick for the idea.}.
-There has been work on automatic tuning of hand-written CGs
-\cite{bick2013tuning}, but to our knowledge no tools to
-search for inconsistencies or suboptimal design. %in order to point it out to the grammar writer.
-
-
-A conflict in an ordered scheme can be defined as 
-a set of two or more rules, such that applying the first makes the
-next rules impossible to apply, regardless of the input.
-We can reuse the example from Section~\ref{sec:unord}:
-
-\begin{itemize}
-\item [] \texttt{SELECT v ;} \\
-         \texttt{REMOVE v IF (-1 det) ;}
-\end{itemize}
-
-The first rule selects the verb reading everywhere and removes
-all other readings, leaving no chance for the second rule to take action.
-If the rules are introduced in a different order, there is no
-conflict: the \textsc{remove} rule would not remove verb readings from all
-possible verb analyses, so there is a possibility for the \textsc{select} rule
-to fire.
-
-
-Ordered SAT-CG can be used to detect these conflicts without any
-modifications, as a side effect of its design. 
-After applying each rule, it stores the clauses
-produced by the rule and commits to them.
-In case of a conflict, the program detects the particular rule that 
-violates the previous clauses, with the sentence
-where it is applied. Thus we get feedback which rule fails, and on which
-particular word(s).
-
-% This conflict solving can be done per section, or for the whole grammar. 
-% In case of section-based application, we run each section on the
-% input, and give the output as a fresh input to the new section, discarding
-% all clauses. Alternatively, we can let the rules interact with each
-% other regardless of the section boundaries.
-
-Unordered SAT-CG with maximisation-based conflict solving is not
-suitable for this task: the whole definition of conflict depends on
-ordering, and the unordered scheme deliberately loses this information.
-On a more speculative note, an unordered formalism such as Finite-State
-Intersection Grammar \cite{koskenniemi90} might benefit from the
-maximisation-based technique in conflict handling.
-
-
-
-\section{Conclusions}
+In the examples, we have overlooked the C operator, and made a lot of noise how two rules without C can work together and who needs the damn C.
+But SAT-CG is perfectly fine with C: it can start disambiguating, even if none of the rules is able to act on its own. 
 
 
 
 
-Interesting alternative for a CG engine, but loses in practicality: performance & lack of transparency for grammar writers.  
+
+\section{Summary}
+
+In this section, we have accidentally reinvented FSIG, and then spent a lot of time trying to convince ourselves that it's still okay.
+
+
+Interesting alternative for a CG engine, but loses in practicality: performance and lack of transparency for grammar writers.  
 As a side note, using maximisation to solve conflicts could be of interest in a FSIG implementation.
 
 There is potential in the ``wait before acting'' property. No decision is lost---we can use SAT-encoding to analyse CGs, rather than execute them. Next chapter will be all about that!
