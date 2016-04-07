@@ -37,28 +37,45 @@ Another possible assignment would be $\{\ant=0, \bat=0, \cat=0, \dog=0, \emu=1, 
 Some problems have a single solution, some problems have multiple solutions, and some are unsatisfiable, i.e. no combination of assignments can make the formula true.
 
  \begin{figure}[t]
-  $$\begin{array}{r | r @{~} l | l @{\quad \wedge \quad } l @{\quad \wedge \quad} l }
-   \textbf{Animal}
-                & \multicolumn{2}{l}{\textbf{Constraint}} 
-                                        & \multicolumn{3}{l}{\textbf{Constraint in conjunctive normal form}} \\ \hline
+  % $$\begin{array}{r | r @{~} l | l @{\quad \wedge \quad } l @{\quad \wedge \quad} l }
+  %  \textbf{Animal}
+  %               & \multicolumn{2}{l}{\textbf{Constraint}} 
+  %                                       & \multicolumn{3}{l}{\textbf{Constraint in conjunctive normal form}} \\ \hline
 
-    \ant        & \ant &\Rightarrow \neg{}\cat \wedge \neg{}\dog \wedge \neg{}\fox 
-    								    & \neg{}\ant \vee \neg{}\cat 
-                                        & \neg{}\ant \vee \neg{}\dog 
-                                        & \neg{}\ant \vee \neg{}\fox \\
+  %   \ant        & \ant &\Rightarrow \neg{}\cat \wedge \neg{}\dog \wedge \neg{}\fox 
+  %   								    & \neg{}\ant \vee \neg{}\cat 
+  %                                       & \neg{}\ant \vee \neg{}\dog 
+  %                                       & \neg{}\ant \vee \neg{}\fox \\
 
+  %  \bat         & \bat &\Rightarrow \neg{}\ant \wedge \neg{}\emu
+  %  								        & \neg{}\bat \vee \neg{}\ant 
+  %                                       & \multicolumn{2}{l}{\neg{}\bat \vee \neg{}\emu} \\
+  %  \cat         & \cat &\Rightarrow \bat & \multicolumn{3}{l}{\neg{}\cat \vee \bat} \\
+  %  \dog         & \dog &\Rightarrow \cat & \multicolumn{3}{l}{\neg{}\dog \vee \cat} \\
+  %  \emu         & \emu &\Rightarrow \neg{}\ant \wedge \neg{}\bat
+  %  										& \neg{}\emu \vee \neg{}\ant 
+  %                                       & \multicolumn{2}{l}{\neg{}\emu \vee \neg{}\bat} \\
+  %  \fox         & \fox &\Rightarrow \neg (\bat \wedge \emu) 
+  %  									    & foo 
+  %  									    & bar
+  %  									    & baz \\
+  %
+  % \end{array}$$ \\
+
+    $$\begin{array}{r | r @{~} l | l }
+   \textbf{Agent}
+                & \multicolumn{2}{l}{\textbf{Constraint}} & \textbf{Explanation} \\ \hline
+    \text{\em you} & \multicolumn{2}{l}{\ant \vee \bat \vee \cat \vee \dog \vee \fox} & \text{``You want to buy at least one pet.''} \\
+
+    \ant        & \ant &\Rightarrow \neg{}\cat \wedge \neg{}\dog \wedge \neg{}\fox & \text{``Ant does not like four-legged animals.''} \\
    \bat         & \bat &\Rightarrow \neg{}\ant \wedge \neg{}\emu
-   								        & \neg{}\bat \vee \neg{}\ant 
-                                        & \multicolumn{2}{l}{\neg{}\bat \vee \neg{}\emu} \\
-   \cat         & \cat &\Rightarrow \bat & \multicolumn{3}{l}{\neg{}\cat \vee \bat} \\
-   \dog         & \dog &\Rightarrow \cat & \multicolumn{3}{l}{\neg{}\dog \vee \cat} \\
+                          & \text{``Bat does not like herbivores.''} \\ 
+   \cat         & \cat &\Rightarrow \bat & \text{``Cat wants to live with bat.''} \\
+   \dog         & \dog &\Rightarrow \cat & \text{``Dog wants to live with cat.''} \\
    \emu         & \emu &\Rightarrow \neg{}\ant \wedge \neg{}\bat
-   										& \neg{}\emu \vee \neg{}\ant 
-                                        & \multicolumn{2}{l}{\neg{}\emu \vee \neg{}\bat} \\
+                                         &  \text{``Emu does not like small animals.''} \\
    \fox         & \fox &\Rightarrow \neg (\bat \wedge \emu) 
-   									    & foo 
-   									    & bar
-   									    & baz \\
+                                         & \text{``Fox cannot live with two winged animals.''} 
 
   \end{array}$$ \\
 
@@ -67,19 +84,29 @@ Some problems have a single solution, some problems have multiple solutions, and
 \end{figure}
 
 
-
+% I actually like the CNF representation: it makes the problem look more low-level and simple. 
+% I hope it would make the point "look, we reduce a complex problem into a simple format."
 
 \paragraph{History and applications}
 
-SAT-solving as a research area dates back to 1970s. Throughout its history, it has been of interest for both theoretical and practical purposes. 
-SAT is a well-known NP-complete \cite{cook1971complexity}. This means that we can express any problem in the complexity class NP, such as prime number factorisation, as a SAT-instance, and use a SAT-solver to solve it.
-As we know, problems in NP have an exponential worst-case complexity. However, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics \cite{claessen2009satpractice}.
+SAT-solving as a research area dates back to 1970s.
+Throughout its history, it has been of interest for both theoretical and practical purposes. 
+SAT is a well-known example of an \emph{NP-complete problem} \cite{cook1971complexity}: for all such problems, a potential solution can be \emph{verified} in polynomial time, but there is no known algorithm that would \emph{find} such solution, in general case, in sub-exponential time.
+This means that we can express any NP-complete problem as a SAT-instance, and use a SAT-solver to solve it.
+Think of tasks such as job scheduling, where jobs are scheduled to different actors with minimal overhead---$x$ must be completed before $y$ can start, and $z$ must run constantly, but not all actors can perform all jobs. 
+%This kind of optimisation is going on constantly in our computers, cars.
+Nevertheless, all these problems can be reduced into the same representation as the animals in the shop: 
+the massive effort of an operating system---or an autopilot---can be expressed as a set of simple disjunctions, just like $\neg\bat \vee \neg\emu$.
 
-
-Since the 2000s, SAT-solving is widely used in practical applications \cite{marques_silva2010}. Much of the SAT research in the last two decades has been devoted to heuristic solving algorithms and more efficient ways of encoding various real-life problems into SAT.
-One of the biggest success stories for SAT application is model checking \todo{cite}, used in software and hardware verification. In addition, SAT has been used in domains such as computational biology \todo{cite} and \todo{example}.
-
-What kind of problems could benefit from an implementation in SAT?
-Formulating a decision problem in SAT is an attractive approach: instead of developing search heuristics independently, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
+%Since the 2000s, SAT-solving is widely used in practical applications \cite{marques_silva2010}. 
+The first decades of SAT-research was concentrated on the theoretical side, with little practical applications: 
+after all, a difficult problem must be slow to solve, regardless of the packaging? 
+However, there is a difference between a general case, where the algorithm must be prepared for any input, and an ``easy case'', where we can expect some helpful properties from the input.
+Think of a sorting algorithm: in the general case, it is given truly random lists, and in the ``easy case'', it mostly gets lists with some kind of structure, such as half sorted, reversed, or containing bounded values. The general time complexity of sorting is still $O(n\ log\, n)$, but arguably, the easier cases can be expected to behave much faster, and we can even design heuristic sorting algorithms that exploit those properties.
+Analogously, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics. 
+Much of the SAT research in the last two decades has been devoted to optimising the solving algorithms, and finding more efficient ways of encoding various real-life problems into SAT.
+This development has led to an increasing amount of use cases since the 2000s \cite{claessen2009satpractice}.
+One of the biggest success stories for SAT application is model checking \todo{cite}, used in software and hardware verification. In addition, SAT has been used in domains such as computational biology \todo{cite}, AI \todo{cite} and \todo{examples}.
+Formulating a decision problem in SAT is an attractive approach: instead of developing search heuristics for each problem independently, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
 
 % Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
