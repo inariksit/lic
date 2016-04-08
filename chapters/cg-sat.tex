@@ -46,9 +46,9 @@ Thanks to these advances, we were able to revisit the idea and develop it furthe
 
 
 The content in this chapter is based on \cite{listenmaa_claessen2015}.
-We include evaluation for three schemes: the original unordered, the original ordered, and the updated ordered.
-Other changes to the content are just added detail.
-
+As in the original paper, we present a translation of CG rules into logical formulas, and show how to encode it into a SAT-problem.
+This work is implemented as an open-source software SAT-CG\footnote{\url{https://github.com/inariksit/cgsat}}. It uses the high-level library SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is based on MiniSAT \cite{een04sat}.
+We evaluate SAT-CG against the state of the art, VISL CG-3.
 
 
 \section{Previous work: CG in logic}\label{encoding-in-logic}
@@ -318,15 +318,15 @@ This problem is known as Max-SAT \todo{cite}, and it is reducible to SAT; thus, 
 \subsection{Ordered scheme}
 \label{sec:orderedScheme}
 
-In the following, we show two variations for emulating order.
-In the first one, we show a modification to the parallel scheme, 
+In the following, we show a modification to the parallel scheme, 
 where the clauses are added to the formula incrementally, 
 making sure that each new clause fits with the previously added.
-In the second one, we abandon the parallel scheme, and use \todo{}.
+%This allows us to emulate order, but still keep the benefits from the parallel
+We contrast this with an alternative scheme; one that will be used in Chapter~\ref{chapterCGana}.
 
 
 
-\paragraph{Prefix of rules} We keep the parallel base: the cohort vectors are not manipulated between the rule applications, thus the 100\textsuperscript{th} rule still accesses the same variables as the first rule.
+\paragraph{Adding the rules in order} We keep the parallel base: the cohort vectors are not manipulated between the rule applications, thus the 100\textsuperscript{th} rule still accesses the same variables as the first rule.
 %the cohorts are encoded as vectors of variables, and the rules form implications at each application.
 This means that all the benefits of parallel execution still hold: the three rules, which all target \emph{casa} may still disambiguate \emph{la}, without \emph{la} ever being the target.
 
@@ -367,8 +367,7 @@ Similarly to the maximisation-based scheme, we create a clause for each instance
 
 
 
-\paragraph{State of the sentence} aka. ``CG as a task of manipulating Boolean expressions''
-
+\paragraph{Modelling the state of the sentence} 
 For the second option, we abandon the parallel encoding, and return to the semantics of good old sequential CG: rule application takes effect immediately, is irreversible, and only allows changes in target.
 To present this scheme, we start from something that is \emph{not} a SAT-problem: namely, the translation into logic by Lager and Nivre \cite{lager_nivre01}.
 
@@ -481,6 +480,9 @@ We include evaluation for three schemes: the original unordered, the original or
 
 
 
+\def\satcgMax{SAT-CG\textsubscript{Max}}
+\def\satcgOrd{SAT-CG\textsubscript{Ord}}
+
 \subsection{Performance against VISL CG-3}
 
 
@@ -503,14 +505,12 @@ available gold standard.
 The worst-case complexity of SAT is exponential, whereas the standard
 implementations of CG are polynomial, but with advances in SAT solving
 techniques, the performance in the average case in practice is more feasible than in the previous works done in 90s--00s.
-We used the open-source SAT solver MiniSat \cite{een04sat}.
-
 
 We tested the performance by parsing Don Quijote (384,155 words) with
 the same Spanish grammars as in the previous experiment. 
 Table~\ref{table:time} shows execution times compared to VISL CG-3;
-SAT-CG\textsubscript{Max} is the parallel scheme with maximisation and
-SAT-CG\textsubscript{Prefix} is the parallel scheme where rules are introduced one by one.
+\satcgMax is the parallel scheme with maximisation and
+\satcgOrd is the parallel scheme where rule applications are introduced one by one.
 % For both systems, the number of rules in the grammar affects the performance more than the word count.
 From the SAT solving side, maximisation is the most costly operation. 
 Emulating order is slightly faster, likely because the maximisation problems are smaller.
@@ -525,16 +525,18 @@ that there are other reasons for the worse performance.
 This is to be expected, as SAT-CG is currently just a naive
 proof-of-concept implementation with no optimisations.
 
+
+
 \begin{table}
   \centering
-  \begin{tabular}{|c|c|c|c|}
+  \begin{tabular}{ c | c | c | c }
      \hline
-     \textbf{\# rules} &  \textbf{SAT-CG\textsubscript{U}} & \textbf{SAT-CG\textsubscript{O}} & \textbf{VISL CG-3} \\ \hline
-      19   & 39.7s &  22.1s   & 4.2s\\ %\hline
-      99   & 1m34.1s & 1m14.9s & 6.1s \\ %\hline
-      261  & 2m54.1s & 2m31.6s & 10.7s \\ \hline
+     \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
+      19   & 39.7s &  22.1s   & 4.2s\\ 
+      99   & 1m34.1s & 1m14.9s & 6.1s \\ 
+      261  & 2m54.1s & 2m31.6s & 10.7s \\ 
   \end{tabular}
-  \caption{Execution times for 384,155 words.}
+  \caption{F-scores and execution times for 384,155 words.}
   \label{table:time}
 \end{table}
 
@@ -607,8 +609,7 @@ Interesting alternative for a CG engine, but loses in practicality: performance 
 As a side note, using maximisation to solve conflicts could be of interest in a FSIG implementation.
 
 There is potential in the ``wait before acting'' property. No decision is lost---we can use SAT-encoding to analyse CGs, rather than execute them.
-As hinted in Section~\ref{sec:orderedScheme}, we will ultimately combine the CG semantics of rule application with the uncertainty ``which analyses did we start with''. 
+As hinted in Section~\ref{sec:orderedScheme}, we will ultimately combine the CG semantics of unambiguous rule application, and leave the uncertainty for the question ``which analyses did we start with?''.
 
-Let us start the next chapter.
 
 
