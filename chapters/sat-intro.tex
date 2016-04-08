@@ -93,7 +93,8 @@ SAT-solving as a research area dates back to 1970s.
 Throughout its history, it has been of interest for both theoretical and practical purposes. 
 SAT is a well-known example of an \emph{NP-complete problem} \cite{cook1971complexity}: for all such problems, a potential solution can be \emph{verified} in polynomial time, but there is no known algorithm that would \emph{find} such solution, in general case, in sub-exponential time.
 This means that we can express any NP-complete problem as a SAT-instance, and use a SAT-solver to solve it.
-Think of tasks such as job scheduling, where jobs are scheduled to different actors with minimal overhead---$x$ must be completed before $y$ can start, and $z$ must run constantly, but not all actors can perform all jobs. 
+The class includes problems which are much harder than the animal example:
+think of tasks such as job scheduling, where jobs are scheduled to different actors with minimal overhead---$x$ must be completed before $y$ can start, and $z$ must run constantly, but not all actors can perform all jobs. 
 %This kind of optimisation is going on constantly in our computers, cars.
 Nevertheless, all these problems can be reduced into the same representation as the animals in the shop: 
 the massive effort of an operating system---or an autopilot---can be expressed as a set of simple disjunctions, just like $\neg\bat \vee \neg\emu$.
@@ -103,10 +104,10 @@ The first decades of SAT-research was concentrated on the theoretical side, with
 after all, a difficult problem must be slow to solve, regardless of the packaging? 
 However, there is a difference between a general case, where the algorithm must be prepared for any input, and an ``easy case'', where we can expect some helpful properties from the input.
 Think of a sorting algorithm: in the general case, it is given truly random lists, and in the ``easy case'', it mostly gets lists with some kind of structure, such as half sorted, reversed, or containing bounded values. The general time complexity of sorting is still $O(n\ log\, n)$, but arguably, the easier cases can be expected to behave much faster, and we can even design heuristic sorting algorithms that exploit those properties.
-Analogously, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics. 
+, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics. 
 Much of the SAT research in the last two decades has been devoted to optimising the solving algorithms, and finding more efficient ways of encoding various real-life problems into SAT.
-This development has led to an increasing amount of use cases since the 2000s \cite{claessen2009satpractice}.
-One of the biggest success stories for SAT application is model checking \todo{cite}, used in software and hardware verification. In addition, SAT has been used in domains such as computational biology \todo{cite}, AI \todo{cite} and \todo{examples}.
-Formulating a decision problem in SAT is an attractive approach: instead of developing search heuristics for each problem independently, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
+This development has led to an increasing amount of use cases since the early 2000s \cite{claessen2009satpractice}.
+One of the biggest success stories for a SAT-application is model checking \todo{cite}, used in software and hardware verification. Furthermore, SAT has been used in domains such as computational biology \todo{cite}, AI \todo{cite} and \todo{examples}---just to pick a few examples.
+In summary, formulating a decision problem in SAT is an attractive approach: instead of developing search heuristics for each problem independently, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
 
 % Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
