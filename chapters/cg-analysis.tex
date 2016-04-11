@@ -27,7 +27,7 @@ grammar writers to detect conflicting rules.
 Following the idea further, the tool could give feedback that is not 
 restricted to conflicts, but also other features that are helpful 
 in the process of writing grammar.
-Given the rules in Figure~\ref{infrules}~and~\ref{fig:regroup},, a grammar writer may 
+Given the rules in Figure~\ref{infrules}, a grammar writer may 
 ask the following questions.
 
 
@@ -41,22 +41,24 @@ ask the following questions.
 
 %%%%%
 
+
 \begin{figure}[t]
-\begin{center}
+\ttfamily
+\centering
+\begin{tabular}{l | l l}
+SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} \\
+~~(-1 Prep) (0C V) ;       & (*-1C Negv LINK NOT *1 Vfin)  & (NOT *-1 Niin OR Neg)  \\
+~~(-1 Para OR De) (0C V) ; & (NOT 0 N) (NOT 0 Pron)        & (*-1C Negv \\
+~~(-1C Vbmod) (0C V) ;     & (NOT *1 Neg) (NOT *-1 Neg)    &  ~~LINK NOT 0 Imprt \\
+~~(-1C Vai) ;              & (NOT 0 Pass) (NOT *-1 Niin)   &  ~~LINK NOT *1 Vfin OR CLB?) \\
+~~(-1C Vbmod) (0 Ser) ;    & (*-1C Negv LINK NOT *1 CLB?)  & (NOT 0 N OR Pron OR Pass) \\
+~~(-1C Ter/de) ;           & (*-1C Negv LINK NOT 0 Imprt) ;  & (NOT *1 Neg) ; \\
 
-\begin{itemize}
-\item[]
-\begin{verbatim}SELECT Inf IF (-1 Para OR De) (0C V) ;
-SELECT Inf IF (-1 Prep) (0C V) ;
-SELECT Inf IF (-1C Vai) ;
-SELECT Inf IF (-1C Vbmod) (0C V) ;
-SELECT Inf IF (-1C Ter/de) ;
-SELECT Inf IF (-1C Vbmod) (0 Ser) ;
-\end{verbatim}
-\end{itemize}
+\end{tabular}
 
-\caption{Rules to select infinitive in Portuguese.}
-\end{center}
+\caption{Left: rules to select infinitive in Portuguese. 
+        Right: two versions of a condition in Finnish.}
+
 \label{fig:infrules}
 \end{figure}
 
@@ -64,35 +66,35 @@ The chapter follows with introduction of related work: namely, corpus-based meth
 
 
 
-\begin{figure}[t]
-\centering
-\begin{itemize}
+% \begin{figure}[t]
+% \centering
+% \begin{itemize}
 
-\item[]\texttt{SELECT V + Prs/Imprt + Act + Neg}
+% \item[]\texttt{SELECT V + Prs/Imprt + Act + Neg}
 
-\item[\texttt{IF}]
-\begin{verbatim}(*-1C Negv LINK NOT *1 Vfin/PrsPrc/Inf) 
-(NOT 0 N) (NOT 0 Pron) 
-(NOT *1 Neg) (NOT *-1 Neg)
-(NOT 0 Pass) (NOT *-1 Niin) 
-(*-1C Negv LINK NOT *1 CLB?) 
-(*-1C Negv LINK NOT 0 Imprt) ; 
-\end{verbatim}
+% \item[\texttt{IF}]
+% \begin{verbatim}(*-1C Negv LINK NOT *1 Vfin/PrsPrc/Inf) 
+% (NOT 0 N) (NOT 0 Pron) 
+% (NOT *1 Neg) (NOT *-1 Neg)
+% (NOT 0 Pass) (NOT *-1 Niin) 
+% (*-1C Negv LINK NOT *1 CLB?) 
+% (*-1C Negv LINK NOT 0 Imprt) ; 
+% \end{verbatim}
 
-\item[\texttt{IF}]
-\begin{verbatim}(NOT *-1 Niin OR Neg)  
-(*-1C Negv
-  LINK NOT 0 Imprt
-  LINK NOT *1 Vfin/PrsPrc/Inf OR CLB?) 
-(NOT 0 N OR Pron OR Pass) 
-(NOT *1 Neg) ;
-\end{verbatim}
-\end{itemize}
+% \item[\texttt{IF}]
+% \begin{verbatim}(NOT *-1 Niin OR Neg)  
+% (*-1C Negv
+%   LINK NOT 0 Imprt
+%   LINK NOT *1 Vfin/PrsPrc/Inf OR CLB?) 
+% (NOT 0 N OR Pron OR Pass) 
+% (NOT *1 Neg) ;
+% \end{verbatim}
+% \end{itemize}
 
-\caption{Two versions of a condition in Finnish.}
+% \caption{Two versions of a condition in Finnish.}
 
-\label{fig:regroup}
-\end{figure}
+% \label{fig:regroup}
+% \end{figure}
 
 
 \section{Related work}
