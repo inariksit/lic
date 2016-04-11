@@ -61,11 +61,15 @@ While the absolute numbers have changed, the relative differences between the ru
 \section{CG as a SAT-problem}
 \label{sec:CGSAT}
 
-First we present the preliminaries: Input=ambiguous clauses; Each reading = variable; Apply rule = create implications on those variables; Goal: find a solution!
+\todo{First we present the preliminaries: Input=ambiguous clauses; Each reading = variable; Apply rule = create implications on those variables; Goal: find a solution!
 
 Then, we explain different ordering schemes, and discuss conflict handling.
 
-Finally, we evaluate SAT-CG against VISL CG-3, for both F-score and running time.
+I think this bit should have approximately three lines more text,
+
+so that I can fiddle with formatting elsewhere.
+
+So difficult.}
 %: for F-score, we use a 20,000--word Spanish gold standard corpus, and for running time, we use.
 
 \subsection{Preliminaries}
@@ -221,7 +225,9 @@ Notice that none of the three rules has targeted the word \la{}; still it has be
 
 Now, this is all very nice, but the present thesis is not called ``Implementing FSIG with a SAT-solver''. 
 However, understanding the translation of rules to implications is vital to the rest of this thesis, and FSIG provides, arguably, a simpler starting point.
-In the following sections, we discuss the concepts of conflict resolution and ordering of the rules. We will show a way to handle conflicts in pure FSIG, and consider two ways of emulating rule ordering in the SAT-encoding.
+In the following sections, we will discuss the concepts of conflict resolution and ordering of the rules. 
+Firstly, we show two ways to handle conflicts in the parallel setting, 
+and secondly, we consider an alternative method for a sequential SAT-encoding.
 
 
 % We have given a minimal description of SAT-based implementation. 
@@ -229,6 +235,7 @@ In the following sections, we discuss the concepts of conflict resolution and or
 
 
 \subsection{Solving conflicts in the parallel scheme}
+\label{sec:parallelScheme}
 
 As described in Section~\ref{sec:ordering}, the parallel FSIG behaves differently than the 
 sequential CG: the rules are dependent on each other, and the order does not matter.
@@ -317,8 +324,6 @@ This problem is known as Max-SAT \todo{cite}, and it is reducible to SAT; thus, 
 \todo{What is SAT+ actually doing? Some theory here.}
 
 
-\subsection{Ordered scheme}
-\label{sec:orderedScheme}
 
 In the following, we show a modification to the parallel scheme, 
 where the clauses are added to the formula incrementally, 
@@ -328,7 +333,8 @@ We contrast this with an alternative scheme; one that will be used in Chapter~\r
 
 
 
-\paragraph{Adding the rules in order} We keep the parallel base: the cohort vectors are not manipulated between the rule applications, thus the 100\textsuperscript{th} rule still accesses the same variables as the first rule.
+\paragraph{Emulating order} 
+For the second option, we keep the parallel base: the cohort vectors are not manipulated between the rule applications, thus the 100\textsuperscript{th} rule still accesses the same variables as the first rule.
 %the cohorts are encoded as vectors of variables, and the rules form implications at each application.
 This means that all the benefits of parallel execution still hold: the three rules, which all target \emph{casa} may still disambiguate \emph{la}, without \emph{la} ever being the target.
 
@@ -378,9 +384,11 @@ Similarly to the maximisation-based scheme, we create a clause for each instance
 \def\invConds{\text{invalid condition}}
 \def\onlyTrgLeft{\text{only target left}}
 
-\paragraph{Modelling the state of the sentence} 
 
-For the second option, we abandon the parallel encoding, and return to the semantics of good old sequential CG: rule application takes effect immediately, is irreversible, and only allows changes in the target.
+\subsection{Sequential scheme}
+\label{sec:orderedScheme}
+
+For a moment, we abandon the parallel encoding and return to the semantics of good old sequential CG: rule application takes effect immediately, is irreversible, and only allows changes in the target.
 To present this scheme, we start from something that is \emph{not} a SAT-problem: namely, manipulating Boolean expressions. The following encoding corresponds to the one in \cite{lager_nivre01} \todo{Do I need some formal proof that it corresponds to Lager \& Nivre, or can I just say that?}; however, we present it in a way that is syntactically closer to what we have seen so far.
 
 As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
@@ -389,13 +397,14 @@ all those readings are true at the ``first round'', and the goal is to make more
 At each rule application, we create a new variable \newVar{} for each targeted reading \oldVar{}.
 The new variable \newVar{} is true iff 
 
+\begin{figure}[h]
 \begin{tabular}{l l}
 (a) \oldVar{} was true, and 
                              & (b) the rule cannot apply: this can be because \\
                                      & ~~~~-- its conditions do not hold, or \\
                                      & ~~~~-- it would remove the last reading.
 \end{tabular}
-
+\end{figure}
 
 \noindent In another notation, application of \t{REMOVE v IF (-1 det)} looks like the following:
 
@@ -531,6 +540,7 @@ We include evaluation for three schemes: the original unordered, the original or
 
 \subsection{Performance against VISL CG-3}
 
+\todo{This whole section needs to be updated \\
 
 We took a manually tagged
 corpus\footnote{\url{https://svn.code.sf.net/p/apertium/svn/branches/apertium-swpost/apertium-en-es/es-tagger-data/es.tagged}}
@@ -544,13 +554,11 @@ Treating the original corpus as the gold standard, the disambiguation
 by  VISL CG-3 achieves F-score of 82.6 \%, ordered SAT-CG 81.5 \%  and
 unordered SAT-CG 79.2 \%. 
 We did not test with other languages or text genres due to the lack of
-available gold standard.
+available gold standard.}
 
 \subsection{Execution time}
 
-The worst-case complexity of SAT is exponential, whereas the standard
-implementations of CG are polynomial, but with advances in SAT solving
-techniques, the performance in the average case in practice is more feasible than in the previous works done in 90s--00s.
+\todo{Whole section needs to be updated \\
 
 We tested the performance by parsing Don Quijote (384,155 words) with
 the same Spanish grammars as in the previous experiment. 
@@ -569,8 +577,7 @@ the maximisation function was called 147,253 times, and with 19 rules,
 the differences in the execution times are much larger, which suggests
 that there are other reasons for the worse performance. 
 This is to be expected, as SAT-CG is currently just a naive
-proof-of-concept implementation with no optimisations.
-
+proof-of-concept implementation with no optimisations.}
 
 
 \begin{table}
@@ -596,7 +603,7 @@ proof-of-concept implementation with no optimisations.
 
 
   \end{tabular}
-  \caption{F-scores and execution times for subsets of the Spanish grammar, disambiguating Don Quijote (384,155 words).}
+  \caption{F-scores and execution times for subsets of the Spanish grammar, disambiguating Don Quijote (384,155 words).\todo{Rerun tests}}
   \label{table:time}
 \end{table}
 
@@ -612,7 +619,7 @@ Lacking an actual CG writer, it is hard to say whether this prediction holds or 
 We predict that less rules are needed; whether this holds in the order of thousands of rules remains to be tested. On the one hand, getting rid of ordering and cautious context could ease the task of the grammar writer, since it removes the burden of estimating the best sequence of rules and whether to make them cautious. On the other hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
 
 
-The results in Table~\todo{make such table} suggests that that when running grammars that are written
+The results in Table~\ref{table:time} suggests that that when running grammars that are written
 with the traditional CG in mind, SAT-CG loses with both ordering
 strategies, but emulating order fares better.
 
@@ -628,9 +635,9 @@ works better (\textless0.5 \%), but it required trying
 subsequences of the 19-rule set in a brute force manner---this hardly
 presents any real life use case.
 
-
+\todo{Not sure if this is worth mentioning \\
 Out of interest, we also manually flipped a small grammar and tested it against the original.
-The personal experiences of doing this was that ``wow, people don't really mean what they write''. Like if you're drawing a portrait, try to flip your paper upside down or look at it as a mirror image; it is easier to see if the ears are wonky or the eyes are all over the place.
+The personal experiences of doing this was that ``wow, people don't really mean what they write''. Like if you're drawing a portrait, try to flip your paper upside down or look at it as a mirror image; it is easier to see if the ears are wonky or the eyes are all over the place.}
 
 
 % Similar patterns were observed with small (\textless{}20) rule sets
@@ -643,9 +650,6 @@ The personal experiences of doing this was that ``wow, people don't really mean 
 
 % Additional tests could include plugging SAT-CG into Apertium
 % translation pipeline, and comparing the translation quality.
-
-
-Personal experiences about transparency (or lack thereof) and expressiveness.
 
 
 The sequential application of traditional CG rules is good for
@@ -670,11 +674,15 @@ In this section, we have accidentally reinvented FSIG, and then spent a lot of t
 To alleviate the brittleness of FSIG, we developed two approaches to discard conflicting rule applications.
 The first one is based on maximisation; trying to make as many clauses as possible apply, and the second one is based on order; introducing clauses one by one, and assuming that the previous clauses are true.
 
-Interesting alternative for a CG engine, but loses in practicality: performance and lack of transparency for grammar writers.  
-As a side note, using maximisation to solve conflicts could be of interest in a FSIG implementation.
+Interesting alternative for a CG engine, but loses in practicality: performance and lack of transparency for grammar writers.
+Perhaps the biggest contribution in this work has been to the FSIG community, with a practical implementation and ways to get around conflicts.
+For sequential CG, we looked into an alternative scheme in Section~\ref{sec:orderedScheme}; however, we will rather direct our attention into analysing CGs, instead of implementing a CG engine.
 
-There is potential in the ``wait before acting'' property. No decision is lost---we can use SAT-encoding to analyse CGs, rather than execute them.
-As hinted in Section~\ref{sec:orderedScheme}, we will ultimately combine the CG semantics of unambiguous rule application, and leave the uncertainty for the question ``which analyses did we start with?''.
+%we found the alternative scheme in Section~\ref{sec:orderedScheme} promising for grammar analysis. 
+
+
+% There is potential in the ``wait before acting'' property. No decision is lost---we can use SAT-encoding to analyse CGs, rather than execute them.
+% As hinted in , we will ultimately combine the CG semantics of unambiguous rule application, and leave the uncertainty for the question ``which analyses did we start with?''.
 
 
 
