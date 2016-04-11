@@ -164,7 +164,7 @@ In Appendix~\ref{appendix1}
 
 %Finally, we have all we need to solve the disambiguation problem. Given the clauses presented in step 2, SAT-solver returns a model---this is our disambiguated sentence. 
 
-Finally, we have all we need to disambiguate the segment: the cohorts and the constraints encoded as SAT-variables and clauses. The SAT-solver returns a model that satisfies all the clauses presented in step 2.
+Finally, we have all we need to disambiguate the segment: the sentence and the constraints encoded as SAT-variables and clauses. The SAT-solver returns a model that satisfies all the clauses presented in step 2.
 We started off with all the variables unassigned, and required at least one variable 
 in each cohort to be true. In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$.
 We can see with bare eye that this problem will have a solution; in fact, multiple ones, 
@@ -276,14 +276,14 @@ rules would make a large set of clauses that fit together, and the
 inapplicable rule would not ``fit in''.
 In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
 
-This corresponds loosely to the common design pattern in
-CGs, where there is a number of rules with the same target, ordered
-such that more secure rules come first,
-with a catch-all rule with no condition as the last resort, to be
-applied if none of the previous has fired.
-The order-based heuristic in the traditional CG is replaced by a more
-holistic behaviour: if the rules conflict, discard the one that seems
-like an outlier.
+% This corresponds loosely to the common design pattern in
+% CGs, where there is a number of rules with the same target, ordered
+% such that more secure rules come first,
+% with a catch-all rule with no condition as the last resort, to be
+% applied if none of the previous has fired.
+% The order-based heuristic in the traditional CG is replaced by a more
+% holistic behaviour: if the rules conflict, discard the one that seems
+% like an outlier.
 
 Assuming our rules are \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}, the revised algorithm goes as follows:
 
@@ -306,7 +306,7 @@ Assuming our rules are \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{R
       \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
       \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
       \ob{\neg \casaN}^{\t{REMOVE n}} \}$
-\item No solution for all clauses: try to find a solution that satisfies maximally many clauses.
+\item No solution for all clauses: try to find a solution that satisfies maximally many clauses; however, default rule cannot be overridden.
 \end{enumerate}
 
 If a rule matches multiple cohorts, it creates a separate clause for each instance.
@@ -339,7 +339,7 @@ Again, we have the same rule set: \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 
 \item Apply \t{REMOVE v IF (-1 det)}
  \begin{itemize}
     \item Create a clause: $\laDet \Rightarrow \neg \casaV$
-    \item Solve with all clauses:
+    \item Solve with previous clauses:
   $\{ \ob{\laDet \! \vee \laPrn, \ \casaN \vee \casaV, \  \grandeAdj}^{\text{default rule}}, \ 
       \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}} \}$
     \item Solution found: add new clause to the formula
@@ -347,19 +347,21 @@ Again, we have the same rule set: \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 
 \item Apply \t{REMOVE v IF (1 adj)} 
  \begin{itemize}
     \item Create a clause: $\grandeAdj \Rightarrow \neg \casaV$
-    \item Solve with all clauses:
-  $\{ \laDet \! \vee \laPrn, ..., \laDet \Rightarrow \neg \casaV, \ 
+    \item Solve with previous clauses:
+  $\{..., \laDet \Rightarrow \neg \casaV, \ 
       \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}  \}$
     \item Solution found: add new clause to the formula
  \end{itemize}
 \item Apply \t{REMOVE n}
  \begin{itemize}
     \item Create a clause: $\neg \casaN$
-    \item Solve with all clauses:
-  $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
-      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
-      \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
+    \item Solve with previous clauses:
+      $\{ ..., \laDet \Rightarrow \neg \casaV, \ 
+      \grandeAdj \Rightarrow \neg \casaV, \ 
       \ob{\neg \casaN}^{\t{REMOVE n}} \}$
+  % $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
+  %     \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
+  %     \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
     \item No solution: discard clause
  \end{itemize}
 \end{enumerate}
@@ -368,15 +370,57 @@ The SAT-solver starts out with a prefix of rules, attempts to solve, and if it s
 Similarly to the maximisation-based scheme, we create a clause for each instance of the rule application, and in the case of a conflict, we can only discard the clause targeting the offending cohort, not the whole sentence.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\newVar{$\text{\em word}'_\textsc{ RD}$}
+\def\oldVar{$\text{\em word}_\textsc{\,RD}$}
+\def\eqdef{\Coloneqq}
+\def\invConds{\text{invalid condition}}
+\def\onlyTrgLeft{\text{only target left}}
 
 \paragraph{Modelling the state of the sentence} 
-For the second option, we abandon the parallel encoding, and return to the semantics of good old sequential CG: rule application takes effect immediately, is irreversible, and only allows changes in target.
-To present this scheme, we start from something that is \emph{not} a SAT-problem: namely, the translation into logic by Lager and Nivre \cite{lager_nivre01}.
 
-\todo{present their encoding. The original encoding looks different, but we present their encoding in a notation that is syntactically closer to the one in this chapter.}
+For the second option, we abandon the parallel encoding, and return to the semantics of good old sequential CG: rule application takes effect immediately, is irreversible, and only allows changes in the target.
+To present this scheme, we start from something that is \emph{not} a SAT-problem: namely, manipulating Boolean expressions. The following encoding corresponds to the one in \cite{lager_nivre01} \todo{Do I need some formal proof that it corresponds to Lager \& Nivre, or can I just say that?}; however, we present it in a way that is syntactically closer to what we have seen so far.
 
-Now, it looks pretty much like our previous encoding, so why is this not a SAT-problem? %We sure talk about Boolean values and build formulas.
-The answer lies in the first step, where all variables start off as true. All the new variables, created from the rule applications, get their value immediately: $\casa{}'_\v \Leftarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftarrow True \wedge \neg (True \wedge \neg True)$. There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
+As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
+But now, we assume that each variable starts off as true: 
+all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
+At each rule application, we create a new variable \newVar{} for each targeted reading \oldVar{}.
+The new variable \newVar{} is true iff 
+
+\begin{tabular}{l l}
+(a) \oldVar{} was true, and 
+                             & (b) the rule cannot apply: this can be because \\
+                                     & ~~~~-- its conditions do not hold, or \\
+                                     & ~~~~-- it would remove the last reading.
+\end{tabular}
+
+
+\noindent In another notation, application of \t{REMOVE v IF (-1 det)} looks like the following:
+
+$$\begin{array}{r l}
+\text{New variable } \casa{}'_\v 
+      & \Leftrightarrow \casaV\ 
+        \wedge\: ( \; \ob{\neg\laDet}^{\invConds} 
+        \vee  \ob{(\casaV \wedge \neg \casaN) }^{\onlyTrgLeft} ) \\
+\end{array}$$
+
+
+\noindent After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. A sentence vector may look like following after two rules which target verbs and one which targets nouns:
+
+
+%\begin{figure}
+$$\begin{array}{l @{~\rightarrow~} l}
+1 & \{\laDet, \laPrn \} \\
+2 & \{\casa{}''_\v, \casa{}'_\n \} \\
+3 & \{ \grandeAdj \} \\
+\end{array}$$
+%\label{fig:after3Rules}
+%\end{figure}
+
+Now, we may ask, why is this not a SAT-problem? %We sure talk about Boolean values and build formulas.
+The answer lies in the first step, where all variables start off as true. All the new variables, created from the rule applications, get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
 
 Can we find something in this setup that would make an interesting SAT-problem? 
 If this question is too intimidating, let us just ask ``can we make it into \emph{any} kind of SAT-problem''? 
@@ -384,9 +428,9 @@ Forget all ambition, just ask what we \emph{can} do.
 We can go back to the first step: instead of all variables starting off as true, we can keep them unassigned. If we do that, where is the uncertainty?
 All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
 
-Huh. We may see no use for this now. But in Chapter~\ref{chapterCGana}, this question will allow us, ultimately, find conflicts in the grammar; approximate generation, and answer questions about expressivity. 
+Huh. That is an interesting question on its own right, but not very useful for a CG engine: we do know which readings were originally true, and we do not want the SAT-solver to be extra helpful and remove something that is targeted by no rule. But in Chapter~\ref{chapterCGana}, the new setup will allow us to find conflicts in the grammar, approximate generation and answer questions about expressivity. 
+For the remainder of this chapter, however, we keep the parallel scheme and wrap up what we have started. 
 
-For the remainder of this chapter, we keep the parallel scheme. In the following sections, we briefly discuss the implementation details of the SAT-CG software, and perform experiments with the two first-mentioned parallel schemes: maximisation-based and order-based.
 
 
 
@@ -465,7 +509,7 @@ For the remainder of this chapter, we keep the parallel scheme. In the following
 \section{Experiments}
 \label{sec:eval}
 
-In this section, we report experiments on the two variants: unordered maximisation-based, and ordering by committing to a prefix of rules.
+In this section, we report experiments on the two modifications to the parallel scheme: maximisation-based, and ordering by committing to a prefix of rules.
 We evaluate the performance against VISL CG-3 in accuracy and running time; in addition, we offer some preliminary observations on the effect of grammar writing.
 
 
@@ -559,7 +603,12 @@ proof-of-concept implementation with no optimisations.
 \subsection{Effect on grammar writing}
 
 Throughout the implementation of SAT-CG, we have predicted that the more declarative features would influence the way rules are written. 
+We hoped to combine the best parts of CG and FSIG: 
+In addition, our modifications to the brittleness of FSIG have let us run CGs as FSIG; something that previous FSIG implementations do not allow.
+As an inverse experiment, it would be interesting to take some large FSIG grammars \todo{find who has written them and cite} and run them with a CG engine, then compare the precision and recall.
+
 Lacking an actual CG writer, it is hard to say whether this prediction holds or not.
+
 We predict that less rules are needed; whether this holds in the order of thousands of rules remains to be tested. On the one hand, getting rid of ordering and cautious context could ease the task of the grammar writer, since it removes the burden of estimating the best sequence of rules and whether to make them cautious. On the other hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
 
 
