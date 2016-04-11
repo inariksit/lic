@@ -140,9 +140,9 @@ We try to craft rules that make sense for this segment; however, some variants a
 %The basis of the rule is \texttt{REMOVE adj}, which will target the word form \emph{más}.
 % Its positive counterpart is \texttt{SELECT adv}, which translates into ``remove everything but adv''.
 
-\subsection{Unordered scheme}
+\subsection{Parallel scheme}
 
-We begin by introducing the unordered scheme. For basic rules, this corresponds to the encoding in \cite{lager98}; each analysis is given a single variable, and all rules have access to it.
+We begin by introducing the parallel scheme. For basic rules, this corresponds to the encoding in \cite{lager98}; each analysis is given a single variable, and all rules have access to it.
 % and all the rules are applied at the same time. 
 %In addition, we add rule types that \cite{lager98} does not consider.
 
@@ -351,8 +351,6 @@ Here we demonstrate a number of inverted rules, in which the contextual test doe
 \end{equation}
 
 
-\subsubsection{Solving and conflict handling}
-
 
 
 % The unordered scheme has a strong advantage compared to the ordered one: it can start disambiguating, even if none of the rules on its own was able to act. In addition, 
@@ -386,19 +384,21 @@ REMOVE adj IF (-1 n) ;          REMOVE adv IF (-1 n) ;\end{verbatim}
    \label{fig:orderMatters}
 \end{figure}
 
-\subsection{Ordered scheme}
+\subsection{Sequential scheme}
 
-We continue with the ordered scheme. In contrast to the unordered scheme, ordering of the rules makes a difference: the two rule orders in Figure~\ref{fig:orderMatters} produce a different result.
+We continue with the sequential scheme. In contrast to the parallel scheme, ordering of the rules makes a difference: the two rule orders in Figure~\ref{fig:orderMatters} produce a different result.
 
-In the unordered scheme, we simply translated every applicable rule into a clause, and asked the SAT-solver to find a model that satisfies all the clauses. 
+In the parallel scheme, we simply translated every applicable rule into a clause, and asked the SAT-solver to find a model that satisfies all the clauses. 
 Now, we need to model a state of the sentence. The first rule accesses the initial input
 by the morphological analyser, and the $n^{th}$ rule accesses the sentence after the first $n-1$ rules have been run.
 Similarly to \cite{lager_nivre01}, we model this as a composition of clauses, each accessing the state produced by the previous clause.
 
+Now, in Section~\ref{sec:orderedScheme}, we explained how the version by \cite{lager_nivre01} is not a SAT-problem, but mere manipulation of Boolean expressions.
+Then we established that we can make it into a SAT-problem by leaving the variables on the first round unassigned, which gives us the question ``which variables were originally true'', and promised that it will all make sense in Chapter~\ref{chapterCGana}. Regardless whether we use the scheme as a SAT-problem or not, in the remainder of this appendix, we will show how the new variables are created. We use the same rule types as we have seen for the parallel scheme.
+
 %each time that a rule is applied to a target, a new variable for the target is created.
 %This makes it possible to separate two cases: a variable assigned a value, because some rule targets it, or a variable is assigned a value, because it appears in the condition of some other rule. Most importantly, it allows us to model the effect of time.
 
-The following is not the only possible SAT-encoding to model an ordered execution of the rules. In fact, \cite{listenmaa_claessen2015} uses a different encoding; however, we changed into the one described in the following, because it generalises to grammar analysis (see Chapter~\ref{chapterCGana}).
 
 \subsubsection{Creating the sentence}
 
@@ -418,20 +418,10 @@ But if all variables start as unassigned, then it is a SAT-problem.}
 % \label{eq:allStartTrue}
 % \end{equation}
 
-\def\newVar{$\text{\em word}'_\textsc{ RD}$}
-\def\oldVar{$\text{\em word}_\textsc{\,RD}$}
+
 
 \noindent 
-As described in Section~\todo{write that section}, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
-At each rule application, we create a new variable \newVar for each targeted reading \oldVar.
-The new variable \newVar is $True$ iff 
 
-\begin{tabular}{l l}
-(a) \oldVar was $True$, and 
-                             & (b) the rule cannot apply: this can be because \\
-                                     & ~~~~-- its conditions do not hold, or \\
-                                     & ~~~~-- it would remove the last reading.
-\end{tabular}
 
 % \begin{inparaenum}
  %      \item the old variable was true, and
@@ -442,18 +432,7 @@ The new variable \newVar is $True$ iff
  %        \end{inparaenum}
  %  \end{inparaenum}
 
- After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. A sentence vector may look like following after two rules which target verbs and one which targets nouns:
 
-\begin{equation}
-\begin{array}{l @{~\rightarrow~} l}
-1 & \{\sobrePr, \sobre{}'_\n \} \\
-2 & \{\unaPrn, \unaDet, \una{}''_\vPrsPThree, \una{}''_\vPrsPOne, \una{}''_\vImpPThree \} \\
-3 & \{ \aproximacion{}'_\n \} \\
-% \masAdv \wedge \masAdj \\
-% \cientificaAdj \wedge \cientificaN \\
-\end{array}
-\label{eq:after3Rules}
-\end{equation}
 
 
 For subsequent rule applications, only the variables from the latest round are accessible: the $n^{th}$ rule may only access the variables that are created, or left unchanged, by the $n-1^{th}$ rule. 
