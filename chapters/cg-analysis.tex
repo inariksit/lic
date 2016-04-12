@@ -2,7 +2,7 @@
 \label{chapterCGana}
 
 
-In the previous chapter, we have presented a tool.
+In the previous chapter, we presented a tool.
 In the current chapter, we will solve a problem.
 
 
@@ -45,7 +45,7 @@ ask the following questions.
 \begin{figure}[t]
 \ttfamily
 \centering
-\begin{tabular}{l | l l}
+\begin{tabular}{l | l  l}
 SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} \\
 ~~(-1 Prep) (0C V) ;       & (*-1C Negv LINK NOT *1 Vfin)  & (NOT *-1 Niin OR Neg)  \\
 ~~(-1 Para OR De) (0C V) ; & (NOT 0 N) (NOT 0 Pron)        & (*-1C Negv \\
@@ -65,36 +65,6 @@ SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} 
 The chapter follows with introduction of related work: namely, corpus-based methods to aid grammar writing, and automatic optimisation of a complete, human-written grammar. We continue by presenting our solution, along with a working implementation, and finally, evaluate its performance.
 
 
-
-% \begin{figure}[t]
-% \centering
-% \begin{itemize}
-
-% \item[]\texttt{SELECT V + Prs/Imprt + Act + Neg}
-
-% \item[\texttt{IF}]
-% \begin{verbatim}(*-1C Negv LINK NOT *1 Vfin/PrsPrc/Inf) 
-% (NOT 0 N) (NOT 0 Pron) 
-% (NOT *1 Neg) (NOT *-1 Neg)
-% (NOT 0 Pass) (NOT *-1 Niin) 
-% (*-1C Negv LINK NOT *1 CLB?) 
-% (*-1C Negv LINK NOT 0 Imprt) ; 
-% \end{verbatim}
-
-% \item[\texttt{IF}]
-% \begin{verbatim}(NOT *-1 Niin OR Neg)  
-% (*-1C Negv
-%   LINK NOT 0 Imprt
-%   LINK NOT *1 Vfin/PrsPrc/Inf OR CLB?) 
-% (NOT 0 N OR Pron OR Pass) 
-% (NOT *1 Neg) ;
-% \end{verbatim}
-% \end{itemize}
-
-% \caption{Two versions of a condition in Finnish.}
-
-% \label{fig:regroup}
-% \end{figure}
 
 
 \section{Related work}
@@ -154,7 +124,7 @@ Now let's get to the fun. We start by defining a conflict, and present our solut
 
 \paragraph{Conflict}
 
-We define \emph{conflict} as follows: a set of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input.
+We define \emph{conflict} as follows: a list of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input.
 Some examples of conflicts follow:
 
 \begin{itemize}
@@ -181,14 +151,31 @@ targets verbs.
 \paragraph{Solution}
 Some hints for the solution have been dropped along the way. 
 In Section~\ref{sec:orderedScheme}, we found how to ask the question 
-``Which readings were originally true?'' Now match it to the definition of conflict: ``... impossible to apply ... \emph{regardless of input}''.
+``Which readings were originally true?'' Now match it to the definition of conflict: ``applying $R$ makes it impossible to apply $r$ \emph{regardless of input}''.
 In a nutshell, we are going to show the absence of a conflict by creating 
-a sequence where $r'$ can apply after $r$; conversely, we detect a conflict by 
+a sequence where $r$ can apply after $R$; conversely, we detect a conflict by 
 showing that such sequence cannot be created.
 
-\todo{Reached the end of new content! I removed the old paper from here.}
 
 
+
+
+\todo{Reached the end of new content! From here on it's just the old paper copypasted.}
+
+
+\subsection{Preliminaries}
+
+Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
+Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}:
+every cohort contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
+
+Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too. In our experiments, the number of readings has ranged from about 300 to about 9000. 
+
+Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule mentioned in the introduction, the width is 2.
+
+If the context contains a \verb!*! (context word can be anywhere),
+we may need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis.
+%we create sentences that are up to 3 words wider than the context without \verb!*!, and try them all.
 
 
 %%%%%%%
