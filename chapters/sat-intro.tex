@@ -14,7 +14,7 @@ Imagine you are in a pet shop with a selection of animals: \ant, {\em bat, cat, 
 These animals are very particular about each others' company. The dog has no teeth and needs the cat to chew its food. The cat, in turn, wants its best friend bat. 
 But the bat is very aggressive towards all herbivores, and the emu is afraid of anything lighter than 2 kilograms. The ant hates all four-legged creatures, and the fox can only handle one flatmate with wings. 
 
-You need to decide on a subset of pets to buy---you love all animals, but realistically, you cannot have them all. You start calculating in your head: ``If I take the ant, I cannot take cat, dog, nor fox. How about I take the dog, then I must take the cat and the bat as well.''
+You need to decide on a subset of pets to buy---you love all animals, but due to their restrictions, you cannot have them all. You start calculating in your head: ``If I take the ant, I cannot take cat, dog, nor fox. How about I take the dog, then I must take the cat and the bat as well.''
 After some time, you decide on bat, cat, dog and fox, leaving the ant and the emu in the pet shop.
 
 \paragraph{Definition}
@@ -22,10 +22,10 @@ After some time, you decide on bat, cat, dog and fox, leaving the ant and the em
 This everyday situation is an example of \emph{Boolean satisfiability (SAT)} problem.
 The animals translate into \emph{variables}, %$\{ant, bat, cat, dog, emu, fox\}$.
 and the lists of friends and enemies of each animal translate into \emph{clauses}.
-These clauses are disjunctions of \emph{literals}: either a variable, such as $cat$, or its negation, $\neg{}cat$.
-A positive literal $cat$ means that the animal comes with you, 
-and conversely, $\neg{}cat$ means it is left in the shop. 
-The clause $\neg{}dog \vee cat$ means ``I don't buy the dog or I buy the cat''. 
+These clauses are disjunctions of \emph{literals}: either a variable, such as \cat, or its negation, $\neg\cat$.
+A positive literal \cat{} means that the animal comes with you, 
+and conversely, $\neg\cat{}$ means it is left in the shop. 
+The clause $\neg\dog \vee \cat{}$ means ``I don't buy the dog or I buy the cat''. 
 All the clauses are shown in Figure~\ref{fig:animalCohabitingProblem}.
 
 
@@ -100,14 +100,20 @@ Nevertheless, all these problems can be reduced into the same representation as 
 the massive effort of an operating system---or an autopilot---can be expressed as a set of simple disjunctions, just like $\neg\bat \vee \neg\emu$.
 
 %Since the 2000s, SAT-solving is widely used in practical applications \cite{marques_silva2010}. 
-The first decades of SAT-research was concentrated on the theoretical side, with little practical applications: 
-after all, a difficult problem must be slow to solve, regardless of the packaging? 
+The first decades of SAT-research was concentrated on the theoretical side, with little practical applications.
+But things changed in the 90s: there was a breakthrough in the SAT-solving techniques, 
+which allowed for scaling up and finding new use cases. As a result, modern SAT-solvers can deal with problems that have hundreds of thousands of variables and millions of clauses \cite{marques_silva2010}.
+
+What was behind these advances? SAT, as a general problem, remains NP-complete: 
+it is true that there are still SAT-problems \todo{formulation? that cannot be solved in sub-exponential time.}
 However, there is a difference between a general case, where the algorithm must be prepared for any input, and an ``easy case'', where we can expect some helpful properties from the input.
-Think of a sorting algorithm: in the general case, it is given truly random lists, and in the ``easy case'', it mostly gets lists with some kind of structure, such as half sorted, reversed, or containing bounded values. The general time complexity of sorting is still $O(n\ log\, n)$, but arguably, the easier cases can be expected to behave much faster, and we can even design heuristic sorting algorithms that exploit those properties.
-, a typical real-life scenario formulated as SAT-problem can be solved much more efficiently with proper heuristics. 
-Much of the SAT research in the last two decades has been devoted to optimising the solving algorithms, and finding more efficient ways of encoding various real-life problems into SAT.
+Think of a sorting algorithm: in the general case, it is given truly random lists, and in the ``easy case'', it mostly gets lists with some kind of structure, such as half sorted, reversed, or containing bounded values. The general time complexity of sorting is still $O(n\ log\, n)$, but arguably, the easier cases can be expected to behave in linear time, and we can even design heuristic sorting algorithms that exploit those properties.
+
+Analogously, the 90s breakthrough owes much to the fact that many typical real-life scenarios, 
+when formulated as SAT-problem, can be solved efficiently with proper heuristics. 
+Much of the SAT-research in the last two decades has been devoted to optimising the solving algorithms, and finding more efficient ways of encoding.% various real-life problems into SAT.
 This development has led to an increasing amount of use cases since the early 2000s \cite{claessen2009satpractice}.
-One of the biggest success stories for a SAT-application is model checking \todo{cite}, used in software and hardware verification. Furthermore, SAT has been used in domains such as computational biology \todo{cite}, AI \todo{cite} and \todo{examples}---just to pick a few examples.
+One of the biggest success stories for a SAT-application is model checking \cite{sheeran1998modelchecking;biere1999modelchecking;bradley2011modelchecking}, used in software and hardware verification. Furthermore, SAT has been used in domains such as computational biology \cite{claessen2013compbioSAT} and AI planning \todo{cite}---just to pick a few examples.
 In summary, formulating a decision problem in SAT is an attractive approach: instead of developing search heuristics for each problem independently, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
 
 % Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
