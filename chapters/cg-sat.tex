@@ -273,24 +273,27 @@ Recall the heuristic rule order from Section~\ref{sec:ordering}. The heuristic o
 For an unordered scheme, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
 Answering this is beyond the means of previous FSIG engines \todo{is this so?}, but with a SAT-solver, we can answer this question. 
 
-\paragraph{Maximisation} aka. ``FSIG as a MaxSAT-problem''
+\paragraph{Maximisation} 
+Each rule application to a concrete cohort produces a clause,
+and the whole rule set applied to the whole sentence produces 
+a large formula.In an ideal case, all the rules are well-behaved, 
+and the whole formula is satisfiable. However, if the whole formula 
+is unsatisfiable, we may still ask for an assignment that satisfies 
+the maximum number of the clauses; that is, rule applications. 
+If the grammar is good, we hope that the interaction between 
+the appropriate rules would make a large set of clauses that 
+fit together, and the inapplicable rule would not ``fit in''.
 
-Each rule application to a concrete cohort produces a clause, and the whole rule set applied to the whole sentence produces a large formula.
-In an ideal case, all the rules are well-behaved, and the whole formula is satisfiable. 
-However, if the whole formula is unsatisfiable, we may still ask for an assignment that satisfies the maximum number of the clauses; that is, rule applications. 
-If the grammar is good, we hope that the interaction between the appropriate
-rules would make a large set of clauses that fit together, and the
-inapplicable rule would not ``fit in''.
-In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
+%In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
 
-% This corresponds loosely to the common design pattern in
-% CGs, where there is a number of rules with the same target, ordered
-% such that more secure rules come first,
-% with a catch-all rule with no condition as the last resort, to be
-% applied if none of the previous has fired.
-% The order-based heuristic in the traditional CG is replaced by a more
-% holistic behaviour: if the rules conflict, discard the one that seems
-% like an outlier.
+This corresponds loosely to the common design pattern in CGs, 
+where there is a number of rules with the same target: the more 
+secure rules are introduced first, with a catch-all rule as 
+the last resort, to be applied only if none of the previous rules 
+has met the conditions.
+The order-based heuristic in the traditional CG is replaced by a more
+holistic behaviour: if the rules conflict, discard the one that seems
+like an outlier.
 
 Assuming our rules are \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}, the revised algorithm goes as follows:
 
@@ -320,8 +323,23 @@ If a rule matches multiple cohorts, it creates a separate clause for each instan
 Thus, if the rule causes a conflict in only one cohort---say, we have another potential noun in the sentence, but it is not ambiguous with a verb, this is no problem. We can discard only the conflicting instances: we prevent \t{REMOVE n} from applying to $\casaN$, but it still may apply to other nouns.
 
 
-This problem is known as Max-SAT \todo{cite}, and it is reducible to SAT; thus, it has the same properties, like it's NP-complete and stuff.
-\todo{What is SAT+ actually doing? Some theory here.}
+The problem of satisfying maximum amout of clauses is known as MaxSAT \todo{cite}.
+Whereas SAT is a decision problem, MaxSAT is an optimisation problem. 
+\todo{Optimisation can be expressed as a sequence of decision problems: first compute a solution, then add constraint ``the solution must be better than the one you found''. 
+Repeat that until answer is unsat.
+
+Counting: we cannot just do all the solutions, because there may be huuuuge amount of them. 
+Like, one where no rule applies, and everything is retained. Or everything that can be a verb, is a verb.
+So we do counting instead. When we build clauses, we associate to each of them a helper variable. Remember that it's all just disjunctions: $\neg\laDet \vee \neg\casaV$. 
+Now, we add the variable $a$ to each clause, such that $[\neg{}a \vee \neg\laDet \vee \neg\casaV]$, and retain all the $a$s. 
+Since the formula contains $\neg{}a$, if $a$ later on will be assigned true, 
+the clause will be simplified to $[\neg\laDet \vee \neg\casaV]$. 
+This means that the implication in it will be taken into account by the SAT solver.
+
+Consider what happens if $a$ is not true: then $[\neg{}a \vee \neg\laDet \vee \neg\casaV]$ is known to be true because of $\neg{}a$, and the whole clause will be removed; SAT-solver can find a solution without ever satisfying the original $\neg\laDet \vee \neg\casaV$.
+
+The algorithm used in our implementation is like something in \cite{een06minisatplus}}.
+
 
 
 
@@ -374,73 +392,6 @@ Again, we have the same rule set: \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 
 
 The SAT-solver starts out with a prefix of rules, attempts to solve, and if it succeeds, only then it commits to the latest rule.
 Similarly to the maximisation-based scheme, we create a clause for each instance of the rule application, and in the case of a conflict, we can only discard the clause targeting the offending cohort, not the whole sentence.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\def\newVar{$\text{\em word}'_\textsc{ RD}$}
-\def\oldVar{$\text{\em word}_\textsc{\,RD}$}
-\def\eqdef{\Coloneqq}
-\def\invConds{\text{invalid condition}}
-\def\onlyTrgLeft{\text{only target left}}
-
-
-\subsection{Sequential scheme}
-\label{sec:orderedScheme}
-
-For a moment, we abandon the parallel encoding and return to the semantics of good old sequential CG: rule application takes effect immediately, is irreversible, and only allows changes in the target.
-To present this scheme, we start from something that is \emph{not} a SAT-problem: namely, manipulating Boolean expressions. The following encoding corresponds to the one in \cite{lager_nivre01} \todo{Do I need some formal proof that it corresponds to Lager \& Nivre, or can I just say that?}; however, we present it in a way that is syntactically closer to what we have seen so far.
-
-As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
-But now, we assume that each variable starts off as true: 
-all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
-At each rule application, we create a new variable \newVar{} for each targeted reading \oldVar{}.
-The new variable \newVar{} is true iff 
-
-\begin{figure}[h]
-\begin{tabular}{l l}
-(a) \oldVar{} was true, and 
-                             & (b) the rule cannot apply: this can be because \\
-                                     & ~~~~-- its conditions do not hold, or \\
-                                     & ~~~~-- it would remove the last reading.
-\end{tabular}
-\end{figure}
-
-\noindent In another notation, application of \t{REMOVE v IF (-1 det)} looks like the following:
-
-$$\begin{array}{r l}
-\text{New variable } \casa{}'_\v 
-      & \Leftrightarrow \casaV\ 
-        \wedge\: ( \; \ob{\neg\laDet}^{\invConds} 
-        \vee  \ob{(\casaV \wedge \neg \casaN) }^{\onlyTrgLeft} ) \\
-\end{array}$$
-
-
-\noindent After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. A sentence vector may look like following after two rules which target verbs and one which targets nouns:
-
-
-%\begin{figure}
-$$\begin{array}{l @{~\rightarrow~} l}
-1 & \{\laDet, \laPrn \} \\
-2 & \{\casa{}''_\v, \casa{}'_\n \} \\
-3 & \{ \grandeAdj \} \\
-\end{array}$$
-%\label{fig:after3Rules}
-%\end{figure}
-
-Now, we may ask, why is this not a SAT-problem? %We sure talk about Boolean values and build formulas.
-The answer lies in the first step, where all variables start off as true. All the new variables, created from the rule applications, get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
-
-Can we find something in this setup that would make an interesting SAT-problem? 
-If this question is too intimidating, let us just ask ``can we make it into \emph{any} kind of SAT-problem''? 
-Forget all ambition, just ask what we \emph{can} do.
-We can go back to the first step: instead of all variables starting off as true, we can keep them unassigned. If we do that, where is the uncertainty?
-All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
-
-Huh. That is an interesting question on its own right, but not very useful for a CG engine: we do know which readings were originally true, and we do not want the SAT-solver to be extra helpful and remove something that is targeted by no rule. But in Chapter~\ref{chapterCGana}, the new setup will allow us to find conflicts in the grammar, approximate generation and answer questions about expressivity. 
-For the remainder of this chapter, however, we keep the parallel scheme and wrap up what we have started. 
-
-
 
 
 
@@ -675,13 +626,12 @@ The first one is based on maximisation; trying to make as many clauses as possib
 
 Interesting alternative for a CG engine, but loses in practicality: performance and lack of transparency for grammar writers.
 Perhaps the biggest contribution in this work has been to the FSIG community, with a practical implementation and ways to get around conflicts.
-For sequential CG, we looked into an alternative scheme in Section~\ref{sec:orderedScheme}; however, we will rather direct our attention into analysing CGs, instead of implementing a CG engine.
+For the next chapter, we will use the benefits of SAT for analysing CGs.
 
 %we found the alternative scheme in Section~\ref{sec:orderedScheme} promising for grammar analysis. 
 
 
 % There is potential in the ``wait before acting'' property. No decision is lost---we can use SAT-encoding to analyse CGs, rather than execute them.
-% As hinted in , we will ultimately combine the CG semantics of unambiguous rule application, and leave the uncertainty for the question ``which analyses did we start with?''.
 
 
 
