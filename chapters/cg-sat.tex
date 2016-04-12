@@ -330,15 +330,28 @@ Repeat that until answer is unsat.
 
 Counting: we cannot just do all the solutions, because there may be huuuuge amount of them. 
 Like, one where no rule applies, and everything is retained. Or everything that can be a verb, is a verb.
-So we do counting instead. When we build clauses, we associate to each of them a helper variable. Remember that it's all just disjunctions: $\neg\laDet \vee \neg\casaV$. 
-Now, we add the variable $a$ to each clause, such that $[\neg{}a \vee \neg\laDet \vee \neg\casaV]$, and retain all the $a$s. 
-Since the formula contains $\neg{}a$, if $a$ later on will be assigned true, 
-the clause will be simplified to $[\neg\laDet \vee \neg\casaV]$. 
-This means that the implication in it will be taken into account by the SAT solver.
+So we do counting instead. When we build clauses, we associate to each of them a helper variable. 
 
-Consider what happens if $a$ is not true: then $[\neg{}a \vee \neg\laDet \vee \neg\casaV]$ is known to be true because of $\neg{}a$, and the whole clause will be removed; SAT-solver can find a solution without ever satisfying the original $\neg\laDet \vee \neg\casaV$.
+Remember that all the implications can be translated into disjunctions:
+ $\laDet \Rightarrow \neg\casaV$ is equivalent to $\neg\laDet \vee \neg\casaV$. 
+We can associate variables to these clauses with a simple trick.
+For each clause, we create a new variable $a$. Then we add 
+the negation of this variable to the corresponding clause, 
+so that it becomes $\neg{}a \vee \neg\laDet \vee \neg\casaV$.
+Then, we ask for a solution where maximally many of these $a$s are true.
 
-The algorithm used in our implementation is like something in \cite{een06minisatplus}}.
+What happens if a given $a$ is false? The SAT-solver has gotten all 
+its clauses with the added $\neg{}a$. If we know that 
+$\neg{}a \vee \neg\laDet \vee \neg\casaV$ and $\neg{}a$, we can discard
+the rest of the clause---it is a disjunction, and if $\neg{}a$ is true, then 
+the whole disjunction is true.
+This means that if an $a$ is false, then the SAT-solver does not need to care
+about its respective clause.
+Conversely, if an $a$ is true, then its negation is eliminated, and the SAT-solver
+will have to deal with the original $\neg\laDet \vee \neg\casaV$.
+
+
+The algorithm used in our implementation is like something in \cite{een06minisatplus}.}
 
 
 
