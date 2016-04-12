@@ -610,19 +610,18 @@ proof-of-concept implementation with no optimisations.}
 \subsection{Effect on grammar writing}
 
 Throughout the implementation of SAT-CG, we have predicted that the more declarative features would influence the way rules are written. 
-We hoped to combine the best parts of CG and FSIG: 
-In addition, our modifications to the brittleness of FSIG have let us run CGs as FSIG; something that previous FSIG implementations do not allow.
-As an inverse experiment, it would be interesting to take some large FSIG grammars \todo{find who has written them and cite} and run them with a CG engine, then compare the precision and recall.
-
+We hoped to combine the best parts of CG and FSIG: because of the their mutual dependence, we would need less rules;
+but conflicts would still be solved, and not render the whole grammar useless.
+On the one hand, getting rid of ordering and cautious context could ease the task of the grammar writer, since it removes the burden of estimating the best sequence of rules and whether to make them cautious. On the other hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
 Lacking an actual CG writer, it is hard to say whether this prediction holds or not.
 
-We predict that less rules are needed; whether this holds in the order of thousands of rules remains to be tested. On the one hand, getting rid of ordering and cautious context could ease the task of the grammar writer, since it removes the burden of estimating the best sequence of rules and whether to make them cautious. On the other hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
+In addition, our modifications to the brittleness of FSIG have let us run CGs as FSIG; something that previous FSIG implementations do not allow.
+As an inverse experiment, it would be interesting to take some FSIG grammars, such as \cite{voutilainen1997fsig}, and run them with a CG engine, then compare the precision and recall. 
 
 
 The results in Table~\ref{table:time} suggests that that when running grammars that are written
 with the traditional CG in mind, SAT-CG loses with both ordering
 strategies, but emulating order fares better.
-
 We also tested whether SAT-CG outperforms traditional CG with a
 small rule set. With our best performing and most concise
 grammar\footnote{\url{https://github.com/inariksit/cgsat/blob/master/data/spa\_smallset.rlx}}
