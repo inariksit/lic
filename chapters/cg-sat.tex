@@ -61,27 +61,20 @@ While the absolute numbers have changed, the relative differences between the ru
 \section{CG as a SAT-problem}
 \label{sec:CGSAT}
 
-\todo{First we present the preliminaries: Input=ambiguous clauses; Each reading = variable; Apply rule = create implications on those variables; Goal: find a solution!
-
-Then, we explain different ordering schemes, and discuss conflict handling.
-
-I think this bit should have approximately three lines more text,
-
-so that I can fiddle with formatting elsewhere.
-
-So difficult.}
-%: for F-score, we use a 20,000--word Spanish gold standard corpus, and for running time, we use.
-
-\subsection{Preliminaries}
-
-%We have seen in Section~\ref{sec:SAT-intro} how to transform a simple decision task into a SAT-problem. 
-%:each animal was represented as a variable, and their restrictions for cohabiting were expressed as clauses; ``if dog, then cat''.
-In the following, we translate the disambiguation of a sentence into a SAT-problem.
+In this section, we translate the disambiguation of a sentence into a SAT-problem.
 We demonstrate our encoding with an example in Spanish, shown in Figure~\ref{fig:laCasaGrande}: {\em la casa grande}. % (`the big house'). 
 The first word, {\em la}, is ambiguous between a definite article (`the') or an object pronoun (`her'), and the second word, {\em casa}, can be a noun (`house') or a verb form (`marries').
 The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$ 
 `the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'. 
 However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whole segment into a noun phrase: `the big house'.
+
+Firstly, we translate input sentences into variables and rules into clauses.
+Secondly, we disambiguate the sentence by asking for a solution. 
+Finally, we consider different ordering schemes and conflict handling.
+
+
+\subsection{Encoding the input}
+
 
 \begin{figure}[h]
 \centering
@@ -192,7 +185,9 @@ $$\begin{array}{ c | c | c | c | c}
 \label{fig:modelsOneRule}
 \end{figure}
 
-The reader may notice that this is not a particularly exciting result. A standard CG would just do what it is told and remove the verb, not give 5 different interpretations for a single rule.
+
+It seems like SAT-CG does worse than any standard CG implementation:
+the latter would just remove the verb, not give 5 different interpretations for a single rule.
 But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN$. The new clause
 %, together with $\laDet \Rightarrow \neg \casaV$, 
 prohibits the combination $\laPrn \ \casaN$, which rules out three models out of five. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
@@ -221,13 +216,13 @@ In contrast, a sequential CG engine applies each rule individually, and it canno
 The CG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
 
 To finish our FSIG example, let us add one more rule: \t{REMOVE v IF (1 adj)}, and the corresponding clause $\grandeAdj \Rightarrow \neg \casaV$. This clause will rule out Model~2 of Figure~\ref{fig:modelsTwoRules}, and we will get Model~1 as the unique solution. 
-Notice that none of the three rules has targeted the word \la{}; still it has become unambiguous. 
+We can see another benefit in having deeper connections between rules: none of the three rules has targeted the word \la{}, still it has become unambiguous. 
 
-Now, this is all very nice, but the present thesis is not called ``Implementing FSIG with a SAT-solver''. 
-However, understanding the translation of rules to implications is vital to the rest of this thesis, and FSIG provides, arguably, a simpler starting point.
-In the following sections, we will discuss the concepts of conflict resolution and ordering of the rules. 
-Firstly, we show two ways to handle conflicts in the parallel setting, 
-and secondly, we consider an alternative method for a sequential SAT-encoding.
+% Now, this is all very nice, but the present thesis is not called ``Implementing FSIG with a SAT-solver''. 
+% However, understanding the translation of rules to implications is vital to the rest of this thesis, and FSIG provides, arguably, a simpler starting point.
+% In the following sections, we will discuss the concepts of conflict resolution and ordering of the rules. 
+% Firstly, we show two ways to handle conflicts in the parallel setting, 
+% and secondly, we consider an alternative method for a sequential SAT-encoding.
 
 
 % We have given a minimal description of SAT-based implementation. 
@@ -257,124 +252,55 @@ The truth is that pure FSIG is very brittle: each and every rule in the set must
 \end{figure}
 
 The order clearly demonstrates the course of action: ``if \todo{Foo} is preceded by \todo{Bar}, then remove/select \todo{Baz}; then, move on to other rules; finally, if \todo{Foo} is still ambiguous, select/remove \todo{Quux}.'' 
-Comparing the success of CG to FSIG, one may speculate that the strictly sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to FSIG, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
+Comparing the success of CG to FSIG, one may speculate that the sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to FSIG, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
 If two rules target the same cohort, the first mentioned gets to apply, and removes the target. When the first rule has acted, the second rule is not even considered, because it would remove the last reading.
-%After that, the second one would not even be considered, because of the default rule, which prohibits removing the last reading.
+
 
 % In the carefully crafted examples, we have ignored the careful mode: \t{IF (-1C det)} `if the previous word is unambiguously determiner'. 
 Ideally, both ways of grammar writing should yield similar results:
 sequential CG rules are more imperative, and FSIG rules are more declarative.
-The problem of conflicts in FSIG still remains---can we use an alternative way to handle conflicts in the unordered scheme?
+But the problem of conflicts in FSIG still remains. 
+In the following, we present two solutions: 
+in the first one, we emulate ordering in choosing which clauses to keep, and in the second one, we maximise the number of rule applications. 
+
+
+
+
+
+
 %
-% Recall the notion of heuristic rule order from Section~\ref{sec:ordering}: the rules are chosen based on how well they match the context. A longer rule is a more exact match than a shorter rule, and thus preferred. The heuristic rule order is still an order, though; it does not tell us what to do, when the two rules have already created clauses.
-%
-Recall the heuristic rule order from Section~\ref{sec:ordering}. The heuristic order is asking: ``out of all the rules that target this cohort, which one is the most exact match?'' If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or pick the one which is mentioned first in the rule set.
 
-For an unordered scheme, we can ask a more complex question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
-Answering this is beyond the means of previous FSIG engines \todo{is this so?}, but with a SAT-solver, we can answer this question. 
-
-\paragraph{Maximisation} 
-Each rule application to a concrete cohort produces a clause,
-and the whole rule set applied to the whole sentence produces 
-a large formula.In an ideal case, all the rules are well-behaved, 
-and the whole formula is satisfiable. However, if the whole formula 
-is unsatisfiable, we may still ask for an assignment that satisfies 
-the maximum number of the clauses; that is, rule applications. 
-If the grammar is good, we hope that the interaction between 
-the appropriate rules would make a large set of clauses that 
-fit together, and the inapplicable rule would not ``fit in''.
-
-%In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
-
-This corresponds loosely to the common design pattern in CGs, 
-where there is a number of rules with the same target: the more 
-secure rules are introduced first, with a catch-all rule as 
-the last resort, to be applied only if none of the previous rules 
-has met the conditions.
-The order-based heuristic in the traditional CG is replaced by a more
-holistic behaviour: if the rules conflict, discard the one that seems
-like an outlier.
-
-Assuming our rules are \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}, the revised algorithm goes as follows:
-
-\begin{enumerate}
-\item Apply \t{REMOVE v IF (-1 det)}
- \begin{itemize}
-    \item Create a clause: $\laDet \Rightarrow \neg \casaV$
- \end{itemize}
-\item Apply \t{REMOVE v IF (1 adj)} 
- \begin{itemize}
-    \item Create a clause: $\grandeAdj \Rightarrow \neg \casaV$
- \end{itemize}
-\item Apply \t{REMOVE n}
- \begin{itemize}
-    \item Create a clause: $\neg \casaN$
- \end{itemize}
-
-\item Solve with all clauses:
-  $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
-      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
-      \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
-      \ob{\neg \casaN}^{\t{REMOVE n}} \}$
-\item No solution for all clauses: try to find a solution that satisfies maximally many clauses; however, default rule cannot be overridden.
-\end{enumerate}
-
-If a rule matches multiple cohorts, it creates a separate clause for each instance.
-Thus, it is no problem if the rule causes a conflict in only one cohort---say, we 
-have another potential noun in the sentence, but there is no other rule which targets 
-its other readings. We can discard only the conflicting instances: we prevent 
-\t{REMOVE n} from applying to $\casaN$, but it still may apply to other nouns.
-
-
-The problem of satisfying maximum amout of clauses is known as MaxSAT \todo{cite}.
-Whereas SAT is a decision problem, MaxSAT is an optimisation problem.
-However, optimisation can be expressed as a sequence of decision problems:
-first, we compute a solution, then we add a constraint ``the solution must be better than the one just found'', and ask for another one. 
-This process repeats until a better solution cannot be found; then we accept the 
-latest solution.
-
-Now let us define how is one solution ``better'' than other. 
-To start, remember that implications can be translated into disjunctions: 
-$\laDet \Rightarrow \neg\casaV$ is equivalent to $\neg\laDet \vee \neg\casaV$. 
-We can associate helper variables to these clauses with a simple trick.
-For each clause, we create a new variable $v$. Then we add 
-the negation of this variable to the corresponding clause, 
-so that it becomes $\neg{}v \vee \neg\laDet \vee \neg\casaV$.
-Then, we ask for a solution where maximally many of these $v$s are true.
-In other words, the goodness of a solution is measured in how many of 
-the helper variables are true.
-
-What happens if a given $v$ is false? The SAT-solver has received all its clauses 
-with the added $\neg{}v$. 
-\todo{Does it make sense to translate this back into an implication and explain on that level?}
-If we know that $\neg{}v \vee \neg\laDet \vee \neg\casaV$ 
-and $\neg{}v$, we see immediately that the whole disjunction evaluates to true.
-%can discard the rest of the clause---it is a disjunction, and if $\neg{}v$ is true, then the whole disjunction is true.
-This means that if $v$ is false, then the SAT-solver can discard the rest of the clause; namely, the part that came from the rule application. %does not need to care about its respective clause.
-Conversely, if $v$ is true, then its negation $\neg{}v$ is eliminated from the clause, 
-and the SAT-solver will have to deal with the original $\neg\laDet \vee \neg\casaV$.
-
-How, then, are the helper $v$s maximised? 
-The algorithm used in our implementation is like something in \cite{een06minisatplus}.
-
-
-
-
-% In the following, we show a modification to the parallel scheme, 
-% where the clauses are added to the formula incrementally, 
-% making sure that each new clause fits with the previously added.
-% %This allows us to emulate order, but still keep the benefits from the parallel
-% We contrast this with an alternative scheme; one that will be used in Chapter~\ref{chapterCGana}.
 
 
 
 \paragraph{Emulating order} 
-For the second option, we keep the parallel base: the cohort vectors are not manipulated between the rule applications, thus the 100\textsuperscript{th} rule still accesses the same variables as the first rule.
-%the cohorts are encoded as vectors of variables, and the rules form implications at each application.
-This means that all the benefits of parallel execution still hold: the three rules, which all target \emph{casa} may still disambiguate \emph{la}, without \emph{la} ever being the target.
 
-In this modified scheme, we establish order by introducing the clauses to the SAT-solver one by one. 
-Again, we have the same rule set: \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}. Now the procedure goes as follows:
+We keep the parallel base, but use ordering as information for solving conflicts.
+This means that all the benefits of parallel execution still hold: the three rules, which all target \emph{casa}, may still disambiguate \emph{la}, without \emph{la} ever being the target.
+If all the rules play well together, no rule applications need to be removed; 
+however, in the case shown in Figure~\ref{fig:ruleOrder}, the clauses created by 
+\todo{REMOVE quux} would be ignored, in favour of the clauses that are created by earlier rules.
+
+
+
+% we keep the parallel base: the cohort vectors are not manipulated between the rule applications, thus the 100\textsuperscript{th} rule still accesses the same variables as the first rule.
+%the cohorts are encoded as vectors of variables, and the rules form implications at each application.
+
+In this modified scheme, we introduce the clauses to the SAT-solver one by one, 
+and attempt to solve after each clause. If the SAT-problem after the 50$^{th}$ rule 
+has a solution, we accept all the clauses created by rule 50, and commit to them.
+If rule 51 causes a conflict, we prioritise the previous, well-behaving subset of
+50 rules, and discard the conflicting clauses created by rule 51.
+
+If a rule matches multiple cohorts, it creates a separate clause for each instance.
+Thus, it is no problem if the rule causes a conflict in only one cohort---say, we 
+have another potential Quux in the sentence, but there is no other rule which targets 
+its other readings. We can discard only the conflicting instances: we prevent 
+\todo{REMOVE quux} from applying to $foo$, but it still may apply to other $foo$s.
+
+
+Assuming our rule set is \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}, the revised algorithm goes as follows:
+
 
 \begin{enumerate}
 \item Apply \t{REMOVE v IF (-1 det)}
@@ -407,8 +333,116 @@ Again, we have the same rule set: \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 
  \end{itemize}
 \end{enumerate}
 
-The SAT-solver starts out with a prefix of rules, attempts to solve, and if it succeeds, only then it commits to the latest rule.
-Similarly to the maximisation-based scheme, we create a clause for each instance of the rule application, and in the case of a conflict, we can only discard the clause targeting the offending cohort, not the whole sentence.
+
+
+
+
+
+
+\paragraph{Maximisation} 
+
+Ultimately, solving conflicts means asking the question ``which rule is the best one to apply''
+Ordering substitutes the question with ``which rule comes first in the grammar''.
+In contrast, the heuristic rule order asks ``out of all the rules that target this cohort, which one has the best matching context?''
+If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or fall back to ordering.
+
+However, there is a more holistic question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
+Answering this is beyond the means of previous FSIG implementations \todo{check if so}, but with a SAT-solver, we can answer this question. 
+
+
+Each rule application to a concrete cohort produces a clause,
+and the whole rule set applied to the whole sentence produces 
+a large formula. In an ideal case, all the rules are well-behaved, 
+and the whole formula is satisfiable. However, if the whole formula 
+is unsatisfiable, we may still ask for an assignment that satisfies 
+the maximum number of the clauses; that is, rule applications. 
+If the grammar is good, we hope that the interaction between 
+the appropriate rules would make a large set of clauses that 
+fit together, and the inapplicable rule would not ``fit in''.
+
+%In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
+
+
+The order-based heuristic in the traditional CG is replaced by a more
+holistic behaviour: if the rules conflict, discard the one that seems
+like an outlier.
+
+We keep the rule set \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}.
+Now the procedure goes as follows:
+
+\begin{enumerate}
+\item Apply \t{REMOVE v IF (-1 det)}
+ \begin{itemize}
+    \item Create a clause: $\laDet \Rightarrow \neg \casaV$
+ \end{itemize}
+\item Apply \t{REMOVE v IF (1 adj)} 
+ \begin{itemize}
+    \item Create a clause: $\grandeAdj \Rightarrow \neg \casaV$
+ \end{itemize}
+\item Apply \t{REMOVE n}
+ \begin{itemize}
+    \item Create a clause: $\neg \casaN$
+ \end{itemize}
+
+\item Solve with all clauses:
+  $\{ \ob{\laDet \! \vee \laPrn, ...}^{\text{default rule}}, \ 
+      \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
+      \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
+      \ob{\neg \casaN}^{\t{REMOVE n}} \}$
+\item No solution for all clauses: try to find a solution that satisfies maximally many clauses; however, default rule cannot be overridden.
+\end{enumerate}
+
+Similarly to the order-based heuristic, we create a clause for each 
+instance of the rule application. In the case of a conflict, we can 
+only discard the clauses targeting the offending cohort, not the whole sentence.
+
+
+The problem of satisfying maximum amout of clauses is known as \emph{Maximum Satisfiability} (MaxSAT).
+Whereas SAT is a decision problem, MaxSAT is an optimisation problem.
+However, optimisation can be expressed as a sequence of decision problems:
+first, we compute a solution, then we add a constraint ``the solution must be better than the one just found'', and ask for another one. 
+This process repeats until a better solution cannot be found; then we accept the 
+latest solution.
+
+Now let us define how is one solution ``better'' than other. 
+To start, remember that implications can be translated into disjunctions: 
+$\laDet \Rightarrow \neg\casaV$ is equivalent to $\neg\laDet \vee \neg\casaV$. 
+We can associate helper variables to these clauses with a simple trick.
+For each clause, we create a new variable $v$. Then we add 
+the negation of this variable to the corresponding clause, 
+so that it becomes $\neg{}v \vee \neg\laDet \vee \neg\casaV$.
+Then, we ask for a solution where maximally many of these $v$s are true,
+and the question for improvement becomes ``can we make any more of the $v$s true''?
+
+What happens if a given $v$ is false? The SAT-solver has received all its clauses 
+with the added $\neg{}v$. 
+%Now, if we know that $\neg{}v$, then we know that the whole disjunction is true, without even considering the rest.
+%If we have a long disjunction and we know its first argument is true, then we see
+%immediately that the whole disjunction is true.
+Now, if $v$ is false, that is, $\neg{}v$ is true, then we know that 
+the whole disjunction $\neg{}v \vee \neg\laDet \vee \neg\casaV$ is true.
+This means that the SAT-solver can ignore the rest of the clause---the part that comes from the rule application.
+%Since this part comes from the rule application, the effect of this trick with $v$ means that the original rule application can be ignored.
+%It knows already that the whole disjunction is true, regardless if the original rule applies or not.
+Conversely, if $v$ is true, then its negation $\neg{}v$ is eliminated from the clause, 
+and the SAT-solver must take into account the original $\neg\laDet \vee \neg\casaV$.
+
+
+How, then, are the helper $v$s maximised? 
+For a problem with $n$ variables, there are $2^n$ possible assignments; 
+it is not practical to try them all and choose the solution with most $v$s.
+\formulation{However, there are methods for ordering different solutions, even before attempting to solve.
+Then, if we have tried the solutions with 10 $v$s and failed, we know that no solution with 11 or more $v$s would work either. The algorithm used in SAT-CG is like the one in \cite{een06minisatplus}.}
+
+
+
+
+
+% In the following, we show a modification to the parallel scheme, 
+% where the clauses are added to the formula incrementally, 
+% making sure that each new clause fits with the previously added.
+% %This allows us to emulate order, but still keep the benefits from the parallel
+% We contrast this with an alternative scheme; one that will be used in Chapter~\ref{chapterCGana}.
 
 
 
@@ -547,6 +581,13 @@ that there are other reasons for the worse performance.
 This is to be expected, as SAT-CG is currently just a naive
 proof-of-concept implementation with no optimisations.}
 
+However, we notice that SAT-CG performs, in effect, a different task from VISL CG-3.
+Perhaps a more accurate comparison would be a state-of-the-art FSIG parser.
+Unfortunately, there have been none since the 1990s \todo{cite!}.
+We may still compare the FSIG parsers from 1998 to the CG parsers from 1998:
+\cite{voutilainen1998} reports that \todo{the FSIG engine is unable to find a correct parse for some long sentences}; whereas \cite{tapanainen1999phd} reports an average between 2 and 30 seconds for sentences of length 5--50 words; execution time grows in a manner that follows $O(n log\!n)$.
+Compared to those results, a modern SAT-based FSIG engine is much closer to a modern CG engine.
+
 
 \begin{table}
   \centering
@@ -631,18 +672,24 @@ In the examples, we have overlooked the C operator, and made a lot of noise how 
 But SAT-CG is perfectly fine with C: it can start disambiguating, even if none of the rules is able to act on its own. 
 
 
-
-
+% This corresponds loosely to the common design pattern in CGs, 
+% where there is a number of rules with the same target: the more 
+% secure rules are introduced first, with a catch-all rule as 
+% the last resort, to be applied only if none of the previous rules 
+% has met the conditions.
 
 \section{Summary}
 
-In this section, we have accidentally reinvented FSIG, and then spent a lot of time trying to convince ourselves that it's still okay.
-
+In this section, we started from the parallels between CG and logic:
+the rules express what is true (`SELECT') and false (`REMOVE'), under certain conditions (`IF').
+Plugging this into a SAT-solver, we get a working CG implementation---that is, parallel CG, known as FSIG. 
 To alleviate the brittleness of FSIG, we developed two approaches to discard conflicting rule applications.
 The first one is based on maximisation; trying to make as many clauses as possible apply, and the second one is based on order; introducing clauses one by one, and assuming that the previous clauses are true.
 
-Interesting alternative for a CG engine, but loses in practicality: performance and lack of transparency for grammar writers.
+
+As a conclusion, SAT-solver provides an interesting alternative for a CG engine, but loses in practicality: performance and lack of transparency for grammar writers.
 Perhaps the biggest contribution in this work has been to the FSIG community, with a practical implementation and ways to get around conflicts.
+%CG and FSIG grammars are written in different styles
 For the next chapter, we will use the benefits of SAT for analysing CGs.
 
 %we found the alternative scheme in Section~\ref{sec:orderedScheme} promising for grammar analysis. 
