@@ -20,6 +20,27 @@
 
 \def\defRule{``do not remove the last reading''}
 
+\def\ventero{\emph{El ventero, que, como está dicho, era un poco socarrón y ya tenía algunos
+barruntos de la falta de juicio de su huésped, acabó de creerlo cuando
+acabó de oírle semejantes razones, y, por tener qué reír aquella noche,
+determinó de seguirle el humor; y así, le dijo que andaba muy acertado en
+lo que deseaba y pedía, y que tal prosupuesto era propio y natural de los
+caballeros tan principales como él parecía y como su gallarda presencia
+mostraba; y que él, ansimesmo, en los años de su mocedad, se había dado a
+aquel honroso ejercicio, andando por diversas partes del mundo buscando sus
+aventuras, sin que hubiese dejado los Percheles de Málaga, Islas de Riarán,
+Compás de Sevilla, Azoguejo de Segovia, la Olivera de Valencia, Rondilla de
+Granada, Playa de Sanlúcar, Potro de Córdoba y las Ventillas de Toledo y
+otras diversas partes, donde había ejercitado la ligereza de sus pies,
+sutileza de sus manos, haciendo muchos tuertos, recuestando muchas viudas,
+deshaciendo algunas doncellas y engañando a algunos pupilos, y, finalmente,
+dándose a conocer por cuantas audiencias y tribunales hay casi en toda
+España; y que, a lo último, se había venido a recoger a aquel su castillo,
+donde vivía con su hacienda y con las ajenas, recogiendo en él a todos los
+caballeros andantes, de cualquiera calidad y condición que fuesen, sólo por
+la mucha afición que les tenía y porque partiesen con él de sus haberes, en
+pago de su buen deseo.}}
+
 
 \chapter{CG as a SAT-problem}
 \label{chapterCGSAT}
@@ -339,13 +360,13 @@ Assuming our rule set is \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t
 
 \paragraph{Maximisation} 
 
-Ultimately, solving conflicts means asking the question ``which rule is the best one to apply''
-Ordering substitutes the question with ``which rule comes first in the grammar''.
-In contrast, the heuristic rule order asks ``out of all the rules that target this cohort, which one has the best matching context?''
+Solving conflicts means that we have multiple rules that target the same reading, and we must choose which rule to apply.
+Strict ordering substitutes the question with a simpler one: ``which rule comes first in the grammar?''
+Heuristic rule order asks ``out of all the rules that target this cohort, which one has the best matching context?''
 If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or fall back to ordering.
 
-However, there is a more holistic question: ``out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
-Answering this is beyond the means of previous FSIG implementations \todo{check if so}, but with a SAT-solver, we can answer this question. 
+However, there is another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
+Addressing this is beyond the means of previous FSIG implementations \todo{check if so}, but with a SAT-solver, we can answer this question. 
 
 
 Each rule application to a concrete cohort produces a clause,
@@ -359,11 +380,9 @@ the appropriate rules would make a large set of clauses that
 fit together, and the inapplicable rule would not ``fit in''.
 
 %In the SAT-world, this means that the largest number of satisfiable clauses would include the group of well-fitting rules, and leave the odd rule out.
-
-
-The order-based heuristic in the traditional CG is replaced by a more
-holistic behaviour: if the rules conflict, discard the one that seems
-like an outlier.
+% The order-based heuristic in the traditional CG is replaced by a more
+% holistic behaviour: if the rules conflict, discard the one that seems
+% like an outlier.
 
 We keep the rule set \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}.
 Now the procedure goes as follows:
@@ -390,9 +409,10 @@ Now the procedure goes as follows:
 \item No solution for all clauses: try to find a solution that satisfies maximally many clauses; however, default rule cannot be overridden.
 \end{enumerate}
 
-Similarly to the order-based heuristic, we create a clause for each 
+Similarly to the previous, order-based scheme, we create a clause for each 
 instance of the rule application. In the case of a conflict, we can 
-only discard the clauses targeting the offending cohort, not the whole sentence.
+only discard the clauses targeting the offending cohort, but the rule may apply 
+elsewhere in the sentence.
 
 
 The problem of satisfying maximum amout of clauses is known as \emph{Maximum Satisfiability} (MaxSAT).
@@ -540,31 +560,6 @@ We include evaluation for the two schemes presented in previous sections:
 \subsection{Performance against VISL CG-3}
 
 
-
-We took a manually tagged
-corpus\footnote{\url{https://svn.code.sf.net/p/apertium/svn/branches/apertium-swpost/apertium-en-es/es-tagger-data/es.tagged}}
-containing approximately 22,000 words of Spanish news text, 
-and a small constraint grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}}, produced independently of the authors.
-% We ignored substitute rules, but kept subreadings and unification, even though our implementation doesn't handle them.
-We kept only \textsc{select} and \textsc{remove} rules, which left us 261 rules.
-With this setup, we produced an ambiguous version of the tagged
-corpus, and ran both SAT-CG and VISL CG-3 on it.
-In addition, we wrote a small grammar of 19 rules
-To add middle ground, we chose a random subset of 99 rules from the original grammar: 
-the purpose is to demonstrate the effect of the number of rules.
-
-Table~\ref{table:fscore} shows F-scores and execution times for these three variants.\satcgMax is the parallel scheme with maximisation and
-\satcgOrd is the parallel scheme where rule applications are introduced one by one.
-\todo{Treating the original corpus as the gold standard, the disambiguation
-by  VISL CG-3 achieves F-score of 82.6 \%, ordered SAT-CG 81.5 \%  and
-unordered SAT-CG 79.2 \%.}
-
-We did not test with other languages or text genres due to the lack of
-available gold standard.
-
-
-
-
 \begin{table}[h]
 %   \begin{tabular}{ c | c c | c c | c c }
 %       & \multicolumn{2}{c}{19 rules}  
@@ -590,58 +585,86 @@ available gold standard.
   \label{table:fscore}
 \end{table}
 
+We took a manually tagged
+corpus\footnote{\url{https://svn.code.sf.net/p/apertium/svn/branches/apertium-swpost/apertium-en-es/es-tagger-data/es.tagged}}
+containing approximately 22,000 words of Spanish news text, 
+and a small constraint grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}}, produced independently of the authors.
+% We ignored substitute rules, but kept subreadings and unification, even though our implementation doesn't handle them.
+We kept only \textsc{select} and \textsc{remove} rules, which left us 261 rules.
+With this setup, we produced an ambiguous version of the tagged
+corpus, and ran both SAT-CG and VISL CG-3 on it.
+In addition, we wrote a small grammar of 19 rules
+To add middle ground, we chose a random subset of 99 rules from the original grammar: 
+the purpose is to demonstrate the effect of the number of rules.
+
+Table~\ref{table:fscore} shows F-scores and execution times for these three variants.\satcgMax is the parallel scheme with maximisation and
+\satcgOrd is the parallel scheme where rule applications are introduced one by one.
+\todo{Treating the original corpus as the gold standard, the disambiguation
+by  VISL CG-3 achieves F-score of 82.6 \%, ordered SAT-CG 81.5 \%  and
+unordered SAT-CG 79.2 \%.}
+
+We did not test with other languages or text genres due to the lack of
+available gold standard.
+
+
+
 
 \subsection{Execution time}
 
 
-\begin{table}
+\begin{table}[h]
   \centering
-  \begin{tabular}{ r | c c c | c c c }
- %      & \multicolumn{3}{c}{Full novel: 384,155 words} & \multicolumn{3}{c}{Longest sentence: x words} \\
-     \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} 
-                                        & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
-      19   & 39.7s &  22.1s   & 4.2s    & ? & ? & ? \\ 
-      99   & 1m34.1s & 1m14.9s & 6.1s   & ? & ? & ? \\ 
-      261  & 2m54.1s & 2m31.6s & 10.7s  & ? & ? & ? \\ 
+  \begin{tabular}{ r | c c c }
+     \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
+      19   & 39.7s &  22.1s   & 4.2s    \\ 
+      99   & 1m34.1s & 1m14.9s & 6.1s   \\ 
+      261  & 2m54.1s & 2m31.6s & 10.7s  \\ 
    \end{tabular}
   \caption{Execution times for subsets of the Spanish grammar, disambiguating Don Quijote (384,155 words).}
   \label{table:time}
 \end{table}
 
-\begin{table}
+
+\paragraph{Number of rules vs. number of words}
+
+In addition to the 22,000-word corpus of news text,
+we tested the performance by parsing Don Quijote (384,155 words) with
+the same Spanish grammars as in the previous experiment. 
+We added this experiment in order to stress test our implementation.
+Don Quijote contains, on average, longer sentences: the news text has the average sentence length of 14.1 words, median 11 words and maximum 72 words; Don Quijote has, respectively, almost double for each of these numbers: average 25.8, median 22 and maximum 147 words.
+For these numbers, we have included colons and semicolons as well as full stops, because
+the grammar includes those as delimiters.
+Table~\ref{table:time} shows execution times compared to VISL CG-3;
+
+
+For both systems, the number of rules in the grammar affects the performance more than the word count.
+
+\paragraph{Sentence length} 
+In addition, we explored the effect of sentence length further.
+When split by just full stops, the longest sentence in Don Quijote consists of 283 tokens\footnote{The longest sentence in Don Quijote: \ventero}, including punctuation. In Table~\ref{table:timeVentero}, we see this sentence parsed, on the right as a single unit, and on the left, we split it in three parts, at the semicolons. In Table~\ref{table:time}, it was already split by semicolons---as we can see, parsing the 283 tokens as a single unit takes more time than parsing the whole 384,155 tokens.
+Even with the split, this sentence is responsible for good 16 \% of the parsing time of the whole novel. 
+
+
+% 
+
+\begin{table}[ht]
   \centering
   \begin{tabular}{ r | c c c | c c c }
-       & \multicolumn{3}{c}{Longest sentence: 283 tokens} & \multicolumn{3}{c}{Longest sentence split at semicolons: x + 126 + y tokens} \\
+       & \multicolumn{3}{c}{Whole sentence: 283 tokens} & \multicolumn{3}{c}{Split: x + 126 + y tokens} \\
      \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} 
                                         & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
       19   & 12s    &  ?  & 0.021s   & 3.2s   & ? & 0.021s \\ 
       99   & ?      &  ?  & ?        & ?      & ? & ? \\ 
       261  & 11m 2s &  ?  & 0.052s   & 1m 47s & ? & 0.028s \\ 
    \end{tabular}
-  \caption{Experiments with sentence length: parsing the longest sentence in Don Quijote. On the left, the complete 283-token sentence; on the right, split in three parts.}
-  \label{table:time}
+  \caption{Experiments with sentence length: parsing the longest sentence in Don Quijote. On the left, the complete 283-token sentence; on the right, split at semicolons into three parts.}
+  \label{table:timeVentero}
 \end{table}
 
-In addition to the 22,000-word corpus of news text,
-we tested the performance by parsing Don Quijote (384,155 words) with
-the same Spanish grammars as in the previous experiment. 
-Don Quijote contains, on average, longer sentences: \todo{make a plot}.
 
-Table~\ref{table:time} shows execution times compared to VISL CG-3;
-
-The left column contains the time for the full novel, and the right column for the longest sentence, of 126 tokens\footnote{y que él, ansimesmo, en los años de su mocedad, se había dado a
-aquel honroso ejercicio, andando por diversas partes del mundo buscando sus
-aventuras, sin que hubiese dejado los Percheles de Málaga, Islas de Riarán,
-Compás de Sevilla, Azoguejo de Segovia, la Olivera de Valencia, Rondilla de
-Granada, Playa de Sanlúcar, Potro de Córdoba y las Ventillas de Toledo y
-otras diversas partes, donde había ejercitado la ligereza de sus pies,
-sutileza de sus manos, haciendo muchos tuertos, recuestando muchas viudas,
-deshaciendo algunas doncellas y engañando a algunos pupilos, y, finalmente,
-dándose a conocer por cuantas audiencias y tribunales hay casi en toda
-España}.
-% For both systems, the number of rules in the grammar affects the performance more than the word count.
-From the SAT solving side, maximisation is the most costly operation. 
-Emulating order is slightly faster, likely because the maximisation problems are smaller.
+From the SAT-solving side, maximisation is the most costly operation. 
+Emulating order is slightly faster: maximisation is not needed, but
+the solve function is performed after each clause.
 In any case, SAT does not seem to be the bottleneck: with 261 rules,
 the maximisation function was called 147,253 times, and with 19 rules,
 132,255 times, but 
@@ -650,8 +673,10 @@ the maximisation function was called 147,253 times, and with 19 rules,
 %needed less than 14.
 the differences in the execution times are much larger, which suggests
 that there are other reasons for the worse performance. 
-This is to be expected, as SAT-CG is currently just a naive
+This is to be expected, as SAT-CG is a rather naive
 proof-of-concept implementation with no optimisations.
+
+\paragraph{Comparison to FSIG}
 
 However, we notice that SAT-CG performs, in effect, a different task from VISL CG-3.
 Perhaps a more accurate comparison would be against a state-of-the-art FSIG engine; 
