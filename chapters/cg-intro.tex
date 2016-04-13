@@ -476,14 +476,14 @@ In parallel execution, both \emph{w2} and \emph{w3} lose their verb tag; in sequ
 
 %Parallel and sequential would return a different result for the following passage: 
 
-
+\begin{figure}[h]
 \begin{tabular}{p{0.5cm} l   p{0.5cm} l    p{0.5cm} l}
 \t{"<w1>"}      &  & \t{"<w2>"}    & & \t{"<w3>"}      & \\
    & \t{"w1" noun} & & \t{"w2" noun} & & \t{"w3" noun}   \\
    & \t{"w1" verb} & & \t{"w2" verb} & & \t{"w3" verb} 
 
 \end{tabular}
-
+\end{figure}
 
 Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
 If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}: there are less possible rules that may apply. 
@@ -630,7 +630,7 @@ The aforementioned task is easy partly because the input already contains so muc
 
 This said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
 
-We draw inspiration from \cite{tapanainen1999phd}, who demonstrates the expressive power of another reductionist parsing formalism, Functional Dependency Grammar \todo{cite!!!}.
+We draw inspiration from \cite{tapanainen1999phd}, who demonstrates the expressive power of another reductionist parsing formalism, Functional Dependency Grammar \cite{tapanainen97fdg}.
 Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language, and the context-sensitive $a^nb^nc^n$. 
 Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can make such leap quite easily. In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading. We call the set of readings $\Sigma$. In addition, we may need some helper labels $\Sigma'$, such as $\{even, odd, start, end\}$. We add the additional requirement that the output of the grammar may only contain readings in $\Sigma$.
 
