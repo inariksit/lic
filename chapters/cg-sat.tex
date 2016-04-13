@@ -40,9 +40,7 @@ dependencies between the tags than standard CG.
 Applying logic to reductionist grammars has been explored earlier by \cite{lager98,lager_nivre01}, but there has not been, to our knowledge, a full logic-based CG implementation; at the time, logic programming was too slow to be used for tagging or parsing. 
 Since those works, SAT-solving techniques have improved significantly \cite{marques_silva2010}, and they are used in domains such as microprocessor design and computational 
 biology---these problems easily match or exceed CG in complexity. 
-In addition, SAT-solving brings us more practical tools
-
-Thanks to these advances, we were able to revisit the idea and develop it further. 
+In addition, SAT-solving brings us more practical tools, such as maximisation, which enables us to implement novel conflict resolution for parallel CG.
 
 
 The content in this chapter is based on \cite{listenmaa_claessen2015}.
@@ -216,7 +214,7 @@ In contrast, a sequential CG engine applies each rule individually, and it canno
 The CG engine would have just applied one of the rules---say, the first one, removed the verb and stopped there. If another rule later in the sequence removes the determiner, there is no way to restore the verb. 
 
 To finish our FSIG example, let us add one more rule: \t{REMOVE v IF (1 adj)}, and the corresponding clause $\grandeAdj \Rightarrow \neg \casaV$. This clause will rule out Model~2 of Figure~\ref{fig:modelsTwoRules}, and we will get Model~1 as the unique solution. 
-We can see another benefit in having deeper connections between rules: none of the three rules has targeted the word \la{}, still it has become unambiguous. 
+We can see another benefit in allowing connections between rules: none of the three rules has targeted \la{}, still it has become unambiguous. 
 
 % Now, this is all very nice, but the present thesis is not called ``Implementing FSIG with a SAT-solver''. 
 % However, understanding the translation of rules to implications is vital to the rest of this thesis, and FSIG provides, arguably, a simpler starting point.
@@ -238,18 +236,7 @@ This prevents too hasty decisions, such as removing $\casaV$ before we know the 
 However, ignoring the order means that we miss significant information in the rule set. 
 The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}---taken from an actual grammar\footnote{\url{http://link.to/grammar}}---will be well-behaved in a strict and sequential CG. Its behaviour will be less clear in a heuristic and sequential CG, but in FSIG, it will definitely cause a conflict, rendering the whole grammar useless.
 
-\begin{figure}
-\centering
-   \begin{verbatim}
-   SECTION:good_rules
-   REMOVE baz IF (-1 bar) ;
 
-   SECTION:heuristic   
-   REMOVE quux ;
-   \end{verbatim}
-\label{fig:ruleOrder}
-\caption{Example from a XXX grammar}
-\end{figure}
 
 The order clearly demonstrates the course of action: ``if \todo{Foo} is preceded by \todo{Bar}, then remove/select \todo{Baz}; then, move on to other rules; finally, if \todo{Foo} is still ambiguous, select/remove \todo{Quux}.'' 
 Comparing the success of CG to FSIG, one may speculate that the sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to FSIG, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
@@ -267,7 +254,18 @@ in the first one, we emulate ordering in choosing which clauses to keep, and in 
 
 
 
+\begin{figure}[ht]
+\centering
+   \begin{verbatim}
+   SECTION:good_rules
+   REMOVE baz IF (-1 bar) ;
 
+   SECTION:heuristic   
+   REMOVE quux ;
+   \end{verbatim}
+\label{fig:ruleOrder}
+\caption{Example from a XXX grammar}
+\end{figure}
 %
 
 
@@ -528,8 +526,7 @@ For evaluation, we measure the performance against the state-of-the-art CG parse
 % both in terms of accuracy and execution time.
 SAT-CG fares slightly worse for accuracy, and significantly worse for execution time.
 The results are presented in more detail in the following sections.
-We include evaluation for three schemes: the original unordered, the original ordered, and the updated ordered.
-
+We include evaluation for the two schemes presented in previous sections: 
 %This suggests that our implementation should not compete with existing
 %state-of-the-art, but rather it has value as a way of relating the CG
 %formalism to wider context in the theory of computer science.
@@ -542,7 +539,7 @@ We include evaluation for three schemes: the original unordered, the original or
 
 \subsection{Performance against VISL CG-3}
 
-\todo{This whole section needs to be updated \\
+
 
 We took a manually tagged
 corpus\footnote{\url{https://svn.code.sf.net/p/apertium/svn/branches/apertium-swpost/apertium-en-es/es-tagger-data/es.tagged}}
@@ -552,21 +549,96 @@ and a small constraint grammar\footnote{\url{https://svn.code.sf.net/p/apertium/
 We kept only \textsc{select} and \textsc{remove} rules, which left us 261 rules.
 With this setup, we produced an ambiguous version of the tagged
 corpus, and ran both SAT-CG and VISL CG-3 on it.
-Treating the original corpus as the gold standard, the disambiguation
+In addition, we wrote a small grammar of 19 rules
+To add middle ground, we chose a random subset of 99 rules from the original grammar: 
+the purpose is to demonstrate the effect of the number of rules.
+
+Table~\ref{table:fscore} shows F-scores and execution times for these three variants.\satcgMax is the parallel scheme with maximisation and
+\satcgOrd is the parallel scheme where rule applications are introduced one by one.
+\todo{Treating the original corpus as the gold standard, the disambiguation
 by  VISL CG-3 achieves F-score of 82.6 \%, ordered SAT-CG 81.5 \%  and
-unordered SAT-CG 79.2 \%. 
+unordered SAT-CG 79.2 \%.}
+
 We did not test with other languages or text genres due to the lack of
-available gold standard.}
+available gold standard.
+
+
+
+
+\begin{table}[h]
+%   \begin{tabular}{ c | c c | c c | c c }
+%       & \multicolumn{2}{c}{19 rules}  
+%                         &  \multicolumn{2}{c}{99 rules} 
+%                                           & \multicolumn{2}{c}{261 rules} \\ 
+%       & F-score & Time  & F-score & Time  & F-score & Time  \\ \hline
+% \textbf{VISL CG-3}
+%       & 82.6 \% & 4.2s  & ??? \% & 6.1s  & ??? \% & 10.7s \\
+% \textbf{\satcgOrd}
+%       & 81.5 \% & 22.1s & ??? \% &1m 15s & ??? \% & 2m 32s \\
+% \textbf{\satcgMax}
+%       & 79.2 \% & 39.7s & ??? \% &1m 34s & ??? \% & 2m 54s \\ 
+\centering
+\begin{tabular}{r | c c | c c | c c}
+ 
+           & \multicolumn{2}{c}{\textbf{\satcgMax}} &  \multicolumn{2}{c}{\textbf{\satcgOrd}} & \multicolumn{2}{c}{\textbf{VISL CG-3}} \\ 
+\textbf{\# rules} & F-score & Time       &  F-score & Time    & F-score & Time \\ \hline
+      19   & 82.6 \% & ?          &  ? \%    & ?       &  ? \%    & ?\\ 
+      99   & 81.5 \% & ?          &  ? \%    & ?       &  ? \%    & ?\\ 
+      261  & 79.2 \% & ?          &  ? \%    & ?       &  ? \%    & ?\\ 
+  \end{tabular}
+\caption{F-scores and execution times for the subset of the Spanish grammar, tested on a gold standard corpus of 22,000 words.}
+  \label{table:fscore}
+\end{table}
+
 
 \subsection{Execution time}
 
-\todo{Whole section needs to be updated \\
 
-We tested the performance by parsing Don Quijote (384,155 words) with
+\begin{table}
+  \centering
+  \begin{tabular}{ r | c c c | c c c }
+ %      & \multicolumn{3}{c}{Full novel: 384,155 words} & \multicolumn{3}{c}{Longest sentence: x words} \\
+     \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} 
+                                        & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
+      19   & 39.7s &  22.1s   & 4.2s    & ? & ? & ? \\ 
+      99   & 1m34.1s & 1m14.9s & 6.1s   & ? & ? & ? \\ 
+      261  & 2m54.1s & 2m31.6s & 10.7s  & ? & ? & ? \\ 
+   \end{tabular}
+  \caption{Execution times for subsets of the Spanish grammar, disambiguating Don Quijote (384,155 words).}
+  \label{table:time}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{ r | c c c | c c c }
+       & \multicolumn{3}{c}{Longest sentence: 283 tokens} & \multicolumn{3}{c}{Longest sentence split at semicolons: x + 126 + y tokens} \\
+     \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} 
+                                        & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
+      19   & 12s    &  ?  & 0.021s   & 3.2s   & ? & 0.021s \\ 
+      99   & ?      &  ?  & ?        & ?      & ? & ? \\ 
+      261  & 11m 2s &  ?  & 0.052s   & 1m 47s & ? & 0.028s \\ 
+   \end{tabular}
+  \caption{Experiments with sentence length: parsing the longest sentence in Don Quijote. On the left, the complete 283-token sentence; on the right, split in three parts.}
+  \label{table:time}
+\end{table}
+
+In addition to the 22,000-word corpus of news text,
+we tested the performance by parsing Don Quijote (384,155 words) with
 the same Spanish grammars as in the previous experiment. 
+Don Quijote contains, on average, longer sentences: \todo{make a plot}.
+
 Table~\ref{table:time} shows execution times compared to VISL CG-3;
-\satcgMax is the parallel scheme with maximisation and
-\satcgOrd is the parallel scheme where rule applications are introduced one by one.
+
+The left column contains the time for the full novel, and the right column for the longest sentence, of 126 tokens\footnote{y que él, ansimesmo, en los años de su mocedad, se había dado a
+aquel honroso ejercicio, andando por diversas partes del mundo buscando sus
+aventuras, sin que hubiese dejado los Percheles de Málaga, Islas de Riarán,
+Compás de Sevilla, Azoguejo de Segovia, la Olivera de Valencia, Rondilla de
+Granada, Playa de Sanlúcar, Potro de Córdoba y las Ventillas de Toledo y
+otras diversas partes, donde había ejercitado la ligereza de sus pies,
+sutileza de sus manos, haciendo muchos tuertos, recuestando muchas viudas,
+deshaciendo algunas doncellas y engañando a algunos pupilos, y, finalmente,
+dándose a conocer por cuantas audiencias y tribunales hay casi en toda
+España}.
 % For both systems, the number of rules in the grammar affects the performance more than the word count.
 From the SAT solving side, maximisation is the most costly operation. 
 Emulating order is slightly faster, likely because the maximisation problems are smaller.
@@ -579,42 +651,20 @@ the maximisation function was called 147,253 times, and with 19 rules,
 the differences in the execution times are much larger, which suggests
 that there are other reasons for the worse performance. 
 This is to be expected, as SAT-CG is currently just a naive
-proof-of-concept implementation with no optimisations.}
+proof-of-concept implementation with no optimisations.
 
 However, we notice that SAT-CG performs, in effect, a different task from VISL CG-3.
-Perhaps a more accurate comparison would be a state-of-the-art FSIG parser.
-Unfortunately, there have been none since the 1990s \todo{cite!}.
-We may still compare the FSIG parsers from 1998 to the CG parsers from 1998:
-\cite{voutilainen1998} reports that \todo{the FSIG engine is unable to find a correct parse for some long sentences}; whereas \cite{tapanainen1999phd} reports an average between 2 and 30 seconds for sentences of length 5--50 words; execution time grows in a manner that follows $O(n log\!n)$.
-Compared to those results, a modern SAT-based FSIG engine is much closer to a modern CG engine.
+Perhaps a more accurate comparison would be against a state-of-the-art FSIG engine; 
+unfortunately, there have been none since the 1990s \todo{cite!}.
+To give some context, let us compare an FSIG engine from 1998 to CG engines from the same time.
+\cite{voutilainen1998} reports the performance of a 3,500-rule CG: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule FSIG grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.  
+As another result for CG, \cite{tapanainen1999phd} reports a range between 2 and 20 seconds for sentences below 50 words; the average time for 15-word sentences is under 5 seconds.
+%the execution time grows in a manner that follows $O(n log\!n)$.
+Based on those figures, it would be interesting to run the same FSIG grammar with SAT-CG, and compare SAT-based approach for the same task.
+The differences between CG and FSIG at the time are big; then again, we cannot ignore the differences in the grammars. \cite{voutilainen1998} points out that the 3,500-rule CG grammar contains local phenomena, whereas the 2,600-rule FSIG grammar has a more global scope, at the expense of processing efficiency.
+For now, we cannot report very strong claims: compared to the situation in 1998, a modern SAT-based FSIG engine is closer to a modern CG engine, given that they operate on the same grammar.
 
 
-\begin{table}
-  \centering
-  % \begin{tabular}{ c | c | c | c }
-  %    \hline
-  %    \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
-  %     19   & 39.7s &  22.1s   & 4.2s\\ 
-  %     99   & 1m34.1s & 1m14.9s & 6.1s \\ 
-  %     261  & 2m54.1s & 2m31.6s & 10.7s \\ 
-
-  \begin{tabular}{ c | c c | c c | c c }
-      & \multicolumn{2}{c}{19 rules}  
-                        &  \multicolumn{2}{c}{99 rules} 
-                                          & \multicolumn{2}{c}{261 rules} \\ 
-      & F-score & Time  & F-score & Time  & F-score & Time  \\ \hline
-\textbf{VISL CG-3}
-      & 82.6 \% & 4.2s  & ??? \% & 6.1s  & ??? \% & 10.7s \\
-\textbf{\satcgOrd}
-      & 81.5 \% & 22.1s & ??? \% &1m 15s & ??? \% & 2m 32s \\
-\textbf{\satcgMax}
-      & 79.2 \% & 39.7s & ??? \% &1m 34s & ??? \% & 2m 54s \\ 
-
-
-  \end{tabular}
-  \caption{F-scores and execution times for subsets of the Spanish grammar, disambiguating Don Quijote (384,155 words).\todo{Rerun tests}}
-  \label{table:time}
-\end{table}
 
 \subsection{Effect on grammar writing}
 
@@ -626,6 +676,8 @@ Lacking an actual CG writer, it is hard to say whether this prediction holds or 
 
 In addition, our modifications to the brittleness of FSIG have let us run CGs as FSIG; something that previous FSIG implementations do not allow.
 As an inverse experiment, it would be interesting to take some FSIG grammars, such as \cite{voutilainen1997fsig}, and run them with a CG engine, then compare the precision and recall. 
+According to the previous literature, CG and FSIG rules are written 
+The largest FSIG grammar is : \cite{voutilainen1998} describes the 2,600-rule English grammar as 
 
 
 The results in Table~\ref{table:time} suggests that that when running grammars that are written
