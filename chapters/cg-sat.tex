@@ -68,8 +68,9 @@ The content in this chapter is based on \cite{listenmaa_claessen2015}.
 As in the original paper, we present a translation of CG rules into logical formulas, and show how to encode it into a SAT-problem.
 This work is implemented as an open-source software SAT-CG\footnote{\url{https://github.com/inariksit/cgsat}}. It uses the high-level library SAT+\footnote{\url{https://github.com/koengit/satplus}}, which is based on MiniSAT \cite{een04sat}.
 We evaluate SAT-CG against the state of the art, VISL CG-3.
-The experimental setup is the same, but we ran the tests again for this thesis: since the writing of  \cite{listenmaa_claessen2015}, we have optimised our program and fixed some bugs; likewise, VISL CG-3 has been updated, and executes faster than what we report in the earlier paper. 
-While the absolute numbers have changed, the relative differences between the running time and F-scores remain as in the paper.
+The experimental setup is the same, but we ran the tests again for this thesis: since the writing of  \cite{listenmaa_claessen2015}, we have optimised our program and fixed some bugs; this 
+makes both execution time and F-scores better than we report in the earlier paper. 
+%Likewise, VISL CG-3 has been updated, and executes faster.
 
 
 \section{Previous work: CG in logic}\label{encoding-in-logic}
@@ -540,13 +541,9 @@ Then, if we have tried the solutions with 10 $v$s and failed, we know that no so
 
 In this section, we report experiments on the two modifications to the parallel scheme: maximisation-based, and ordering by committing to a prefix of rules.
 We evaluate the performance against VISL CG-3 in accuracy and running time; in addition, we offer some preliminary observations on the effect of grammar writing.
-
-
-For evaluation, we measure the performance against the state-of-the-art CG parser VISL CG-3.
-% both in terms of accuracy and execution time.
 SAT-CG fares slightly worse for accuracy, and significantly worse for execution time.
 The results are presented in more detail in the following sections.
-We include evaluation for the two schemes presented in previous sections: 
+
 %This suggests that our implementation should not compete with existing
 %state-of-the-art, but rather it has value as a way of relating the CG
 %formalism to wider context in the theory of computer science.
@@ -575,11 +572,11 @@ We include evaluation for the two schemes presented in previous sections:
 \centering
 \begin{tabular}{r | c c | c c | c c}
  
-           & \multicolumn{2}{c}{\textbf{\satcgMax}} &  \multicolumn{2}{c}{\textbf{\satcgOrd}} & \multicolumn{2}{c}{\textbf{VISL CG-3}} \\ 
-\textbf{\# rules} & F-score & Time       &  F-score & Time    & F-score & Time \\ \hline
-      19   & 82.6 \% & ?          &  ? \%    & ?       &  ? \%    & ?\\ 
-      99   & 81.5 \% & ?          &  ? \%    & ?       &  ? \%    & ?\\ 
-      261  & 79.2 \% & ?          &  ? \%    & ?       &  ? \%    & ?\\ 
+           & \multicolumn{2}{c}{\textbf{19 rules}} &  \multicolumn{2}{c}{\textbf{99 rules}} & \multicolumn{2}{c}{\textbf{261 rules}} \\ 
+                          & F-score  & Time   &  F-score & Time    & F-score  & Time \\ \hline
+      \textbf{\satcgMax}  & 83.28 \% &        &  ? \%    & ?       & 79.03 \% & ?\\ 
+      \textbf{\satcgOrd}  & 83.12 \% & ?      &  ? \%    & ?       & 79.17 \% & ?\\ 
+      \textbf{VISL CG-3}  & 81.52 \% & ?      &  ? \%    & ?       & 78.83 \% & ?\\ 
   \end{tabular}
 \caption{F-scores and execution times for the subset of the Spanish grammar, tested on a gold standard corpus of 22,000 words.}
   \label{table:fscore}
@@ -593,7 +590,8 @@ and a small constraint grammar\footnote{\url{https://svn.code.sf.net/p/apertium/
 We kept only \textsc{select} and \textsc{remove} rules, which left us 261 rules.
 With this setup, we produced an ambiguous version of the tagged
 corpus, and ran both SAT-CG and VISL CG-3 on it.
-In addition, we wrote a small grammar of 19 rules
+In addition, we wrote a small grammar of 19 rules, optimised to be very compact and disambiguate effectively, taking advantage of the parallel execution. 
+Some of the rules come from the original grammar, and some were added by the author.
 To add middle ground, we chose a random subset of 99 rules from the original grammar: 
 the purpose is to demonstrate the effect of the number of rules.
 
@@ -603,8 +601,8 @@ Table~\ref{table:fscore} shows F-scores and execution times for these three vari
 by  VISL CG-3 achieves F-score of 82.6 \%, ordered SAT-CG 81.5 \%  and
 unordered SAT-CG 79.2 \%.}
 
-We did not test with other languages or text genres due to the lack of
-available gold standard.
+We had access to freely available grammars of same size range, also in the Apertium repository.
+However, we did not have a gold standard for those languages, so we could not test the performance against VISL CG-3 with other grammars.
 
 
 
@@ -615,10 +613,11 @@ available gold standard.
 \begin{table}[h]
   \centering
   \begin{tabular}{ r | c c c }
-     \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
-      19   & 39.7s &  22.1s   & 4.2s    \\ 
-      99   & 1m34.1s & 1m14.9s & 6.1s   \\ 
-      261  & 2m54.1s & 2m31.6s & 10.7s  \\ 
+ %                     & \multicolumn{3}{c}{Number of rules} \\
+     \textbf{}   & \textbf{19 rules}  & \textbf{99 rules} & \textbf{261 rules} \\ \hline
+      \textbf{\satcgMax}   & ?s & ?s & ?s    \\ 
+      \textbf{\satcgOrd}   & ?s & ?s & ?s   \\ 
+      \textbf{VISL CG-3}   & ?s & ?s & ?s  \\ 
    \end{tabular}
   \caption{Execution times for subsets of the Spanish grammar, disambiguating Don Quijote (384,155 words).}
   \label{table:time}
@@ -630,38 +629,17 @@ available gold standard.
 In addition to the 22,000-word corpus of news text,
 we tested the performance by parsing Don Quijote (384,155 words) with
 the same Spanish grammars as in the previous experiment. 
-We added this experiment in order to stress test our implementation.
+% We added this experiment as a stress test for our implementation.
 Don Quijote contains, on average, longer sentences: the news text has the average sentence length of 14.1 words, median 11 words and maximum 72 words; Don Quijote has, respectively, almost double for each of these numbers: average 25.8, median 22 and maximum 147 words.
-For these numbers, we have included colons and semicolons as well as full stops, because
-the grammar includes those as delimiters.
-Table~\ref{table:time} shows execution times compared to VISL CG-3;
+However, the textual genre is very different: we predicted that on an average sentence,
+less rules would match, compared to the news text
+ which means that less rules apply
+For both of these texts, sentences are split by full stops, colons and semicolons: the grammar specifies those characters as delimiters.
+Table~\ref{table:time} shows execution times compared to VISL CG-3.
 
 
-For both systems, the number of rules in the grammar affects the performance more than the word count.
-
-\paragraph{Sentence length} 
-In addition, we explored the effect of sentence length further.
-When split by just full stops, the longest sentence in Don Quijote consists of 283 tokens\footnote{The longest sentence in Don Quijote: \ventero}, including punctuation. In Table~\ref{table:timeVentero}, we see this sentence parsed, on the right as a single unit, and on the left, we split it in three parts, at the semicolons. In Table~\ref{table:time}, it was already split by semicolons---as we can see, parsing the 283 tokens as a single unit takes more time than parsing the whole 384,155 tokens.
-Even with the split, this sentence is responsible for good 16 \% of the parsing time of the whole novel. 
-
-
-% 
-
-\begin{table}[ht]
-  \centering
-  \begin{tabular}{ r | c c c | c c c }
-       & \multicolumn{3}{c}{Whole sentence: 283 tokens} & \multicolumn{3}{c}{Split: x + 126 + y tokens} \\
-     \textbf{\# rules} & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} 
-                                        & \textbf{\satcgMax}  & \textbf{\satcgOrd} & \textbf{VISL CG-3} \\ \hline
-      19   & 12s    &  ?  & 0.021s   & 3.2s   & ? & 0.021s \\ 
-      99   & ?      &  ?  & ?        & ?      & ? & ? \\ 
-      261  & 11m 2s &  ?  & 0.052s   & 1m 47s & ? & 0.028s \\ 
-   \end{tabular}
-  \caption{Experiments with sentence length: parsing the longest sentence in Don Quijote. On the left, the complete 283-token sentence; on the right, split at semicolons into three parts.}
-  \label{table:timeVentero}
-\end{table}
-
-
+For both systems, the number of rules in the grammar affects the performance 
+more than the raw word count; however, sentence length plays an important role.
 From the SAT-solving side, maximisation is the most costly operation. 
 Emulating order is slightly faster: maximisation is not needed, but
 the solve function is performed after each clause.
@@ -676,16 +654,46 @@ that there are other reasons for the worse performance.
 This is to be expected, as SAT-CG is a rather naive
 proof-of-concept implementation with no optimisations.
 
+\paragraph{Sentence length} 
+In addition, we explored the effect of sentence length further.
+When split by just full stops, the longest sentence in Don Quijote consists of 283 tokens\footnote{The longest sentence in Don Quijote: \ventero}, including punctuation. In Table~\ref{table:timeVentero}, we see this sentence parsed, on the right as a single unit, and on the left, we split it in three parts, at the semicolons. In Table~\ref{table:time}, it was already split by semicolons---as we can see, parsing the 283 tokens as a single unit takes more time than parsing the whole novel.
+Even with the split, the longest, 126-token subpart of this sentence is responsible for a good 16 \% of the parsing time of the complete novel. 
+
+
+% 
+
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{ r | c c c | c c c }
+       & \multicolumn{3}{c}{Full sentence: 283 tokens} & \multicolumn{3}{c}{Split: x + 126 + y tokens} \\
+
+                     & \textbf{19}  & \textbf{99}  & \textbf{261}  &  \textbf{19}  &  \textbf{99} & \textbf{261} \\ \hline
+\textbf{\satcgMax}   & 12s    &  ?  & 11m 2s   & 3.2s   & ?  & 1m 47s \\ 
+\textbf{\satcgOrd}   & ?      &  ?  & ?        & ?      & ?  & ? \\ 
+\textbf{VISL CG-3}   & 0.021s &  ?  & 0.052s   & 0.021s & ?  & 0.028s \\ 
+
+   \end{tabular}
+  \caption{Experiments with sentence length. On the left, the complete 283-token sentence parsed as one unit; on the right, split at semicolons into three parts.}
+  \label{table:timeVentero}
+\end{table}
+
+
+
+
 \paragraph{Comparison to FSIG}
 
-However, we notice that SAT-CG performs, in effect, a different task from VISL CG-3.
+SAT-CG performs, in effect, a different task from VISL CG-3.
+Parallel execution is more complex than sequential, both computationally and semantically---
+%computing a disjunction of readings, as opposed to removing items from a set.
+``which combinations of readings are allowed according to all rules'' as opposed to ``which items can we remove from a set''.
 Perhaps a more accurate comparison would be against a state-of-the-art FSIG engine; 
 unfortunately, there have been none since the 1990s \todo{cite!}.
 To give some context, let us compare an FSIG engine from 1998 to CG engines from the same time.
 \cite{voutilainen1998} reports the performance of a 3,500-rule CG: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule FSIG grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.  
-As another result for CG, \cite{tapanainen1999phd} reports a range between 2 and 20 seconds for sentences below 50 words; the average time for 15-word sentences is under 5 seconds.
+As another CG result from the late 1990s, \cite{tapanainen1999phd} reports a range between 2 and 20 seconds for sentences below 50 words; the average time for 15-word sentences is 5 seconds.
 %the execution time grows in a manner that follows $O(n log\!n)$.
-Based on those figures, it would be interesting to run the same FSIG grammar with SAT-CG, and compare SAT-based approach for the same task.
+Based on those figures, we took \todo{a number of} 15-word sentences from the news text and ran SAT-CG and VISL CG-3 on just them.
+%it would be interesting to run the same FSIG grammar with SAT-CG, and compare SAT-based approach for the same task.
 The differences between CG and FSIG at the time are big; then again, we cannot ignore the differences in the grammars. \cite{voutilainen1998} points out that the 3,500-rule CG grammar contains local phenomena, whereas the 2,600-rule FSIG grammar has a more global scope, at the expense of processing efficiency.
 For now, we cannot report very strong claims: compared to the situation in 1998, a modern SAT-based FSIG engine is closer to a modern CG engine, given that they operate on the same grammar.
 
@@ -712,13 +720,10 @@ We also tested whether SAT-CG outperforms traditional CG with a
 small rule set. With our best performing and most concise
 grammar\footnote{\url{https://github.com/inariksit/cgsat/blob/master/data/spa\_smallset.rlx}}
 of only 19 rules, both SAT-CG and VISL CG-3  achieve a F-score of
-around 85 \%. This experiment is very small and might be explained by
+around XX \%. This experiment is very small and might be explained by
 overfitting or mere chance, but it seems to indicate that rules that
 work well with SAT-CG are also good for traditional CG.
-It was possible to attain a rule set for which the unordered SAT-CG
-works better (\textless0.5 \%), but it required trying
-subsequences of the 19-rule set in a brute force manner---this hardly
-presents any real life use case.
+
 
 \todo{Not sure if this is worth mentioning \\
 Out of interest, we also manually flipped a small grammar and tested it against the original.
