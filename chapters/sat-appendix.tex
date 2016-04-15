@@ -74,13 +74,14 @@
 \label{appendix1}
 
 \noindent In this appendix, we show the SAT-encoding for all the rule types that 
-SAT-CG supports: {\sc remove} and {\sc select} rules, with various operations in the conditions. We show both unordered and ordered variants of SAT-CG.
+SAT-CG supports: 
+{\sc remove} and {\sc select} rules, with the contextual tests and set operations described in CG-2 \cite{tapanainen1996}, except for the operators \t{**} (continue search if linked tests fail) and \t{@} (absolute position). In addition, the software SAT-CG supports a couple of new constructors from VISL CG-3: {\sc cbarrier}, {\sc negate} and subreadings.
 
-The encoding in this appendix is independent of the implementation of the software SAT-CG; it does not describe how the sentence is processed in order to find the variables.
-
+The encoding in this appendix is independent of the implementation of the software SAT-CG; it does not describe how the sentence is processed in order to find the variables. 
 The purpose of this appendix is to give a full description of the different rule types; the method is introduced with more pedagogical focus in Section~\ref{sec:CGSAT}. 
 %However, the examples in this appendix are self-contained; if you know my previous stuff and want to be bored, just read this!
 
+This appendix only describes the parallel scheme. There is another appendix after Chapter~\ref{chapterCGana}, which describes the necessary steps for modelling order.
 
 \section{SAT-encoding of sentences}
 

@@ -175,7 +175,9 @@ Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1
 \end{enumerate}
 
 In Appendix~\ref{appendix1}
-, we have included a translation of {\sc remove} and {\sc select} rules, with all possible conditions in CG-2 \todo{check if all}. The following examples in this section do not require reading the appendix.
+, we have included a translation of all the rule types that SAT-CG supports: 
+{\sc remove} and {\sc select} rules, with most of the operations from CG-2 \cite{tapanainen1996}. In addition, we include a few features from VISL CG-3 \cite{vislcg3}, in order to parse most modern grammars.
+The following examples in this section do not require reading the appendix.
 
 \subsection{Applying a rule}
 
@@ -184,7 +186,7 @@ In Appendix~\ref{appendix1}
 Finally, we have all we need to disambiguate the segment: the sentence and the constraints encoded as SAT-variables and clauses. The SAT-solver returns a model that satisfies all the clauses presented in step 2.
 We started off with all the variables unassigned, and required at least one variable 
 in each cohort to be true. In addition, we gave the clause $\laDet \Rightarrow \neg \casaV$.
-We can see with bare eye that this problem will have a solution; in fact, multiple ones, 
+We can see with a bare eye that this problem will have a solution; in fact, multiple ones, 
 shown in Figure~\ref{fig:modelsOneRule}.
 The verb analysis is removed in the first two models, as required by the presence of $\laDet$. However, the implication may as well be interpreted ``if $\casaV$ may not follow $\laDet$, better remove $\laDet$ instead''; this has happened in Models 3--4. 
 We see a third interpretation in Model 5: $\casaV$ may be removed even without 
@@ -256,13 +258,42 @@ As described in Section~\ref{sec:ordering}, the parallel FSIG behaves differentl
 sequential CG: the rules are dependent on each other, and the order does not matter.
 This prevents too hasty decisions, such as removing $\casaV$ before we know the status of \la{}. 
 However, ignoring the order means that we miss significant information in the rule set. 
-The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}---taken from an actual grammar\footnote{\url{http://link.to/grammar}}---will be well-behaved in a strict and sequential CG. Its behaviour will be less clear in a heuristic and sequential CG, but in FSIG, it will definitely cause a conflict, rendering the whole grammar useless.
+The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}, taken from an actual grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}}, will be well-behaved in a strict and sequential CG. Its behaviour will be less clear in a heuristic and sequential CG; although, the heuristic rules have a shorter context---in fact, no contextual tests at all, so the first mentioned rules would still be matched first. But in FSIG, the rule set will definitely cause a conflict, rendering the whole grammar useless.
 
 
 
-The order clearly demonstrates the course of action: ``if \todo{Foo} is preceded by \todo{Bar}, then remove/select \todo{Baz}; then, move on to other rules; finally, if \todo{Foo} is still ambiguous, select/remove \todo{Quux}.'' 
+The order clearly demonstrates the course of action: ``If a potential imperative starts a sentence and is followed by an object pronoun, select the imperative reading; then, move on to other rules; finally, if any imperative is still ambiguous, remove the imperative reading.'' 
 Comparing the success of CG to FSIG, one may speculate that the sequential order is easier to understand---undeniably, its behaviour is more transparent. %As opposed to FSIG, the rules are ordered. As opposed to the heuristic order, the rules behave always the same way, regardless of the input.
 If two rules target the same cohort, the first mentioned gets to apply, and removes the target. When the first rule has acted, the second rule is not even considered, because it would remove the last reading.
+
+
+
+
+\begin{figure}[ht]
+\centering
+   \begin{verbatim}
+SECTION
+
+   # Zeg me
+   SELECT Imp IF (-1 BOS) (1 (prn obj));
+
+   # . Heb je
+   SELECT (vbhaver pres p2 sg) IF (-1 BOS) (1 (prn obj uns p2 mf sg)) ;
+
+   [--]
+
+SECTION
+
+   # remove all imperative readings that have not been explicitly selected
+   REMOVE Imp ;
+
+   # remove informal 2nd person singular reading of "heb"
+   REMOVE (vbhaver pres p2 sg) ;
+
+   \end{verbatim}
+\label{fig:ruleOrder}
+\caption{Example from a Dutch grammar}
+\end{figure}
 
 
 % In the carefully crafted examples, we have ignored the careful mode: \t{IF (-1C det)} `if the previous word is unambiguously determiner'. 
@@ -274,32 +305,16 @@ in the first one, we emulate ordering in choosing which clauses to keep, and in 
 
 
 
-
-
-\begin{figure}[ht]
-\centering
-   \begin{verbatim}
-   SECTION:good_rules
-   REMOVE baz IF (-1 bar) ;
-
-   SECTION:heuristic   
-   REMOVE quux ;
-   \end{verbatim}
-\label{fig:ruleOrder}
-\caption{Example from a XXX grammar}
-\end{figure}
-%
-
-
-
-
 \paragraph{Emulating order} 
 
 We keep the parallel base, but use ordering as information for solving conflicts.
 This means that all the benefits of parallel execution still hold: the three rules, which all target \emph{casa}, may still disambiguate \emph{la}, without \emph{la} ever being the target.
-If all the rules play well together, no rule applications need to be removed; 
-however, in the case shown in Figure~\ref{fig:ruleOrder}, the clauses created by 
-\todo{REMOVE quux} would be ignored, in favour of the clauses that are created by earlier rules.
+If all the rules play well together, or if the earlier rules do not match any cohorts, 
+then no rule applications need to be removed. 
+However, if we have the grammar from Figure~\ref{fig:ruleOrder}, 
+and imperative is the right thing to select, then the clauses created by 
+\t{REMOVE Imp} would be ignored, in favour of the clauses that are created 
+by \t{SELECT Imp IF (-1 BOS) (1 (prn obj))}.
 
 
 
@@ -314,12 +329,15 @@ If rule 51 causes a conflict, we prioritise the previous, well-behaving subset o
 
 If a rule matches multiple cohorts, it creates a separate clause for each instance.
 Thus, it is no problem if the rule causes a conflict in only one cohort---say, we 
-have another potential Quux in the sentence, but there is no other rule which targets 
-its other readings. We can discard only the conflicting instances: we prevent 
-\todo{REMOVE quux} from applying to $foo$, but it still may apply to other $foo$s.
+have another potential imperative in the sentence, 
+but there is no other rule which targets its other readings. 
+We can discard only the conflicting instances: we prevent 
+\t{REMOVE Imp} from applying to \emph{Zeg} in the sequence \emph{. Zeg me}, 
+but it still may apply to other ambiguous tokens with imperative reading.
 
 
-Assuming our rule set is \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}, the revised algorithm goes as follows:
+Let us demonstrate the procedure with the Spanish segment {\em la casa grande}.
+Assuming our rule set is $\{$\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}$\}$, the revised algorithm goes as follows:
 
 
 \begin{enumerate}
@@ -351,9 +369,13 @@ Assuming our rule set is \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t
   %     \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
     \item No solution: discard clause
  \end{itemize}
+
 \end{enumerate}
 
-
+With this procedure, we use ordering to decide which clauses to include, and
+then apply all of them in parallel.
+After going through all the rules, the final formula to the SAT-solver will contain the clauses  
+$\laDet$~$\vee$~$\laPrn$, $\casaN$~$\vee$~$\casaV$,  $\grandeAdj$, $\laDet$~$\Rightarrow$~$\neg$~$\casaV$ and $\grandeAdj$~$\Rightarrow$~$\neg$~$\casaV$.
 
 
 
@@ -385,7 +407,7 @@ fit together, and the inapplicable rule would not ``fit in''.
 % holistic behaviour: if the rules conflict, discard the one that seems
 % like an outlier.
 
-We keep the rule set \{\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n}\}.
+We keep the Spanish segment and the rule set $\{$\t{REMOVE v IF (-1 det)}, \t{REMOVE v IF (1 adj)}, \t{REMOVE n} $\}$.
 Now the procedure goes as follows:
 
 \begin{enumerate}
@@ -541,8 +563,18 @@ Then, if we have tried the solutions with 10 $v$s and failed, we know that no so
 
 In this section, we report experiments on the two modifications to the parallel scheme: maximisation-based, and ordering by committing to a prefix of rules.
 We evaluate the performance against VISL CG-3 in accuracy and running time; in addition, we offer some preliminary observations on the effect of grammar writing.
-SAT-CG fares slightly worse for accuracy, and significantly worse for execution time.
+
+We implemented another variant for both schemes, where we
+force all the literals not affected by the rules to be true.
+This modification destroys the ``rules disambiguate more'' property, 
+which we hypothesised to be helpful; however, turns out that this variation 
+slightly outperforms even VISL CG-3 in terms of precision and recall.
+The original SAT-CG scheme, where all variables are left unassigned,
+fares slightly worse for accuracy.
+However, the overall accuracy is very low with the tested grammars, thus it is hard to draw conclusions regarding accuracy.
+As for execution time, all variants of SAT-CG perform an order of magnitude worse.
 The results are presented in more detail in the following sections.
+
 
 %This suggests that our implementation should not compete with existing
 %state-of-the-art, but rather it has value as a way of relating the CG
@@ -570,13 +602,15 @@ The results are presented in more detail in the following sections.
 % \textbf{\satcgMax}
 %       & 79.2 \% & 39.7s & ??? \% &1m 34s & ??? \% & 2m 54s \\ 
 \centering
-\begin{tabular}{r | c c | c c | c c}
+\begin{tabular}{l | p{1.8cm} p{1.8cm} c | p{1.8cm} p{1.8cm}  c}
  
-           & \multicolumn{2}{c}{\textbf{19 rules}} &  \multicolumn{2}{c}{\textbf{99 rules}} & \multicolumn{2}{c}{\textbf{261 rules}} \\ 
-                          & F-score  & Time   &  F-score & Time    & F-score  & Time \\ \hline
-      \textbf{\satcgMax}  & 83.28 \% &        &  ? \%    & ?       & 79.03 \% & ?\\ 
-      \textbf{\satcgOrd}  & 83.12 \% & ?      &  ? \%    & ?       & 79.17 \% & ?\\ 
-      \textbf{VISL CG-3}  & 81.52 \% & ?      &  ? \%    & ?       & 78.83 \% & ?\\ 
+           & \multicolumn{3}{c}{\textbf{19 rules}} &  \multicolumn{3}{c}{\textbf{261 rules}} \\ 
+                          & F-score: force~true  &  F-score: unassigned & Time   
+                                               & F-score: force true  &  F-score: unassigned & Time \\ \hline
+      \textbf{\satcgMax}  & 83.28 \% & 80.22 \%  & 4s  & 79.03 \% & 78.15 \% & 8s \\ 
+      \textbf{\satcgOrd}  & 83.12 \% & 81.14 \%  & 4s  & 79.17 \%  & 79.03 \% & 8s \\ 
+      \textbf{VISL CG-3}  & \multicolumn{2}{c}{81.52 \%}  & 0.39s
+                                             & \multicolumn{2}{c}{78.83 \%} & 0.64s\\ 
   \end{tabular}
 \caption{F-scores and execution times for the subset of the Spanish grammar, tested on a gold standard corpus of 22,000 words.}
   \label{table:fscore}
@@ -585,21 +619,27 @@ The results are presented in more detail in the following sections.
 We took a manually tagged
 corpus\footnote{\url{https://svn.code.sf.net/p/apertium/svn/branches/apertium-swpost/apertium-en-es/es-tagger-data/es.tagged}}
 containing approximately 22,000 words of Spanish news text, 
-and a small constraint grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}}, produced independently of the authors.
-% We ignored substitute rules, but kept subreadings and unification, even though our implementation doesn't handle them.
+and a small constraint grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}} from the Apertium repository.
 We kept only \textsc{select} and \textsc{remove} rules, which left us 261 rules.
 With this setup, we produced an ambiguous version of the tagged
 corpus, and ran both SAT-CG and VISL CG-3 on it.
 In addition, we wrote a small grammar of 19 rules, optimised to be very compact and disambiguate effectively, taking advantage of the parallel execution. 
-Some of the rules come from the original grammar, and some were added by the author.
-To add middle ground, we chose a random subset of 99 rules from the original grammar: 
-the purpose is to demonstrate the effect of the number of rules.
+Some of the rules were selected from the original grammar, and some were written by the author.
 
-Table~\ref{table:fscore} shows F-scores and execution times for these three variants.\satcgMax is the parallel scheme with maximisation and
+
+Table~\ref{table:fscore} shows F-scores and execution times for these two grammars.\satcgMax is the parallel scheme with maximisation and
 \satcgOrd is the parallel scheme where rule applications are introduced one by one.
-\todo{Treating the original corpus as the gold standard, the disambiguation
-by  VISL CG-3 achieves F-score of 82.6 \%, ordered SAT-CG 81.5 \%  and
-unordered SAT-CG 79.2 \%.}
+The original grammar performs very poorly: F-scores of around 79 \% for all three setups.
+Due to the unrepresentative example, we cannot draw many conclusions. 
+The experiment with the 19-rule grammar was more promising.
+We intended to write a grammar that would perform exceptionally well for the parallel 
+execution; it was heavily tuned to the gold standard corpus, 
+and tested only with SAT-CG during development.
+To our surprise, this small grammar turned out to outperform the original, 
+261-rule grammar even with VISL CG-3. 
+We didn't particularly try to make a \emph{bad} order, but
+It is likely that most
+
 
 We had access to freely available grammars of same size range, also in the Apertium repository.
 However, we did not have a gold standard for those languages, so we could not test the performance against VISL CG-3 with other grammars.
@@ -615,9 +655,9 @@ However, we did not have a gold standard for those languages, so we could not te
   \begin{tabular}{ r | c c c }
  %                     & \multicolumn{3}{c}{Number of rules} \\
      \textbf{}   & \textbf{19 rules}  & \textbf{99 rules} & \textbf{261 rules} \\ \hline
-      \textbf{\satcgMax}   & ?s & ?s & ?s    \\ 
-      \textbf{\satcgOrd}   & ?s & ?s & ?s   \\ 
-      \textbf{VISL CG-3}   & ?s & ?s & ?s  \\ 
+      \textbf{\satcgMax}   & 25s & ?s & 1m 5s    \\ 
+      \textbf{\satcgOrd}   & 19s & ?s & 1m 2s   \\ 
+      \textbf{VISL CG-3}   & 2.7s & ?s & 4.8s  \\ 
    \end{tabular}
   \caption{Execution times for subsets of the Spanish grammar, disambiguating Don Quijote (384,155 words).}
   \label{table:time}
@@ -641,8 +681,9 @@ Table~\ref{table:time} shows execution times compared to VISL CG-3.
 For both systems, the number of rules in the grammar affects the performance 
 more than the raw word count; however, sentence length plays an important role.
 From the SAT-solving side, maximisation is the most costly operation. 
-Emulating order is slightly faster: maximisation is not needed, but
-the solve function is performed after each clause.
+Emulating order performs slightly faster, but still in the same range: 
+maximisation is not needed, but the solve function is performed after each clause---this
+gets costlier after each rule.
 In any case, SAT does not seem to be the bottleneck: with 261 rules,
 the maximisation function was called 147,253 times, and with 19 rules,
 132,255 times, but 
@@ -668,7 +709,7 @@ Even with the split, the longest, 126-token subpart of this sentence is responsi
        & \multicolumn{3}{c}{Full sentence: 283 tokens} & \multicolumn{3}{c}{Split: x + 126 + y tokens} \\
 
                      & \textbf{19}  & \textbf{99}  & \textbf{261}  &  \textbf{19}  &  \textbf{99} & \textbf{261} \\ \hline
-\textbf{\satcgMax}   & 12s    &  ?  & 11m 2s   & 3.2s   & ?  & 1m 47s \\ 
+\textbf{\satcgMax}   & 12s    &  ?  &    & 3.2s   & ?  & s \\ 
 \textbf{\satcgOrd}   & ?      &  ?  & ?        & ?      & ?  & ? \\ 
 \textbf{VISL CG-3}   & 0.021s &  ?  & 0.052s   & 0.021s & ?  & 0.028s \\ 
 
@@ -713,22 +754,42 @@ According to the previous literature, CG and FSIG rules are written
 The largest FSIG grammar is : \cite{voutilainen1998} describes the 2,600-rule English grammar as 
 
 
-The results in Table~\ref{table:time} suggests that that when running grammars that are written
-with the traditional CG in mind, SAT-CG loses with both ordering
-strategies, but emulating order fares better.
-We also tested whether SAT-CG outperforms traditional CG with a
-small rule set. With our best performing and most concise
-grammar\footnote{\url{https://github.com/inariksit/cgsat/blob/master/data/spa\_smallset.rlx}}
-of only 19 rules, both SAT-CG and VISL CG-3  achieve a F-score of
-around XX \%. This experiment is very small and might be explained by
-overfitting or mere chance, but it seems to indicate that rules that
-work well with SAT-CG are also good for traditional CG.
+% The results in Table~\ref{table:time} suggests that that when running grammars that are written
+% with the traditional CG in mind, SAT-CG loses with both ordering
+% strategies, but emulating order fares better.
+% We also tested whether SAT-CG outperforms traditional CG with a
+% small rule set. With our best performing and most concise
+% grammar\footnote{\url{https://github.com/inariksit/cgsat/blob/master/data/spa\_smallset.rlx}}
+% of only 19 rules, both SAT-CG and VISL CG-3  achieve a F-score of
+% around XX \%. This experiment is very small and might be explained by
+% overfitting or mere chance, but it seems to indicate that rules that
+% work well with SAT-CG are also good for traditional CG.
 
 
-\todo{Not sure if this is worth mentioning \\
+Discoveries from exploiting the parallel execution?
+The rules are flipped
+
 Out of interest, we also manually flipped a small grammar and tested it against the original.
-The personal experiences of doing this was that ``wow, people don't really mean what they write''. Like if you're drawing a portrait, try to flip your paper upside down or look at it as a mirror image; it is easier to see if the ears are wonky or the eyes are all over the place.}
+The personal experiences of doing this was that ``wow, people don't really mean what they write''.
+\todo{Like if you're drawing a portrait, try to flip your paper upside down or look at it as a mirror image; it is easier to see if the ears are wonky or the eyes are all over the place.}
 
+In all the examples so far, we have not discussed the C operator, for careful application mode:
+only act if the context word is \emph{unambiguously} tagged.
+For sequential execution, careful mode is the way to avoid making too hasty decisions; 
+wait until other rules may have disambiguated a context word first.
+With a SAT-based engine, careful mode is not necessary for ensuring ``careful'' behaviour: 
+for any set of rules, the SAT-solver can start exploring one direction, 
+and always backtrack, if it does not lead to a good solution with the other rules.
+If a rule has C, the only difference is what kind of implications are constructed.
+Contrast \t{REMOVE v IF (-1 det)} and \t{REMOVE v IF (-1C det)}: 
+the first rule, applied to {\em la casa grande}, creates the clause 
+$\laDet \Rightarrow \neg \casaV$, and the second rule creates
+$(\laDet \wedge \neg \laPrn) \Rightarrow \neg \casaV$.
+
+
+SAT-solver can still start exploring
+
+But SAT-CG is perfectly fine with C: it can start disambiguating, even if none of the rules is able to act on its own. 
 
 % Similar patterns were observed with small (\textless{}20) rule sets
 % written by the authors; depending on the subset, SAT-CG and VISL CG-3 had
@@ -750,8 +811,7 @@ sentence as input.
 As a downside, there is no way to know which part comes directly from the
 raw input and which part from applying previous rules.
 
-In the examples, we have overlooked the C operator, and made a lot of noise how two rules without C can work together and who needs the damn C.
-But SAT-CG is perfectly fine with C: it can start disambiguating, even if none of the rules is able to act on its own. 
+
 
 
 % This corresponds loosely to the common design pattern in CGs, 
