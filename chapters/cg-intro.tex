@@ -10,7 +10,7 @@ It was first introduced by
 computational linguistics, such as POS tagging, surface syntax and
 machine translation \cite{bick2011},
 and is reported to achieve F-scores of over 99 \% for morphology, and around
-95-97 \% for syntax \cite{bick2006spanish;bick2000palavras;bick2003hybridCG_PSG}.
+95-97 \% for syntax \cite{bick2000palavras,bick2003hybridCG_PSG,bick2006spanish}.
 CG disambiguates output by morphological analyser by using
 constraint rules which can select or remove a potential analysis (called \emph{reading})
 for a target word, depending on the context words around it. 
@@ -437,7 +437,7 @@ An implementation with \emph{strict order} applies each rule in the order in
 which they appear in the file. If a grammar contains the rules ``remove verb after determiner'' and ``remove noun after pronoun'' in the given order, the rule that removes the verb reading in \emph{question} will be applied first. After it has finished, there are no verb readings available anymore for the second rule to fire.
 					
 How do we know which rule is the right one? There can be many rules that fit the context, but we choose the one that just happens to appear first in the rule file. 
-A common design pattern is to place rules with narrow set of conditions first; 
+A common design pattern is to place rules with a long list of conditions first; 
 only if they do not apply, then try a rule with less conditions. For a similar effect,
 a \emph{careful mode} may be used: ``remove verb after \emph{unambiguous} determiner'' 
 would not fire on the first round, but it would wait for other rules to clarify the
@@ -471,7 +471,7 @@ In contrast, a \emph{parallel execution} scheme disambiguates all the words at t
 time, using their initial, ambiguous context. Both ``remove verb after determiner'' and 
 ``remove noun after pronoun'' would match \emph{question}, because the original 
 input from the morphological analyser contains both determiner and pronoun as the 
-preceding word. Then, the final decision depends on any another rule that resolves \emph{what}.
+preceding word. Then, the final decision depends on any other rule that resolves \emph{what}.
 To give a minimal example, assume we have a single rule, \texttt{REMOVE verb IF (-1 verb)}, and the three words \emph{w1--w3}, shown below. 
 In parallel execution, both \emph{w2} and \emph{w3} lose their verb tag; in sequential only \emph{w2}.
 
@@ -486,7 +486,7 @@ In parallel execution, both \emph{w2} and \emph{w3} lose their verb tag; in sequ
 \end{tabular}
 \end{figure}
 
-Which execution scheme is better? For most purposes, a sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
+Which execution scheme is better? For most purposes, sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
 If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}: there are less possible rules that may apply. 
 Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other.
 \cite{koskenniemi90} states the following about parallel CG:
@@ -607,7 +607,7 @@ Take the example of central embedding; a feature known to require a context-free
 \item If such grammar can be written, does it mean that CG is context-free?
 \end{inparaenum}
 In addition, there are different variants and implementations of CG: 
-it is not a meaningful question to define the expressivity of ``CG'', but rather CG-1 \cite{karlsson1995constraint}, CG-2 \cite{tapanainen1996}, VISLCG \todo{cite someone}, VISL CG-3 \cite{bick2015}, or any other less mainstream implementation.
+it is not a meaningful question to define the expressivity of ``CG'', but rather CG-1 \cite{karlsson1995constraint}, CG-2 \cite{tapanainen1996}, VISL CG-3 \cite{bick2015}, or any other implementation.
 
 In the following, we look at existing approaches to define the expressivity of reductionist formalisms, 
 and suggest a way to emulate generation within (a variant of) CG.
@@ -619,58 +619,71 @@ and suggest a way to emulate generation within (a variant of) CG.
 As defined in \cite{tapanainen1999phd}, the rules in finite-state constraint languages may include ``contextual tests that are expressed in terms of regular languages''. 
 Indeed, we can verify that in all implementations of CG, 
 the contextual tests must be regular: we cannot write in a single rule ``remove verb if the previous segment contains only well-nested brackets''.
-Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations, such as $(\Sigma - N)*A(\Sigma - V)*N$ \todo{check this rule in CG-2 and CG-3}; in turn, CG-2 \cite{tapanainen1996} can express this, but not e.g. repeated patterns. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{bick2015} did not exist at the time, \cite{tapanainen1999phd} does not include it in the hierarchy of the constraint formalisms.
+Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations, such as $(\Sigma - N)*A(\Sigma - V)*N$\footnote{IF (*1 A BARRIER N LINK *1 N BARRIER V)}; in turn, CG-2 \cite{tapanainen1996} can express this, but not e.g. repeated patterns. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{bick2015} did not exist at the time, \cite{tapanainen1999phd} does not include it in the hierarchy of the constraint formalisms.
 
-The expressivity of a single rule is well defined. However, the expressivity of the whole rule set is harder to define; if we return to the question of central embedding, a CG has much more lightweight task than a generative grammar. The initial tokens, or symbols, come already with a list of alternatives.
-Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''. %This contextual test is regular without question.
+The expressivity of a single rule is well defined. However, the expressivity of the whole rule set is harder to define. 
+A CG has much more lightweight task than a generative grammar: the initial tokens, or symbols, come already with a list of alternatives.
+%Returning to the question of central embedding,
+Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''.%---this contextual test is regular without question.
 Now, this rule will perform the correct disambiguation for the pronoun, even if the relative clause is centrally embedded. If all the other rules are successful, then the grammar has chosen a correct analysis for a sentence, which is not context-free. Still, 
 all of the rules have only regular contextual tests.
 %none of the rules needs to address anything but a regular phenomenon.
 
-The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or a relative pronoun. Furthermore, it does not need to generate only correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
+The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or a relative pronoun. Furthermore, it does not need to generate only the correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
 
 This said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
 
-We draw inspiration from \cite{tapanainen1999phd}, who demonstrates the expressive power of another reductionist parsing formalism, Functional Dependency Grammar \cite{tapanainen97fdg}.
-Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language, and the context-sensitive $a^nb^nc^n$. 
-Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can make such leap quite easily. In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading. We call the set of readings $\Sigma$. In addition, we may need some helper labels $\Sigma'$, such as $\{even, odd, start, end\}$. We add the additional requirement that the output of the grammar may only contain readings in $\Sigma$.
+Closest to answering this question is \cite{tapanainen1999phd}, who demonstrates the expressive power of another reductionist parsing formalism, Functional Dependency Grammar \cite{tapanainen97fdg}.
+Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language,% which consists of only well-nested sequences of \t{[} and \t{]}, 
+and another grammar, which correctly parses the context-sensitive language $a^nb^nc^n$. 
+Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can 
+conceive of such grammar quite easily. In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading. We call the set of readings $\Sigma$. In addition, we may need some helper labels $\Sigma'$, such as $\{even, odd, start, end\}$, which may not be present
+in the final analysis.
+Figure~\ref{fig:anbn} shows the input and output of a hypothetical CG, which takes cohorts
+of $\Sigma = {"a", "b"}$ as an input, and returns 
+Writing such grammars, or proving they cannot be written, is out of scope of this thesis.
+However, we wish to bring to attention the concept \emph{maximally ambiguous sentence}---which 
+will be made use of in Chapter~\ref{chapterCGana}---as a way of generating sequences with CG,
+and better answering the question about expressivity.
 
-\todo{Should I explain here how the $a^nb^n$ grammar works? Or just say ``if we can write such grammar in a variant of CG, we can argue that this variant of CG is at least context-free''?}
+% We add the additional requirement that the output of the grammar may only contain readings in $\Sigma$.
+
+%\todo{Should I explain here how the $a^nb^n$ grammar works? Or just say ``if we can write such grammar in a variant of CG, we can argue that this variant of CG is at least context-free''?}
 
 %We illustrate the power of CG rules with the context-free language $a^nb^n$.
 %Assume that the input sentence is a finite sequence, where every cohort is maximally ambiguous, ie. it contains all possible readings in $\Sigma = \{a, b\}$, and some helper labels (such as $\{even, odd, start, end\}$). Then, if we can write a set of rules that ``disambiguates'' the input as shown in Figure~\ref{fig:anbn}, we can argue that CG can express context-free languages. The same argument goes for languages beyond context-free. \todo{Kokke and Listenmaa (unpublished)} show such grammars in VISL CG-3 for the languages $a^nb^n$ and $a^nb^nc^n$
 
 
 
-\paragraph{Effect of ordering and execution schemes}
+% \paragraph{Effect of ordering and execution schemes}
 
-We can show that the $a^nb^n$ grammar, at least in the form described above,
-requires sequential execution: in the beginning, the status of the positions is 
-clear at the edges, and the certainty spreads towards the middle, with the help of
-the careful context.
-In a parallel execution, we have the initial context during the whole round.
-If we can do parallel with multiple runs, it should work. But not just with one round.
+% We can show that the $a^nb^n$ grammar, at least in the form described above,
+% requires sequential execution: in the beginning, the status of the positions is 
+% clear at the edges, and the certainty spreads towards the middle, with the help of
+% the careful context.
+% In a parallel execution, we have the initial context during the whole round.
+% If we can do parallel with multiple runs, it should work. But not just with one round.
 
-How about strict and heuristic?
+% How about strict and heuristic?
 
-\paragraph{Note on termination} 
-Running the grammar multiple times is desirable: especially the rules
-with a careful context may need other rules to run first and
-disambiguate some items.
-With the most basic operations, SELECT and REMOVE, we can ensure that
-applying a grammar to a text will finish. The text might not be fully
-disambiguated, but if there is a point where running the rules again
-doesn't make a change, then the execution is stopped.
+% \paragraph{Note on termination} 
+% Running the grammar multiple times is desirable: especially the rules
+% with a careful context may need other rules to run first and
+% disambiguate some items.
+% With the most basic operations, SELECT and REMOVE, we can ensure that
+% applying a grammar to a text will finish. The text might not be fully
+% disambiguated, but if there is a point where running the rules again
+% doesn't make a change, then the execution is stopped.
 
-If we allow the addition of arbitrary tags to readings, or arbitrary
-readings to cohorts, we cannot guarantee that running the grammar will
-terminate. It is possible to add the same reading over and over again,
-in which case every time we run the grammar, the argument is changed.
-The syntactic tags used by MAP rules have an additional property,
-that one reading can have at most one \texttt{@tag}, and if a reading has one
-already, it is substituted with the old one. One can end up in a loop
-substituting \texttt{@A} with \texttt{@B}.
-However, specific implementations can freely add heuristics to stop
-this kind of behaviour from happening.
+% If we allow the addition of arbitrary tags to readings, or arbitrary
+% readings to cohorts, we cannot guarantee that running the grammar will
+% terminate. It is possible to add the same reading over and over again,
+% in which case every time we run the grammar, the argument is changed.
+% The syntactic tags used by MAP rules have an additional property,
+% that one reading can have at most one \texttt{@tag}, and if a reading has one
+% already, it is substituted with the old one. One can end up in a loop
+% substituting \texttt{@A} with \texttt{@B}.
+% However, specific implementations can freely add heuristics to stop
+% this kind of behaviour from happening.
 
 
