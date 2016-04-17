@@ -61,7 +61,7 @@ dependencies between the tags than standard CG.
 Applying logic to reductionist grammars has been explored earlier by \cite{lager98,lager_nivre01}, but there has not been, to our knowledge, a full logic-based CG implementation; at the time, logic programming was too slow to be used for tagging or parsing. 
 Since those works, SAT-solving techniques have improved significantly \cite{marques_silva2010}, and they are used in domains such as microprocessor design and computational 
 biology---these problems easily match or exceed CG in complexity. 
-In addition, SAT-solving brings us more practical tools, such as maximisation, which enables us to implement novel conflict resolution for parallel CG.
+In addition, SAT-solving brings us more practical tools, such as maximisation, which enables us to implement a novel conflict resolution method for parallel CG.
 
 
 The content in this chapter is based on \cite{listenmaa_claessen2015}.
@@ -87,7 +87,7 @@ The first word, {\em la}, is ambiguous between a definite article (`the') or an 
 The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$ 
 `the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'. 
 However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whole segment into a noun phrase: `the big house'.
-
+%
 Firstly, we translate input sentences into variables and rules into clauses.
 Secondly, we disambiguate the sentence by asking for a solution. 
 Finally, we consider different ordering schemes and conflict handling.
@@ -143,7 +143,7 @@ The readings of the word forms make a natural basis for variables.
 We translate a combination of a word form and a reading, such as \texttt{"<la>" ["el" det def f sg]}, into a variable $\laDet$, which represents the possibility that \la{} is a determiner. This example segment gives us five variables: $\{ \laDet , \laPrn , \casaN , \casaV,  \grandeAdj \}$, shown in \ref{fig:laCasaGrande}.
 
 \paragraph{Cohort} As in the original input, the readings are grouped together in cohorts. We need to keep this distinction, for instance, to model {\sc select} rules and cautious context: 
-\t{SELECT "casa" n} means, in effect, ``remove $\casaV$'', and \t{IF (-1C prn)} means ``if $\laPrn$ is true and $\laDet$ false''. 
+\t{SELECT~"casa"~n} means, in effect, ``remove~$\casaV$'', and \t{IF (-1C prn)} means ``if $\laPrn$ is true and $\laDet$ false''. 
 %
 Most importantly, we need to make sure that the last reading is not removed. Hence we add the default rule, \defRule, as shown in the third column of \ref{fig:laCasaGrande}. 
 These disjunctions ensure that at least one variable in each cohort must be true.
@@ -176,7 +176,8 @@ Next, we formulate a rule in SAT. A single rule, such as \texttt{REMOVE v IF (-1
 
 In Appendix~\ref{appendix1}
 , we have included a translation of all the rule types that SAT-CG supports: 
-{\sc remove} and {\sc select} rules, with most of the operations from CG-2 \cite{tapanainen1996}. In addition, we include a few features from VISL CG-3 \cite{vislcg3}, in order to parse most modern grammars.
+{\sc remove} and {\sc select} rules, with most of the operations from CG-2 \cite{tapanainen1996}, and a couple of features from VISL CG-3 \cite{vislcg3}.
+% In addition, we include a few features from VISL CG-3 \cite{vislcg3}, in order to parse most modern grammars.
 The following examples in this section do not require reading the appendix.
 
 \subsection{Applying a rule}
@@ -258,7 +259,10 @@ As described in Section~\ref{sec:ordering}, the parallel FSIG behaves differentl
 sequential CG: the rules are dependent on each other, and the order does not matter.
 This prevents too hasty decisions, such as removing $\casaV$ before we know the status of \la{}. 
 However, ignoring the order means that we miss significant information in the rule set. 
-The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}, taken from an actual grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}}, will be well-behaved in a strict and sequential CG. Its behaviour will be less clear in a heuristic and sequential CG; although, the heuristic rules have a shorter context---in fact, no contextual tests at all, so the first mentioned rules would still be matched first. But in FSIG, the rule set will definitely cause a conflict, rendering the whole grammar useless.
+The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}, taken from an actual grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}}, will be well-behaved in a strict and sequential CG.
+The grammar will behave as intended also in a heuristic and sequential CG,
+because the rules with a longer context are matched first.
+But in FSIG, the rule set will definitely cause a conflict, rendering the whole grammar useless.
 
 
 
@@ -275,7 +279,7 @@ If two rules target the same cohort, the first mentioned gets to apply, and remo
 SECTION
 
    # Zeg me
-   SELECT Imp IF (-1 BOS) (1 (prn obj));
+   SELECT Imp IF (-1 BOS) (1 (prn obj)) ;
 
    # . Heb je
    SELECT (vbhaver pres p2 sg) IF (-1 BOS) (1 (prn obj uns p2 mf sg)) ;
@@ -312,7 +316,7 @@ This means that all the benefits of parallel execution still hold: the three rul
 If all the rules play well together, or if the earlier rules do not match any cohorts, 
 then no rule applications need to be removed. 
 However, if we have the grammar from Figure~\ref{fig:ruleOrder}, 
-and imperative is the right thing to select, then the clauses created by 
+and imperative is the right analysis for a given context, then the clauses created by 
 \t{REMOVE Imp} would be ignored, in favour of the clauses that are created 
 by \t{SELECT Imp IF (-1 BOS) (1 (prn obj))}.
 
@@ -332,7 +336,7 @@ Thus, it is no problem if the rule causes a conflict in only one cohort---say, w
 have another potential imperative in the sentence, 
 but there is no other rule which targets its other readings. 
 We can discard only the conflicting instances: we prevent 
-\t{REMOVE Imp} from applying to \emph{Zeg} in the sequence \emph{. Zeg me}, 
+\t{REMOVE Imp} from applying to \emph{Zeg} in the sequence \emph{\# Zeg me}, 
 but it still may apply to other ambiguous tokens with imperative reading.
 
 
@@ -389,7 +393,7 @@ Heuristic rule order asks ``out of all the rules that target this cohort, which 
 If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or fall back to ordering.
 
 However, there is another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
-Addressing this is beyond the means of previous FSIG implementations \todo{check if so}, but with a SAT-solver, we can answer this question. 
+Addressing this is beyond the means of previous FSIG implementations \todo{check Anssi/? if so}, but with a SAT-solver, we can answer this question. 
 
 
 Each rule application to a concrete cohort produces a clause,
@@ -565,8 +569,8 @@ In this section, we report experiments on the two modifications to the parallel 
 presented in the previous section. 
 We evaluate the performance against VISL CG-3 in accuracy and running time; in addition, we offer some preliminary observations on the effect of grammar writing.
 
-For these experiments, we implemented another variant for both schemes, where we
-force all the literals that are not targeted by the original rules to be true.
+For these experiments, we implemented another variant for both schemes: 
+we force all the literals that are not targeted by the original rules to be true.
 This modification destroys the ``rules disambiguate more'' property, 
 which we hypothesised to be helpful; however, turns out that this variation 
 slightly outperforms even VISL CG-3 in terms of precision and recall.
@@ -603,13 +607,17 @@ The results are presented in more detail in the following sections.
 % \textbf{\satcgMax}
 %       & 79.2 \% & 39.7s & ??? \% &1m 34s & ??? \% & 2m 54s \\ 
 \centering
-\begin{tabular}{l | p{1.8cm} p{1.8cm} c | p{1.8cm} p{1.8cm}  c}
+\begin{tabular}{l | c c c | p{1.1cm} p{1.1cm}  c}
  
-           & \multicolumn{3}{c}{\textbf{19 rules}} &  \multicolumn{3}{c}{\textbf{261 rules}} \\ 
-                          & F-score: force~true  &  F-score: unassigned & Time   
-                                               & F-score: force true  &  F-score: unassigned & Time \\ \hline
+%           & \multicolumn{3}{c}{\textbf{Spanish: 19 rules}} &  \multicolumn{3}{c}{\textbf{Spanish: 261 rules}} \\
+           & \multicolumn{2}{r}{\textbf{19~rules}} & &  \multicolumn{3}{c}{\textbf{261 rules}} \\
+                          & \multicolumn{2}{c}{F-score} 
+                                               & Time   & \multicolumn{2}{c}{F-score} 
+                                                                             & Time   \\
+                          & force    & unass.      &  & force     & unass. &  \\ \hline
+
       \textbf{\satcgMax}  & 83.28 \% & 80.22 \%  & 4s  & 79.03 \% & 78.15 \% & 8s \\ 
-      \textbf{\satcgOrd}  & 83.12 \% & 81.14 \%  & 4s  & 79.17 \%  & 79.03 \% & 8s \\ 
+      \textbf{\satcgOrd}  & 83.12 \% & 81.14 \%  & 4s  & 79.17 \% & 79.03 \% & 8s \\ 
       \textbf{VISL CG-3}  & \multicolumn{2}{c}{81.52 \%}  & 0.39s
                                              & \multicolumn{2}{c}{78.83 \%} & 0.64s\\ 
   \end{tabular}
@@ -629,8 +637,8 @@ Some of the rules were selected from the original grammar, and some were written
 
 
 Table~\ref{table:fscore} shows F-scores and execution times for these two grammars. 
-\satcgMax is the parallel scheme with maximisation, and
-\satcgOrd is the parallel scheme where rule applications are introduced one by one.
+\satcgMax{} is the parallel scheme with maximisation, and
+\satcgOrd{} is the parallel scheme where rule applications are introduced one by one.
 The original grammar performs very poorly, with an F-score between 78--79 \% for all three setups.
 Due to the unrepresentative example, we cannot draw many conclusions. 
 The experiment with the 19-rule grammar was more promising.
@@ -683,7 +691,7 @@ Table~\ref{table:time} shows the results for both Finnish and Spanish tests.
 
 For both systems, the number of rules in the grammar affects the performance 
 more than the raw word count.
-However, the performance of SAT-CG gets worse quicker than VISL CG-3s.
+However, the performance of SAT-CG gets worse faster than VISL CG-3s.
 From the SAT-solving side, maximisation is the most costly operation. 
 Emulating order performs slightly faster, but still in the same range: 
 maximisation is not needed, but the solve function is performed after 
@@ -706,43 +714,39 @@ a rather naive implementation, written in Haskell and BNFC.
 
 \paragraph{Sentence length} 
 In addition, we explored the effect of sentence length further.
-When split by just full stops, the longest sentence in Don Quijote consists of 283 tokens\footnote{The longest sentence in Don Quijote: \ventero}, including punctuation. In Table~\ref{table:timeVentero}, we see this sentence parsed, on the right as a single unit, and on the left, we split it in three parts, at the semicolons. In Table~\ref{table:time}, it was already split by semicolons.
+When split by just full stops, the longest sentence in Don Quijote consists of 283 tokens\footnote{The longest sentence in Don Quijote: \ventero}, including punctuation. In Table~\ref{table:timeVentero}, we see this sentence parsed, on the right as a single unit, and on the left, we split it in four parts, at the semicolons. In Table~\ref{table:time}, it was already split at semicolons.
+We tested the effect of sentence length also for the Finnish grammar.
+All the sentences in FinnTreeBank were very short, so we created an 251-token ``sentence'' 
+by pasting together 22 short sentences and replacing sentence boundaries with commas.
 
 The results in Table~\ref{table:timeVentero} are promising: the execution time does not grow
-unbearably, even with the long sentence.
+unbearably, even with the unusually long sentence.
 To give some context, let us consider the performance of parallel CG compared to sequential CG in 1998.
 \cite{voutilainen1998} reports the performance of a 3,500-rule CG: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule FSIG grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.  
-As another CG result from the late 1990s, \cite{tapanainen1999phd} reports that the average time for 15-word sentences in CG-2 is 5 seconds.
+As another CG result from the late 1990s, \cite{tapanainen1999phd} reports an average time of 5 seconds for parsing 15-word sentences in CG-2.
 
-\todo{2 seconds to 0.5 seconds is a lot smaller difference than 5 seconds for $>100$ seconds.}
+Compared to the parsing times of sequential and parallel CGs nearly 20 years ago, 
+our results demonstrate a smaller difference, and much less steep curve in the execution time
+related to sentence length. 
+Of course, we cannot ignore the fact that \cite{voutilainen1998} uses different grammars
+for the CG part and the FSIG part; the FSIG grammar contains more global phenomena, 
+which makes the constraint problem larger. In order to properly contrast this experiment to 
+\cite{voutilainen1998}, we should isolate the effect of the grammar and the effect of the execution scheme.
 
-
-% ---as we can see, parsing the 283 tokens as a single unit takes more time than parsing the whole novel.
-% Even with the split, the longest, 126-token subpart of this sentence is responsible for a good 16 \% of the parsing time of the complete novel. 
-
-
-% 
 
 \begin{table}[ht]
   \centering
-%   \begin{tabular}{ r | c c c | c c c }
-%        & \multicolumn{3}{c}{Full sentence: 283 tokens} & \multicolumn{3}{c}{Split: x + 126 + y tokens} \\
-
-%                      & \textbf{19}  & \textbf{99}  & \textbf{261}  &  \textbf{19}  &  \textbf{99} & \textbf{261} \\ \hline
-% \textbf{\satcgMax}   & 1.926s  &  ?  & 2.259s   & 1.855s & ?  & 2.062s \\ 
-% \textbf{\satcgOrd}   & 1.877s  &  ?  & 2.205s   & 1.872s & ?  & 1.988s \\ 
-% \textbf{VISL CG-3}   & 0.021s  &  ?  & 0.052s   & 0.021s & ?  & 0.028s \\ 
-
-%    \end{tabular}
-
-\begin{tabular}{ l | c | c }
-       & \textbf{283 tokens} &  \textbf{x + 126 + y tokens} \\ \hline
-\textbf{\satcgMax}   & 2.259s              & 2.062s \\ 
-\textbf{\satcgOrd}   & 2.205s              & 1.988s \\ 
-\textbf{VISL CG-3}   & 0.052s              & 0.028s \\ 
+\begin{tabular}{ l | c c | c c }
+       & Spanish (261 rules)} && \multicolumn{2}{c}{Finnish (1185 rules)}  \\
+       & \textbf{283 tokens} &  \textbf{Split} %51 + 38 + 126 + 68 tokens}  
+                                           & \textbf{251 tokens} & \textbf{Split} \\ \hline
+\textbf{\satcgMax}   & 2.26s   & 2.06s   & 5.34s & 2.36s\\ 
+\textbf{\satcgOrd}   & 2.20s   & 1.99s   & 4.70s & 2.36s \\ 
+\textbf{VISL CG-3}   & 0.05s   & 0.03s   & 0.04s & 0.04s \\ 
 
    \end{tabular}
-  \caption{Experiments with sentence length, using the 261-rule grammar. On the left, the complete 283-token sentence parsed as one unit; on the right, split at semicolons into three parts.}
+  \caption{Experiments with sentence length. On the left, Spanish 261-rule grammar parsing the complete 283-token sentence, parsed as one unit vs. split at semicolons into four parts.
+  On the right, Finnish 1185-rule grammar parsing an articifially constructed 251-token sentence.}
   \label{table:timeVentero}
 \end{table}
 
