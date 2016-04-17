@@ -20,19 +20,41 @@
 % \licdepartment\\
 % \textsc{\licuniversity}\\
 
-Constraint Grammar (CG) is a relatively young formalism, born out of practical 
-need for a robust and language-independent method for part-of-speech
-tagging.
-This thesis presents two contributions to the field of CG.
-We model CG as a Boolean satisfiability (SAT) problem, and
-describe an implementation using a SAT solver.
+Constraint Grammar (CG) is a robust and language-independent formalism 
+for part-of-speech tagging and shallow parsing. 
+A grammar consists of disambiguation rules for initially ambiguous, 
+morphologically analysed text: the correct analysis for the sentence 
+is attained by removing improper readings from ambiguous words.
+Wide-coverage Constraint Grammars, containing some thousands of rules, 
+generally achieve very high accuracy for free text: 
+thanks to the flexible formalism, new rules can be written 
+to address even the rarest phenomena, without compromising the general tendencies.
+Even with a smaller set of rules, CG-based taggers have been 
+competetive with statistical taggers.
+In addition, CG has been used in more experimental settings: dependency syntax,
+dialogue system for language learning %\cite{antonsen2009dialogue}
+and anaphora resolution. %\cite{puolakainen2015anaphora}.
+
+This thesis presents two contributions to the study of CG.
+Firstly, we model a parallel variant of CG as a 
+Boolean satisfiability (SAT) problem, and
+implement a CG-engine by using a SAT-solver.
 This is attractive for several reasons: formal logic is well-studied,
 and serves as an abstract language to reason about the properties of
-CG. 
+CG. Using SAT-solver as a backend, we can exploit decades of 
+research into optimising SAT-solvers.
+In addition, we suggest two novel alternatives for 
+conflict handling in the parallel scheme.
+%: this brings performance gains compared to previous implementations of parallel CG.
 
-As a practical application, we use SAT-CG to analyse existing CG
-grammars, taking inspiration from software verification. 
+Secondly, we implement a SAT-based tool for analysing sequential CGs.
+Sequential CG is the most commonly used variant: rules are applied in order, 
+and actions are irreversible.
+We apply \formulation{a common technique from software verification}, 
+and model the state of all possible sentences after applying each rule;
+this enables grammar writers to see whether some rule or rule set prevents
+others from applying, or request example sequences that trigger a given rule.
 
-% \bigskip
-% \noindent
-% \textbf{Keywords}: \emph{\lickeywords}
+\bigskip
+\noindent
+\textbf{Keywords}: \emph{\lickeywords}
