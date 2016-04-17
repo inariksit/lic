@@ -612,8 +612,7 @@ The results are presented in more detail in the following sections.
 %           & \multicolumn{3}{c}{\textbf{Spanish: 19 rules}} &  \multicolumn{3}{c}{\textbf{Spanish: 261 rules}} \\
            & \multicolumn{2}{r}{\textbf{19~rules}} & &  \multicolumn{3}{c}{\textbf{261 rules}} \\
                           & \multicolumn{2}{c}{F-score} 
-                                               & Time   & \multicolumn{2}{c}{F-score} 
-                                                                             & Time   \\
+                                               & Time   & \multicolumn{2}{c}{F-score} & Time \\
                           & force    & unass.      &  & force     & unass. &  \\ \hline
 
       \textbf{\satcgMax}  & 83.28 \% & 80.22 \%  & 4s  & 79.03 \% & 78.15 \% & 8s \\ 
@@ -737,7 +736,7 @@ which makes the constraint problem larger. In order to properly contrast this ex
 \begin{table}[ht]
   \centering
 \begin{tabular}{ l | c c | c c }
-       & Spanish (261 rules)} && \multicolumn{2}{c}{Finnish (1185 rules)}  \\
+       & \multicolumn{2}{c}{Spanish (261 rules)} & \multicolumn{2}{c}{Finnish (1185 rules)}  \\
        & \textbf{283 tokens} &  \textbf{Split} %51 + 38 + 126 + 68 tokens}  
                                            & \textbf{251 tokens} & \textbf{Split} \\ \hline
 \textbf{\satcgMax}   & 2.26s   & 2.06s   & 5.34s & 2.36s\\ 
@@ -778,12 +777,124 @@ Throughout the implementation of SAT-CG, we have predicted that the more declara
 We hoped to combine the best parts of CG and FSIG: because of the their mutual dependence, we would need less rules;
 but conflicts would still be solved, and not render the whole grammar useless.
 On the one hand, getting rid of ordering and cautious context could ease the task of the grammar writer, since it removes the burden of estimating the best sequence of rules and whether to make them cautious. On the other hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
-Lacking an actual CG writer, it is hard to say whether this prediction holds or not.
+Without an actual CG writer, it is hard to say whether this prediction holds or not.
 
-In addition, our modifications to the brittleness of FSIG have let us run CGs as FSIG; something that previous FSIG implementations do not allow.
-As an inverse experiment, it would be interesting to take some FSIG grammars, such as \cite{voutilainen1997fsig}, and run them with a CG engine, then compare the precision and recall. 
-According to the previous literature, CG and FSIG rules are written 
-The largest FSIG grammar is : \cite{voutilainen1998} describes the 2,600-rule English grammar as 
+As stated earlier, we got the best F-score with a modification which prevents the rules 
+from disambiguating their context: in the case with {\em la casa grande} and the 
+three rules which all target {\em casa}, we would assign both $\laDet${} and $\laPrn${} true.
+We tried also a second variant, where we would assign true to only those variables which are 
+neither targets nor conditions to any rule.
+Table~\ref{table:forceOrNot} shows in more detail what happens to the precision and recall with all the three variants, with the 19-rule grammar.
+
+%%%%
+\def\noAss{{\sc NoAss}}
+\def\noAff{{\sc NoAff}}
+\def\noTar{{\sc NoTar}}
+
+\begin{table}[h]
+\centering
+  \begin{tabular}{l || cc | cc | cc }
+
+                     & \multicolumn{2}{c}{\noAss} 
+                                    & \multicolumn{2}{c}{\noAff} 
+                                                     & \multicolumn{2}{c}{\noTar} \\ 
+                     & Prec. & Rec.  & Prec. & Rec.  & Prec. & Rec. \\ \hline 
+\textbf{\satcgMax}   & 79.97 & 80.47 & 77.24 & 82.94 & 80.36 & 86.41 \\ 
+\textbf{\satcgOrd}   & 80.96 & 81.31 & 78.42 & 84.07 & 80.22 & 86.28 \\
+\textbf{VISL CG-3}   & 78.29 & 85.02 & 78.29 & 85.02 & 78.29 & 85.02 \\
+
+  \end{tabular}
+
+\label{table:forceOrNot}
+\caption{Showing the effect of three variants on the 19-rule grammar: (\noAss) Leave all variables unassigned; (\noAff) Assign true to variables which do not appear in any rule; (\noTar) Assign true to variables which are not targeted by any rule.}
+\end{table}
+
+
+
+We notice that the SAT-based solution loses severely in recall, 
+when all variables are left unassigned. This is understandable: given that
+the grammar is extremely small, only 19 rules, the majority of the tokens will 
+never appear in the clauses, neither as targets nor conditions. So the SAT-solver is free to 
+arbitrarily decide the analyses for those free words, whereas VISL CG-3 does nothing to them.
+However, the precision in SAT-CG is better already in the unassigned scheme.
+The percentage is calculated by overall number of analyses, but even at the level of different words, the advantage is at SAT-CG. Out of the gold standard corpus, VISL CG-3 differs in the analyses of some 4,200 words, whereas SAT-CG, in the the unassigned variant, disagrees only on 3700-3900 words. 
+Of course, the differences are still very small, and this effect could also be due to randomness: sometimes the SAT-solver happens to disambiguate correctly just by removing a random analysis.
+
+We move on to the second variant, where the completely unaffected variables are assigned true. 
+Unsurprisingly, the recall grows: we have just added some thousands of true variables, 
+some of which would have been otherwise randomly removed by the SAT-solver. 
+The ordered variant resembles most the behaviour of VISL CG-3, both in precision, recall and the amount of words where the analysis disagrees; now the number is around 4,200 for both.
+
+The third variant, where all non-targeted analyses are assigned true, performs the best. 
+High recall is expected; now we force some more thousands of variables true, 
+among them must be some actually true readings.
+But at the same time, this limits the power of disambiguating conditions.
+The most plausible explanation for this phenomenon is the particular features of the tested grammar. When tested with the original 261-rule grammar, 
+shown in Figure~\ref{table:forceOrNotOrig}, the pattern does not repeat: 
+assigning more variables true just brings the performance closer to VISL CG-3.
+
+\begin{table}[h]
+\centering
+  \begin{tabular}{l || cc | cc | cc}
+
+                     & \multicolumn{2}{c}{\noAss} 
+                                    & \multicolumn{2}{c}{\noAff} 
+                                                     & \multicolumn{2}{c}{\noTar} \\ 
+                     & Prec. & Rec.  & Prec. & Rec.  & Prec. & Rec. \\ \hline 
+\textbf{\satcgMax}   & 77.03 & 79.32 & 70.85 & 86.46 & 71.91 & 87.72  \\ 
+\textbf{\satcgOrd}   & 77.91 & 80.18 & 70.79 & 86.40 & 71.78 & 87.62  \\
+\textbf{VISL CG-3}   & 71.17 & 88.34 & 71.17 & 88.34 & 71.17 & 88.34  \\
+
+  \end{tabular}
+
+\label{table:forceOrNotOrig}
+\caption{Evaluation of the three variants, for the original 261-rule grammar.}
+\end{table}
+
+Now, what are these features of the tiny grammar? 
+%Again, the grammar is extremely small, and obviously overfitted just to the data.
+One reason may be that many of the rules come in pairs.
+Figure~\ref{fig:rulesAreBiased} shows an excerpt from the grammar:
+due to these rules, both $\laDet${} and $\laPrn${} would be targeted, and remain unassigned.
+Another peculiarity in the 19-rule grammar is the high number of {\sc select} rules---this 
+means that all the other readings in the cohort become the actual targets.
+Thus, if a rule addresses some phenomenon, most of the readings in the target cohort 
+are saved from the forced assignment.
+
+
+\begin{figure}[h]
+\centering
+\begin{verbatim}
+# la casa (en que vivo)
+SELECT:i01_s_det Det IF (NOT 1C VerbFin) ;  # TOP 1
+
+# (el novio) la casa
+SELECT:i08_s_pro PrnIndep IF (1C VerbFin) ; # TOP 8    
+\end{verbatim}
+\label{fig:rulesAreBiased}
+\caption{Excerpt from the 19-rule Spanish grammar.}
+\end{figure}
+
+To conclude, this experiment has been very inconclusive, due to the extremely low coverage 
+of the tested grammars.
+A high-quality grammar would target significantly more individual words in the test corpus;
+this means less chances for the SAT-solver to randomly decide the values for untargeted readings. We would hope that the power of rules disambiguating their condition would help 
+such grammar to go that extra mile; however, based on the experiments so far, this is mostly speculation.
+It would be interesting to repeat the experiment in writing a serious, large-scale grammar.
+Some questions to address would be 
+\begin{inparaenum}
+\item do we need less rules;
+\item do we need careful context;
+\item do we write more {\sc select} rules; and
+\item will a grammar that performs well with parallel CG also perform well with sequential CG?
+\end{inparaenum}
+
+
+
+% In addition, our modifications to the brittleness of FSIG have let us run CGs as FSIG; something that previous FSIG implementations do not allow.
+% As an inverse experiment, it would be interesting to take some FSIG grammars, such as \cite{voutilainen1997fsig}, and run them with a CG engine, then compare the precision and recall. 
+% According to the previous literature, CG and FSIG rules are written 
+% The largest FSIG grammar is : \cite{voutilainen1998} describes the 2,600-rule English grammar as 
 
 
 % The results in Table~\ref{table:time} suggests that that when running grammars that are written
@@ -798,30 +909,30 @@ The largest FSIG grammar is : \cite{voutilainen1998} describes the 2,600-rule En
 % work well with SAT-CG are also good for traditional CG.
 
 
-Discoveries from exploiting the parallel execution?
-The rules are flipped
+% Discoveries from exploiting the parallel execution?
+% The rules are flipped
 
-Out of interest, we also manually flipped a small grammar and tested it against the original.
-The personal experiences of doing this was that ``wow, people don't really mean what they write''.
-\todo{Like if you're drawing a portrait, try to flip your paper upside down or look at it as a mirror image; it is easier to see if the ears are wonky or the eyes are all over the place.}
+% Out of interest, we also manually flipped a small grammar and tested it against the original.
+% The personal experiences of doing this was that ``wow, people don't really mean what they write''.
+% \todo{Like if you're drawing a portrait, try to flip your paper upside down or look at it as a mirror image; it is easier to see if the ears are wonky or the eyes are all over the place.}
 
-In all the examples so far, we have not discussed the C operator, for careful application mode:
-only act if the context word is \emph{unambiguously} tagged.
-For sequential execution, careful mode is the way to avoid making too hasty decisions; 
-wait until other rules may have disambiguated a context word first.
-With a SAT-based engine, careful mode is not necessary for ensuring ``careful'' behaviour: 
-for any set of rules, the SAT-solver can start exploring one direction, 
-and always backtrack, if it does not lead to a good solution with the other rules.
-If a rule has C, the only difference is what kind of implications are constructed.
-Contrast \t{REMOVE v IF (-1 det)} and \t{REMOVE v IF (-1C det)}: 
-the first rule, applied to {\em la casa grande}, creates the clause 
-$\laDet \Rightarrow \neg \casaV$, and the second rule creates
-$(\laDet \wedge \neg \laPrn) \Rightarrow \neg \casaV$.
+% In all the examples so far, we have not discussed the C operator, for careful application mode:
+% only act if the context word is \emph{unambiguously} tagged.
+% For sequential execution, careful mode is the way to avoid making too hasty decisions; 
+% wait until other rules may have disambiguated a context word first.
+% With a SAT-based engine, careful mode is not necessary for ensuring ``careful'' behaviour: 
+% for any set of rules, the SAT-solver can start exploring one direction, 
+% and always backtrack, if it does not lead to a good solution with the other rules.
+% If a rule has C, the only difference is what kind of implications are constructed.
+% Contrast \t{REMOVE v IF (-1 det)} and \t{REMOVE v IF (-1C det)}: 
+% the first rule, applied to {\em la casa grande}, creates the clause 
+% $\laDet \Rightarrow \neg \casaV$, and the second rule creates
+% $(\laDet \wedge \neg \laPrn) \Rightarrow \neg \casaV$.
 
 
-SAT-solver can still start exploring
+% SAT-solver can still start exploring
 
-But SAT-CG is perfectly fine with C: it can start disambiguating, even if none of the rules is able to act on its own. 
+% But SAT-CG is perfectly fine with C: it can start disambiguating, even if none of the rules is able to act on its own. 
 
 % Similar patterns were observed with small (\textless{}20) rule sets
 % written by the authors; depending on the subset, SAT-CG and VISL CG-3 had
@@ -835,13 +946,13 @@ But SAT-CG is perfectly fine with C: it can start disambiguating, even if none o
 % translation pipeline, and comparing the translation quality.
 
 
-The sequential application of traditional CG rules is good for
-performance and transparency. When a rule takes action, the analyses
-are removed from the sentence, and the next rules get the modified
-sentence as input. 
-% At the execution of rule, there is no way to go back to earlier rules and undo them. 
-As a downside, there is no way to know which part comes directly from the
-raw input and which part from applying previous rules.
+% The sequential application of traditional CG rules is good for
+% performance and transparency. When a rule takes action, the analyses
+% are removed from the sentence, and the next rules get the modified
+% sentence as input. 
+% % At the execution of rule, there is no way to go back to earlier rules and undo them. 
+% As a downside, there is no way to know which part comes directly from the
+% raw input and which part from applying previous rules.
 
 
 
