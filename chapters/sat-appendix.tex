@@ -75,7 +75,8 @@
 
 \noindent In this appendix, we show the SAT-encoding for all the rule types that 
 SAT-CG supports: 
-{\sc remove} and {\sc select} rules, with the contextual tests and set operations described in CG-2 \cite{tapanainen1996}, except for the operators \t{**} (continue search if linked tests fail) and \t{@} (absolute position). In addition, the software SAT-CG supports a couple of new constructors from VISL CG-3: {\sc cbarrier}, {\sc negate} and subreadings.
+{\sc remove} and {\sc select} rules, with the contextual tests and set operations described in CG-2 \cite{tapanainen1996}, except for the operators \t{**} (continue search if linked tests fail) and \t{@} (absolute position). In addition, the software SAT-CG supports a couple of new constructions from VISL CG-3: {\sc cbarrier}, which requires the barrier tag to be unambiguous in order to function as a barrier;
+{\sc negate}, which inverts a whole chain of contextual tests; and subreadings, which make it possible to include e.g. a clitic in the same cohort, but distinguish it from the main reading.
 
 The encoding in this appendix is independent of the implementation of the software SAT-CG; it does not describe how the sentence is processed in order to find the variables. 
 The purpose of this appendix is to give a full description of the different rule types; the method is introduced with more pedagogical focus in Section~\ref{sec:CGSAT}. 
@@ -145,13 +146,13 @@ We try to craft rules that make sense for this segment; however, some variants a
 %The basis of the rule is \texttt{REMOVE adj}, which will target the word form \emph{más}.
 % Its positive counterpart is \texttt{SELECT adv}, which translates into ``remove everything but adv''.
 
-\subsection{Parallel scheme}
+% \subsection{Parallel scheme}
 
-We begin by introducing the parallel scheme. For basic rules, this corresponds to the encoding in \cite{lager98}; each analysis is given a single variable, and all rules have access to it.
+% We begin by introducing the parallel scheme. For basic rules, this corresponds to the encoding in \cite{lager98}; each analysis is given a single variable, and all rules have access to it.
 % and all the rules are applied at the same time. 
 %In addition, we add rule types that \cite{lager98} does not consider.
 
-\subsubsection{No conditions} 
+\subsection{No conditions} 
 
 The simplest rule types remove or select a target in all cases. 
 A rule can target one or multiple readings in a cohort. We demonstrate the case with one target in rules~\ref{eq:rmAdj}--\ref{eq:slAdj}, and multiple target in rules~\ref{eq:rmVb}--\ref{eq:slVb}. \\
@@ -215,7 +216,7 @@ As previously, we need no explicit clause for $\unaPrsPThree  \vee \unaPrsPOne \
 \end{equation}
 
 
-\subsubsection{Positive conditions} 
+\subsection{Positive conditions} 
 
 Rules with contextual tests apply to the target, if the conditions hold. 
 This is naturally represented as implications. We demonstrate both \textsc{remove} and {\sc select} rules with a single condition in \ref{eq:singleCondition}; the rest of the variants only with {\sc remove}. All rule types can be changed to {\sc select} by changing the consequent from $\neg{}\masAdj$ to $\neg{}\masAdv$. %from $\neg{}\masAdj$ to $\masAdv \wedge \neg{}\masAdj$.
@@ -287,7 +288,7 @@ Let $\unaAny$ denote the disjunction $\unaPrn \vee \unaPrsPThree \vee \unaPrsPOn
 \end{align}
 
 
-\subsubsection{Inverted conditions}
+\subsection{Inverted conditions}
 
 In the following, we demonstrate the effect of two inversion operators. 
 The keyword NOT inverts a single contextual test, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}. The keyword NEGATE inverts a whole conjunction of contextual tests, which may have any polarity: \cgrule{IF (NEGATE -2 det LINK NOT 1 noun)} means ``there may not be a determiner followed by a not-noun''; thus, ``det noun'' would be fine, or ``prn adj'', but not ``det adj''. %a sequence which matches the whole``
