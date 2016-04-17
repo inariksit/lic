@@ -144,17 +144,20 @@ performed on a \emph{target}, conditional on a \emph{context}.
 
 \section{Related work}
 
-CG is one in the family of shallow and reductionist grammar formalisms. In this section, we briefly describe other formalisms of the same family, and provide a bit of historical context. In-depth details about CG are presented in Section~\ref{properties}.
+CG is one in the family of shallow and reductionist grammar formalisms. In this section, we briefly describe other formalisms of the same family, and provide a bit of historical context. In-depth details about CG in particular are presented in Section~\ref{properties}.
 
-Historical overview:
+Disambiguation using constraint rules dates back to 1960s and 1970s---the closest system to modern CG was Taggit \cite{taggit}, which was used to tag the Brown Corpus.
+Karlsson \cite{karlsson1995constraint} provides a thorough overview on 
+different approaches to the disambiguation problem, including \cite{hindle1989disamrules,herz1990localSyntacticConstraints}.
 
-\todo{Taggit (1970s or so)} --- it's similar because it also looks at immediate context and discards analyses.
+%Hindle (1983, 1989) uses 350 disambiguation rules, constituting half of the rules of Fidditch. Shieber (1983) postulated disambiguation rules for solving attachment ambiguities in connection with a shift-reduce parser. Herz – Rimon (1990) use local constraints disallowing certain sequences of tags from being in the near context of a target word with designated features. The local constraints are retrieved from a context-free grammar of the language.
 
+CG itself was introduced in 1990. Around the same time, two related formalisms were also proposed: Finite-State Intersection Grammar \cite{koskenniemi90}, also later called Parallel Constraint Grammar; like in (sequential) CG, a FSIG grammar contains of rules which remove impossible readings based on contextual tests.
+But FSIG rules usually target syntactic phenomena, and they work in parallel, unlike the more common, sequential variant of CG.
+Functional Dependency Grammar \cite{tapanainen97fdg} is another shallow, reductionistic system,
+based on dependency syntax.
 
-
-\todo{Functional Dependency Grammar (1990s)} --- it's similar because it also produces complex stuff from simple components.
-
-\todo{FSIG (1990s) -- also called Parallel CG, more on that in the next section} --- it's similar because it is basically the same thing, just parallel.
+Brill tagging \cite{brill1995} is based on transformation rules: the starting point of an analysis is just one, most common tag, and subsequent rule applications transform one tag into another, based on contextual tests.
 
 \todo{All the other things that the standard CG-related papers/theses cite}
 
@@ -163,11 +166,12 @@ Historical overview:
 
 \cite{karlsson1995constraint} lists 24 design principles and describes
 related work at the time of writing.
-Here we summarise a set of main features, and relate CG to the developments in grammar formalism since the initial CG description.
+Here we summarise a set of main features, and relate CG to the developments in grammar formalism since the initial description.
 
-All theories and implementations of CG  a \emph{reductionistic}
-system, designed primarily for analysis, not generation.
-Its task is to give correct analyses to the words in given sentences,
+CG is a \emph{reductionistic} system: the analysis starts from a list of alternatives,
+and removes those which are impossible or improbable.
+CG is designed primarily for analysis, not generation; its task is 
+to give correct analyses to the words in given sentences,
 not to describe a language as a collection of ``all and only the grammatical sentences''.
 
 The syntax is decidedly \emph{shallow}: the rules do not aim to
@@ -178,16 +182,20 @@ easy to add exceptions, and exceptions to exceptions, without
 changing the more general rules.
 
 There are different takes on how \emph{deterministic} the rules are.
-The current state-of-the-art CG parser VISL CG-3 executes the rules strictly based on the order of appearance, but there
-are other implementations that apply their own heuristics or remove the
-ordering completely, such as in finite-state or logic-based implementations. 
+The current state-of-the-art CG parser VISL CG-3 executes the rules strictly 
+based on the order of appearance, but there are other implementations which 
+apply their own heuristics, or remove the ordering completely, 
+applying the rules in parallel. %such as in finite-state or logic-based implementations. 
 
-In addition, we will discuss the \emph{expressivity} of CG---while it is not a generative grammar and cannot be placed in the Chomsky hierarchy, we aim to provide parallels in what kind of output it can produce.
+In addition, we will discuss the \emph{expressivity} of CG. 
+%As said, CG is not a generative grammar, and thus cannot be placed in the Chomsky hierarchy.
+We present earlier work on defining expressivity in CG and similar formalisms,
+and suggest a way to emulate generation; this would allow us to place CG in the Chomsky hierarchy, and better relate to other grammar formalisms.
+%aim to provide parallels in what kind of output it can produce.
 
 \subsection{Reductionistic}\label{reductionist-vs.licencing}
 
-CG is not a generative system.
-It starts from a set of alternative analyses, given by a morphological analyser,
+CG analysis starts from a set of alternative readings, given by a morphological analyser,
 and eliminates the impossible or improbable ones using constraint rules. 
 The remaining analyses are assumed to be correct; that
 is, everything that is not explicitly eliminated, is allowed. 
