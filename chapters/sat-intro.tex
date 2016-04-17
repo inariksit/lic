@@ -77,9 +77,11 @@ Some problems have a single solution, some problems have multiple solutions, and
 
     $$\begin{array}{r | r @{~} l | l }
    \textbf{Variable}
-                & \multicolumn{2}{l}{\textbf{Constraint}} & \textbf{Explanation} \\ \hline
-                & \multicolumn{2}{l}{\ant \vee \bat \vee \cat \vee \dog \vee \fox} & \text{``You want to buy at least one pet.''} \\
+                %& \multicolumn{2}{l}{\textbf{Constraint}} 
+                & & \textbf{~~~Constraint} 
+                                         & \textbf{Explanation} \\ \hline
 
+                & \ant & \vee \ \bat \vee \cat \vee \dog \vee \fox & \text{``You want to buy at least one pet.''} \\
     \ant        & \ant &\Rightarrow \neg{}\cat \wedge \neg{}\dog \wedge \neg{}\fox & \text{``Ant does not like four-legged animals.''} \\
    \bat         & \bat &\Rightarrow \neg{}\ant \wedge \neg{}\emu
                           & \text{``Bat does not like herbivores.''} \\ 
@@ -89,7 +91,6 @@ Some problems have a single solution, some problems have multiple solutions, and
                                          &  \text{``Emu does not like small animals.''} \\
    \fox         & \fox &\Rightarrow \neg (\bat \wedge \emu) 
                                          & \text{``Fox cannot live with two winged animals.''} 
-
   \end{array}$$ \\
 
   \caption{Animals' cohabiting constraints translated into a SAT-problem.}
@@ -121,7 +122,7 @@ But things changed in the 90s: there was a breakthrough in the SAT-solving techn
 which allowed for scaling up and finding new use cases. As a result, modern SAT-solvers can deal with problems that have hundreds of thousands of variables and millions of clauses \cite{marques_silva2010}.
 
 What was behind these advances? SAT, as a general problem, remains NP-complete: 
-it is true that there are still SAT-problems \formulation{that cannot be solved in sub-exponential time}.
+it is true that there are still SAT-problems that cannot be solved in sub-exponential time.
 However, there is a difference between a general case, where the algorithm must be prepared for any input, and an ``easy case'', where we can expect some helpful properties from the input.
 Think of a sorting algorithm: in the general case, it is given truly random lists, and in the ``easy case'', it mostly gets lists with some kind of structure, such as half sorted, reversed, or containing bounded values. The general time complexity of sorting is still $O(n\ log\, n)$, but arguably, the easier cases can be expected to behave in linear time, and we can even design heuristic sorting algorithms that exploit those properties.
 
