@@ -83,7 +83,7 @@ makes both execution time and F-scores better than we report in the earlier pape
 
 In this section, we translate the disambiguation of a sentence into a SAT-problem.
 We demonstrate our encoding with an example in Spanish, shown in Figure~\ref{fig:laCasaGrande}: {\em la casa grande}. % (`the big house'). 
-The first word, {\em la}, is ambiguous between a definite article (`the') or an object pronoun (`her'), and the second word, {\em casa}, can be a noun (`house') or a verb form (`marries').
+The first word, {\em la}, is ambiguous between a definite article (`the') or an object pronoun (`her'), and the second word, {\em casa}, can be a noun (`house') or a verb (`(he/she) marries').
 The subsegment {\em la casa} alone can be either a noun phrase, $\laDet \ \casaN$ 
 `the house'  or a verb phrase $\laPrn \ \casaV$   `(he/she) marries her'. 
 However, the unambiguous adjective, {\em grande} (`big'), disambiguates the whole segment into a noun phrase: `the big house'.
@@ -259,8 +259,8 @@ As described in Section~\ref{sec:ordering}, the parallel FSIG behaves differentl
 sequential CG: the rules are dependent on each other, and the order does not matter.
 This prevents too hasty decisions, such as removing $\casaV$ before we know the status of \la{}. 
 However, ignoring the order means that we miss significant information in the rule set. 
-The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}, taken from an actual grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}}, will be well-behaved in a strict and sequential CG.
-The grammar will behave as intended also in a heuristic and sequential CG,
+The truth is that pure FSIG is very brittle: each and every rule in the set must fit together, without the notion of order. The rule sequence in Figure~\ref{fig:ruleOrder}, taken from a Dutch grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}}, will be well-behaved in a strict and sequential CG.
+The grammar will behave as intended also in a heuristic and sequential variant,
 because the rules with a longer context are matched first.
 But in FSIG, the rule set will definitely cause a conflict, rendering the whole grammar useless.
 
@@ -295,8 +295,8 @@ SECTION
    REMOVE (vbhaver pres p2 sg) ;
 
    \end{verbatim}
-\label{fig:ruleOrder}
 \caption{Example from a Dutch grammar}
+\label{fig:ruleOrder}
 \end{figure}
 
 
@@ -327,7 +327,7 @@ by \t{SELECT Imp IF (-1 BOS) (1 (prn obj))}.
 
 In this modified scheme, we introduce the clauses to the SAT-solver one by one, 
 and attempt to solve after each clause. If the SAT-problem after the 50$^{th}$ rule 
-has a solution, we accept all the clauses created by rule 50, and commit to them.
+has a solution, we accept all the clauses created by rule 50. %, and commit to them.
 If rule 51 causes a conflict, we prioritise the previous, well-behaving subset of
 50 rules, and discard the conflicting clauses created by rule 51.
 
@@ -392,8 +392,8 @@ Strict ordering substitutes the question with a simpler one: ``which rule comes 
 Heuristic rule order asks ``out of all the rules that target this cohort, which one has the best matching context?''
 If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or fall back to ordering.
 
-However, there is another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
-Addressing this is beyond the means of previous FSIG implementations \todo{check Anssi/? if so}, but with a SAT-solver, we can answer this question. 
+However, we can ask yet another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
+Addressing this is beyond the means of previous FSIG implementations \todo{confirm}, but with a SAT-solver, we can answer this question. 
 
 
 Each rule application to a concrete cohort produces a clause,
@@ -436,10 +436,10 @@ Now the procedure goes as follows:
 \item No solution for all clauses: try to find a solution that satisfies maximally many clauses; however, default rule cannot be overridden.
 \end{enumerate}
 
-Similarly to the previous, order-based scheme, we create a clause for each 
-instance of the rule application. In the case of a conflict, we can 
-only discard the clauses targeting the offending cohort, but the rule may apply 
-elsewhere in the sentence.
+% Similarly to the previous, order-based scheme, we create a clause for each 
+% instance of the rule application. In the case of a conflict, we can 
+% only discard the clauses targeting the offending cohort, but the rule may apply 
+% elsewhere in the sentence.
 
 
 The problem of satisfying maximum amout of clauses is known as \emph{Maximum Satisfiability} (MaxSAT).
@@ -470,7 +470,7 @@ This means that the SAT-solver can ignore the rest of the clause---the part that
 %Since this part comes from the rule application, the effect of this trick with $v$ means that the original rule application can be ignored.
 %It knows already that the whole disjunction is true, regardless if the original rule applies or not.
 Conversely, if $v$ is true, then its negation $\neg{}v$ is eliminated from the clause, 
-and the SAT-solver must take into account the original $\neg\laDet \vee \neg\casaV$.
+and the SAT-solver must handle the original constraint $\neg\laDet \vee \neg\casaV$.
 
 
 How, then, are the helper $v$s maximised? 
@@ -571,12 +571,12 @@ We evaluate the performance against VISL CG-3 in accuracy and running time; in a
 
 For these experiments, we implemented another variant for both schemes: 
 we force all the literals that are not targeted by the original rules to be true.
-This modification destroys the ``rules disambiguate more'' property, 
+This modification destroys the ``rules may disambiguate their conditions'' property, 
 which we hypothesised to be helpful; however, turns out that this variation 
 slightly outperforms even VISL CG-3 in terms of precision and recall.
 Conversely, the original SAT-CG scheme, where all variables are left unassigned,
 fares slightly worse for accuracy.
-Overall, the accuracy is very low with the tested grammars, thus it is hard to draw conclusions regarding accuracy.
+Overall, the accuracy is very low with the tested grammars, thus it is hard to draw conclusions.
 As for execution time, all variants of SAT-CG perform an order of magnitude worse than VISL CG-3.
 The results are presented in more detail in the following sections.
 
@@ -638,19 +638,18 @@ Some of the rules were selected from the original grammar, and some were written
 Table~\ref{table:fscore} shows F-scores and execution times for these two grammars. 
 \satcgMax{} is the parallel scheme with maximisation, and
 \satcgOrd{} is the parallel scheme where rule applications are introduced one by one.
-The original grammar performs very poorly, with an F-score between 78--79 \% for all three setups.
+The original grammar performs very poorly, with an F-score between 78--79 \% for all three setups---even with an empty grammar, the F-score would be around 70 \%.
 Due to the unrepresentative example, we cannot draw many conclusions. 
-The experiment with the 19-rule grammar was more promising.
+We had access to other grammars of the same size range, such as 
+Portuguese, Dutch and Russian; 
+however, we had no available gold standard for those languages.
+
+The experiment with the 19-rule grammar was more interesting.
 We intended to write a grammar that would perform exceptionally well for the parallel 
 execution; it was heavily tuned to the gold standard corpus, 
-and tested only with SAT-CG during development.
+and tested only with SAT-CG (leaving all variables unassigned) during development.
 To our surprise, this small grammar turned out to outperform the original, 
 261-rule grammar, even when run with VISL CG-3. 
-
-%We had access to other grammars of same size range, such as Portugues, Dutch and Russian, also in the Apertium repository.
-%However, we did not have a gold standard for those languages, so we could not test the performance against VISL CG-3 with the grammars.
-
-
 
 
 \subsection{Execution time}
@@ -774,8 +773,10 @@ which makes the constraint problem larger. In order to properly contrast this ex
 \subsection{Effect on grammar writing}
 
 Throughout the implementation of SAT-CG, we have predicted that the more declarative features would influence the way rules are written. 
-We hoped to combine the best parts of CG and FSIG: because of the their mutual dependence, we would need less rules;
-but conflicts would still be solved, and not render the whole grammar useless.
+We hoped to combine the best parts of CG and FSIG: 
+the rules would be more expressive and declarative, 
+but we could still fall back to heuristics: eventual 
+conflicts would not render the whole grammar useless.
 On the one hand, getting rid of ordering and cautious context could ease the task of the grammar writer, since it removes the burden of estimating the best sequence of rules and whether to make them cautious. On the other hand, lack of order can make the rules less transparent, and might not scale up for larger grammars.
 Without an actual CG writer, it is hard to say whether this prediction holds or not.
 
@@ -828,8 +829,10 @@ The ordered variant resembles most the behaviour of VISL CG-3, both in precision
 The third variant, where all non-targeted analyses are assigned true, performs the best. 
 High recall is expected; now we force some more thousands of variables true, 
 among them must be some actually true readings.
-But at the same time, this limits the power of disambiguating conditions.
-The most plausible explanation for this phenomenon is the particular features of the tested grammar. When tested with the original 261-rule grammar, 
+But at the same time, this limits the power of rules: they may only disambiguate targets, not conditions---why does precision go up?
+The most plausible explanation for this phenomenon, aside from mere chance, 
+is the particular features of the tested grammar. 
+When tested with the original 261-rule grammar, 
 shown in Figure~\ref{table:forceOrNotOrig}, the pattern does not repeat: 
 assigning more variables true just brings the performance closer to VISL CG-3.
 
@@ -862,7 +865,15 @@ Thus, if a rule addresses some phenomenon, most of the readings in the target co
 are saved from the forced assignment.
 
 
-\begin{figure}[h]
+
+
+To conclude, this experiment has been very inconclusive, due to the extremely low coverage 
+of the tested grammars.
+A high-quality grammar would target significantly more individual words in the test corpus;
+this means less chances for the SAT-solver to randomly decide the values for untargeted readings. We would hope that the power of rules disambiguating their condition would help 
+such grammar to go that extra mile; however, based on the experiments so far, this is mostly speculation.
+
+\begin{figure}[ht]
 \centering
 \begin{verbatim}
 # la casa (en que vivo)
@@ -875,19 +886,15 @@ SELECT:i08_s_pro PrnIndep IF (1C VerbFin) ; # TOP 8
 \caption{Excerpt from the 19-rule Spanish grammar.}
 \end{figure}
 
-To conclude, this experiment has been very inconclusive, due to the extremely low coverage 
-of the tested grammars.
-A high-quality grammar would target significantly more individual words in the test corpus;
-this means less chances for the SAT-solver to randomly decide the values for untargeted readings. We would hope that the power of rules disambiguating their condition would help 
-such grammar to go that extra mile; however, based on the experiments so far, this is mostly speculation.
 It would be interesting to repeat the experiment in writing a serious, large-scale grammar.
 Some questions to address would be 
 \begin{inparaenum}
-\item do we need less rules;
-\item do we need careful context;
-\item do we write more {\sc select} rules; and
-\item will a grammar that performs well with parallel CG also perform well with sequential CG?
+\item[(a)] do we need less rules;
+\item[(b)] do we need careful context;
+\item[(c)] do we write more {\sc select} rules; and
+\item[(d)] will a grammar that performs well with parallel CG also perform well with sequential CG?
 \end{inparaenum}
+
 
 
 
@@ -966,16 +973,18 @@ Some questions to address would be
 \section{Summary}
 
 In this section, we started from the parallels between CG and logic:
-the rules express what is true (`SELECT') and false (`REMOVE'), under certain conditions (`IF').
-Plugging this into a SAT-solver, we get a working CG implementation---that is, parallel CG, known as FSIG. 
+the rules express what is true ({\sc select}) and false ({\sc remove}), under certain conditions ({\sc if}).
+Expressing this as a SAT-problem, we get a working CG implementation---that is, parallel CG, known as FSIG. 
 To alleviate the brittleness of FSIG, we developed two approaches to discard conflicting rule applications.
-The first one is based on maximisation; trying to make as many clauses as possible apply, and the second one is based on order; introducing clauses one by one, and assuming that the previous clauses are true.
+The first one is based on order; introducing clauses one by one, and assuming that the previous clauses are true, 
+and the second one is based on maximisation; trying to make as many clauses as possible apply.
 
 
 As a conclusion, SAT-solver provides an interesting alternative for a CG engine, but loses in practicality: performance and lack of transparency for grammar writers.
-Perhaps the biggest contribution in this work has been to the FSIG community, with a practical implementation and ways to get around conflicts.
+We see more potential in contributing to the FSIG community, with a practical implementation and ways to get around conflicts.
+%Perhaps the biggest contribution in this work has been to 
 %CG and FSIG grammars are written in different styles
-For the next chapter, we will use the benefits of SAT for analysing CGs.
+For the next chapter, we will describe a sequential SAT-encoding, which will be used for analysing CGs.
 
 %we found the alternative scheme in Section~\ref{sec:orderedScheme} promising for grammar analysis. 
 
