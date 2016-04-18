@@ -1,6 +1,7 @@
 \def\t#1{\texttt{#1}}
 
 \section{Introduction to CG}
+\label{sec:cg-intro}
  
 
 Constraint Grammar (CG) is a formalism for 
@@ -8,9 +9,9 @@ disambiguating morphologically analysed text.
 It was first introduced by
 \cite{karlsson1995constraint}, and has been used for many tasks in
 computational linguistics, such as POS tagging, surface syntax and
-machine translation \cite{bick2011},
-and is reported to achieve F-scores of over 99 \% for morphology, and around
-95-97 \% for syntax \cite{bick2000palavras,bick2003hybridCG_PSG,bick2006spanish}.
+machine translation \cite{bick2011}.
+CG-based taggers are reported to achieve F-scores of over 99 \% for morphological disambiguation, 
+and around 95-97 \% for syntactic analysis \cite{bick2000palavras,bick2003hybridCG_PSG,bick2006spanish}.
 CG disambiguates output by morphological analyser by using
 constraint rules which can select or remove a potential analysis (called \emph{reading})
 for a target word, depending on the context words around it. 
@@ -28,20 +29,20 @@ A reading contains one lemma, such as \t{"bear"}, and a list of morphological ta
 %Additional lemmas within one word form, such as clitic pronouns, are represented as \emph{subreadings}; each indented one more tab.
 A word form together with its readings is called a \emph{cohort}. A cohort is ambiguous, if it contains more than one reading.
 
-
-\begin{center}
-\begin{verbatim}
-"<the>"
-        "the" det def
-"<bear>"
-        "bear" noun sg
-        "bear" verb pres
-        "bear" verb inf
-"<sleeps>"
-        "sleep" noun pl
-        "sleep" verb pres p3 sg
-\end{verbatim}
-\end{center}
+\begin{figure}[h]
+\centering
+\ttfamily
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l}
+"<the>"  &                & "<sleeps>"        \\
+    & "the" det def       &     & "sleep" noun pl \\
+"<bear>" &                &     & "sleep" verb pres p3 sg \\
+    & "bear" noun sg      & "<.>"                   \\
+    & "bear" verb pres    &     & "." sent          \\
+    & "bear" verb inf \\
+\end{tabular}
+\label{fig:theBearSleeps}
+\caption{Ambiguous sentence {\em the bear sleeps.}}
+\end{figure}
 
 
 \noindent We can disambiguate this sentence with two rules:
@@ -61,8 +62,8 @@ preceded by a determiner. The rule removes both verb readings from
 Rule 2 is applied to the word \emph{sleeps}, and it removes the noun
 reading. The finished analysis is shown below:
 
-
-\begin{verbatim}
+\begin{itemize}
+\item[] \begin{verbatim}
 "<the>"
         "the" det def
 "<bear>"
@@ -70,6 +71,7 @@ reading. The finished analysis is shown below:
 "<sleeps>"
         "sleep" verb pres p3 sg
 \end{verbatim}
+\end{itemize}
 
 It is also possible to add syntactic tags and dependency structure within CG. 
 After disambiguating \emph{bear} by part of speech (noun), it
@@ -79,13 +81,15 @@ Disambiguating the syntactic role can be done in several ways. One option is to 
 syntactic and morphological analyses from the initial parser---the analysis
 for \emph{bear} would look like the following:
 
-\begin{verbatim}
+\begin{itemize}
+\item[] \begin{verbatim}
 "<bear>"
         "bear" noun sg           @Subj
         "bear" noun sg           @Obj
         "bear" verb pres         @Pred
         "bear" verb inf 
 \end{verbatim}
+\end{itemize}
 
 \noindent Morphological disambiguation rules would
 resolve \emph{bear} into a noun, and syntactic disambiguation rules
@@ -104,16 +108,18 @@ letter `C' after the position means \emph{careful} context: e.g.
 noun. Such rule would not fire if the previous word has any other
 reading in addition to the noun reading.
 
-\begin{enumerate}
+\begin{itemize}
 \itemsep1pt\parskip0pt\parsep0pt
 \item[] \texttt{MAP @Pred IF (0C verb) (-1C noun)}
 \item[] \texttt{MAP @Subj IF (0C noun) (1C verb)}
-\end{enumerate}
+\end{itemize}
 
 \noindent With both of the strategies, we would end up with the
 following output:
 
-\begin{verbatim}
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item[] \begin{verbatim}
 "<the>"
         "the" det def            
 "<bear>"
@@ -122,20 +128,23 @@ following output:
         "sleep" verb pres p3 sg  @Pred
 
 \end{verbatim}
+\end{itemize}
 
 The syntactic tags can also indicate some dependency structure. For
 instance, \emph{the} could get a tag such as
 \texttt{DN\textgreater}, to indicate that it is a determiner whose
 head is to the right. A phrase such as \emph{the little dog} could get
-tagged as  \emph{the}$_{\text{\sc @dn>}}$ \emph{little}$_{\text{\sc @an>}}$ \emph{dog}$_{\text{\sc @head-n}$.
+tagged as  \emph{the}$_{\text{\sc @dn>}}$ \emph{little}$_{\text{\sc @an>}}$ \emph{dog}$_{\text{\sc @head-n}}$.
 Using \textsc{\textless{}tag} and \textsc{tag\textgreater} can identify
 chunks, as long as they are not disconnected.
 
-With the introduction of CG-3, it is possible to add full-fledged dependency
-relations: number the words in the sentence and for each set a parent,
+With the introduction of VISL CG-3 \cite{vislcg3,bick2015}, 
+it is possible to add full-fledged dependency relations, 
+%: number the words in the sentence and for each set a parent,
 such as \texttt{"<the>" "the" det def  \textbf{IND=1 PARENT=2}}. 
-However, these features are recent and not used in many of the grammars written 
-in the community. In this introduction, we will illustrate the examples with the 
+However, 
+%these features are recent and not used in many of the grammars written in the community.
+for the remainder of this introduction, we will illustrate the examples with the 
 most basic operations, that is, disambiguating morphological tags.
 The syntactic operations are not fundamentally
 different from morphological: the rules describe an \emph{operation}
@@ -144,22 +153,31 @@ performed on a \emph{target}, conditional on a \emph{context}.
 
 \section{Related work}
 
-CG is one in the family of shallow and reductionist grammar formalisms. In this section, we briefly describe other formalisms of the same family, and provide a bit of historical context. In-depth details about CG in particular are presented in Section~\ref{properties}.
+CG is one in the family of shallow and reductionist grammar formalisms. In this section, we briefly describe other formalisms of the same family, and provide a bit of historical context. In-depth details about CG in particular are presented in Section~\ref{sec:properties}.
 
 Disambiguation using constraint rules dates back to 1960s and 1970s---the closest system to modern CG was Taggit \cite{taggit}, which was used to tag the Brown Corpus.
-Karlsson \cite{karlsson1995constraint} provides a thorough overview on 
-different approaches to the disambiguation problem, including \cite{hindle1989disamrules,herz1990localSyntacticConstraints}.
+Karlsson \cite{karlsson1995constraint} lists various approaches to the disambiguation 
+problem, including manual intervention, statistical optimisation and Lambek calculus.
+For disambiguation rules based on local constraints, Karlsson mentions \cite{hindle1989disamrules,herz1990localSyntacticConstraints}.
 
 %Hindle (1983, 1989) uses 350 disambiguation rules, constituting half of the rules of Fidditch. Shieber (1983) postulated disambiguation rules for solving attachment ambiguities in connection with a shift-reduce parser. Herz – Rimon (1990) use local constraints disallowing certain sequences of tags from being in the near context of a target word with designated features. The local constraints are retrieved from a context-free grammar of the language.
 
-CG itself was introduced in 1990. Around the same time, two related formalisms were also proposed: Finite-State Intersection Grammar \cite{koskenniemi90}, also later called Parallel Constraint Grammar; like in (sequential) CG, a FSIG grammar contains of rules which remove impossible readings based on contextual tests.
-But FSIG rules usually target syntactic phenomena, and they work in parallel, unlike the more common, sequential variant of CG.
+CG itself was introduced in 1990. Around the same time, two related formalisms were proposed: 
+Finite-State Intersection Grammar \cite{koskenniemi90}, also later called Parallel Constraint Grammar; like in (sequential) CG, a FSIG grammar contains of rules which remove impossible readings based on contextual tests.
+But FSIG rules usually target syntactic phenomena, and they work in parallel, 
+unlike the more common, sequential variant of CG.
 Functional Dependency Grammar \cite{tapanainen97fdg} is another shallow, reductionistic system,
 based on dependency syntax.
 
-Brill tagging \cite{brill1995} is based on transformation rules: the starting point of an analysis is just one, most common tag, and subsequent rule applications transform one tag into another, based on contextual tests.
+Brill tagging \cite{brill1995} is based on transformation rules: the starting point of 
+an analysis is just one tag, the most common one, and subsequent rule applications transform 
+one tag into another, based on contextual tests. 
+Like CG, Brill tagging is known to be efficient and accurate. The contextual tests are very similar; \cite{lager01transformation} 
+has automatically learned both Brill rules and CG rules, using the same system.
 
-\todo{All the other things that the standard CG-related papers/theses cite}
+Similar ideas to CG have been also explored in the finite-state framework, such as \cite{gross1997local,grana2003fst}. In addition, there are reimplementations of CG using finite-state methods \todo{cite: peltonen 2011; huldén 2011}.
+
+%\todo{All the other things that the standard CG-related papers/theses cite}
 
 
 \section{Properties of Constraint Grammar}\label{sec:properties}
@@ -238,7 +256,7 @@ low-level way: selecting and removing readings from individual words,
 without explicit connection between the rules. Bick and Didriksen
 argue that as a side effect, the rules actually manage to describe language.
 
-We return to the questions of generation and declarativity in section~\ref{sec:expressivity}. 
+We return to the questions of generation and expressivity in section~\ref{sec:expressivity}. 
 In chapter~\ref{chapterCGana}, we revisit these questions in the context of analysing CGs.
 
  
@@ -257,13 +275,15 @@ Even local phenomena, such as gender agreement, is not necessarily enforced.
 However, this is often desirable for practical purposes, because it makes the grammar more robust.
 Let us illustrate with an example in Swedish.
 
-\begin{verbatim}
+\begin{itemize}
+\item[] \begin{verbatim}
 "<en>"
         "en" det indef utr sg
         "en" noun utr sg 
 "<bord>"
         "bord" noun neutr sg
 \end{verbatim}
+\end{itemize}
 
 The first word, \emph{en}, is ambiguous between the indefinite determiner for
 \emph{utrum} gender  (masculine and feminine collapsed into one), or the noun `juniper'.
@@ -274,7 +294,7 @@ most likely meaning is ``a table'' instead of ``juniper table''\footnote{Compoun
 CG rules can be as fine-grained or broad as we want: 
 \texttt{SELECT det IF (1 noun) (0 noun)} would match any determiner and any noun, 
 and succesfully disambiguate \emph{en} in this case. 
-We can also enforce grammaticality by writing \texttt{SELECT det utr sg IF (1 noun utr sg) (0 noun utr sg)}%\footnote{the counterpart neuter determiner is not ambiguous with noun, so \texttt{SELECT det neutr sg IF (1 noun neutr sg) (0 noun)} would be redundant. Though it can be ambiguous with the numeral `1'. So actually maybe it's good anyway.}
+We can also enforce grammaticality by writing \texttt{SELECT (det~utr~sg) IF (1~noun~utr~sg) (0~noun~utr~sg)}%\footnote{the counterpart neuter determiner is not ambiguous with noun, so \texttt{SELECT det neutr sg IF (1 noun neutr sg) (0 noun)} would be redundant. Though it can be ambiguous with the numeral `1'. So actually maybe it's good anyway.}
 . In that case, nothing in the grammatically incorrect phrase matches, and it is left ambiguous.
 
 
@@ -300,7 +320,7 @@ The sequence \emph{en}$_{\textsc{Det Utr}}$~\emph{bord}$_{\textsc{N Neutr}}$ is 
 
 CG can be described as a shallow formalism for various reasons. 
 The analysis is limited to concrete words; no invisible structure is postulated.
-CG rules usually operate on a low level of abstraction, and may target concrete words or word forms.
+CG rules usually operate on a low level of abstraction, and may target individual lexemes or word forms.
 % instead of one rule to describe the possible structure of noun phrase,
 %CG would include many small rules each describing one possible kind of noun phrase.
 Finally, the rules are independent: each rule describes its own piece of a phenomenon, and there is no inbuilt mechanism to guarantee that the rules are consistent with each other.
@@ -316,11 +336,14 @@ Syntactic or dependency labels are functionally the same as morphological: for e
 In fact, it is possible to add even more data to the readings, either from the initial morphological analysis, or with suitable post-processing. One could include semantic roles, or any other information that a lexicon may provide, such as animacy or frequency.
 As a result, readings may look like the following:
 
+\begin{itemize}
+\item[] 
 \begin{verbatim}
 "<cat>"
         "cat" noun sg   @Subj £Agent §Animal
         "cat" verb pres @Pred §Computer §Rare
 \end{verbatim}
+\end{itemize}
 
 \noindent Moreover, any of these levels can be accessed in the same rule: e.g. \texttt{SELECT noun IF (-1 "cat" §Animal) (NOT 0 §Rare)}. 
 In other words, we may use syntactic or semantic features to help in morphological disambiguation, and vice versa.
@@ -356,7 +379,7 @@ As for the level of abstraction, CG rules lie somewhere between
 traditional grammar formalisms, such as HPSG, and purely statistical methods.
 The rules do not usually handle long-distance dependencies; 
 they operate on a unit of a few words, nor do they abstract away from surface features such as word order.
-The rule that tells to remove verb reading after a determiner
+The rule that removes a verb reading after a determiner
 does not describe the whole abstract category ``noun phrase''; we need a second
 rule to remove a verb after a determiner and an adjective (\emph{the happy bear}) 
 or an adjectival phrase (\emph{the very happy bear}).
@@ -632,14 +655,14 @@ Tapanainen gives a hierarchy of four different constraint languages, in order of
 The expressivity of a single rule is well defined. However, the expressivity of the whole rule set is harder to define. 
 A CG has much more lightweight task than a generative grammar: the initial tokens, or symbols, come already with a list of alternatives.
 %Returning to the question of central embedding,
-Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''.%---this contextual test is regular without question.
+Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''.%---this contextual test is regular without question. 
 Now, this rule will perform the correct disambiguation for the pronoun, even if the relative clause is centrally embedded. If all the other rules are successful, then the grammar has chosen a correct analysis for a sentence, which is not context-free. Still, 
 all of the rules have only regular contextual tests.
 %none of the rules needs to address anything but a regular phenomenon.
 
 The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or a relative pronoun. Furthermore, it does not need to generate only the correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
 
-This said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
+That said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
 
 Closest to answering this question is \cite{tapanainen1999phd}, who demonstrates the expressive power of another reductionist parsing formalism, Functional Dependency Grammar \cite{tapanainen97fdg}.
 Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language,% which consists of only well-nested sequences of \t{[} and \t{]}, 
@@ -648,7 +671,8 @@ Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG
 conceive of such grammar quite easily. In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading. We call the set of readings $\Sigma$. In addition, we may need some helper labels $\Sigma'$, such as $\{even, odd, start, end\}$, which may not be present
 in the final analysis.
 Figure~\ref{fig:anbn} shows the input and output of a hypothetical CG, which takes cohorts
-of $\Sigma = {"a", "b"}$ as an input, and returns 
+of $\Sigma = \{a, b\}$ as an input, and removes $b$ from the first $n$ words, and $a$ from the last $n$ words. For strings of uneven length, the grammar would either leave it ambiguous, which would be interpreted as a sign of rejection, or use the {\sc remcohort} operation of VISL CG-3, and make the whole string empty.
+
 Writing such grammars, or proving they cannot be written, is out of scope of this thesis.
 However, we wish to bring to attention the concept \emph{maximally ambiguous sentence}---which 
 will be made use of in Chapter~\ref{chapterCGana}---as a way of generating sequences with CG,
