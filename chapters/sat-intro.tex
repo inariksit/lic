@@ -27,9 +27,8 @@ Under the hood, all of these implications are translated into even simpler const
 For instance, ``dog wants to live with cat'' as a disjunction is %expressed as 
 $\neg\dog \vee \cat{}$, which means ``I don't buy the dog or I buy the cat''.
 %More complex implications need to be translated into two or more disjunctions.
-The representation as disjunctions is easier to handle by algorithms; however,
-for the rest of this thesis, we show our examples as implications, because they are
-easier to understand.
+The representation as disjunctions is easier to handle algorithmically; however,
+for the rest of this thesis, we show our examples as implications, because they are easier to understand.
 The variables and the clauses are shown in Figure~\ref{fig:animalCohabitingProblem}.
 
 
@@ -127,11 +126,11 @@ However, there is a difference between a general case, where the algorithm must 
 Think of a sorting algorithm: in the general case, it is given truly random lists, and in the ``easy case'', it mostly gets lists with some kind of structure, such as half sorted, reversed, or containing bounded values. The general time complexity of sorting is still $O(n\ log\, n)$, but arguably, the easier cases can be expected to behave in linear time, and we can even design heuristic sorting algorithms that exploit those properties.
 
 Analogously, the 90s breakthrough was due to the discovery of right kind of heuristics.
-Turns out that many typical real-life scenarios can be formulated as a SAT-problem of the ``easy kind''.
+%Turns out that many typical real-life scenarios can be formulated as a SAT-problem of the ``easy kind''.
 % when formulated as SAT-problem, can be solved efficiently with proper heuristics. 
 Much of the SAT-research in the last two decades has been devoted to optimising the solving algorithms, and finding more efficient methods of encoding various real-life problems into SAT.
 This development has led to an increasing amount of use cases since the early 2000s \cite{claessen2009satpractice}.
-One of the biggest success stories for a SAT-application is model checking \cite{sheeran1998modelchecking;biere1999modelchecking;bradley2011modelchecking}, used in software and hardware verification. Furthermore, SAT has been used in domains such as computational biology \cite{claessen2013compbioSAT} and AI planning \cite{selman_kautz92aiplanning}, just to pick a few examples.
+One of the biggest success stories for a SAT-application is model checking \cite{sheeran1998modelchecking,biere1999modelchecking,bradley2011modelchecking}, used in software and hardware verification. Furthermore, SAT has been used in domains such as computational biology \cite{claessen2013compbioSAT} and AI planning \cite{selman_kautz92aiplanning}, just to pick a few examples.
 In summary, formulating a decision problem in SAT is an attractive approach: instead of developing search heuristics for each problem independently, one can transform the problem into a SAT-instance and exploit decades of research into SAT-solving. 
 
 % Instead of implementing our own search, we can exploit decades of research that has been devoted to SAT-solving: optimising the search and finding the best heuristics, as well as innovative ways of formulating SAT-problems.
