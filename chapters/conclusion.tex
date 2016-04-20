@@ -1,0 +1,92 @@
+\chapter{Conclusions}
+\label{chapterConclusions}
+
+We set out to express CG as a SAT-problem. 
+At the first attempt, we ended up reimplementing FSIG \cite{koskenniemi90}, 
+also known as parallel CG \cite{koskenniemi97}. 
+A straight-forward translation of a sequential scheme, introduced in \cite{lager_nivre01}, 
+turned out not to be a SAT-problem: all that is needed is manipulation of Boolean expressions, 
+without any uncertainty, or need for search. 
+However, we modified the problem in a crucial detail: instead of an actual sentence, 
+we applied the rules to a {\em symbolic sentence}, where every word contains every possible reading.
+Then, instead of ``Which readings are true after all rule applications?'', the SAT-problem became ``Which readings were originally true?''
+We exploited this property for grammar analysis: for each rule $r$, we tried to create a sentence 
+which has passed through all previous rules $R$, and could still trigger $r$.
+If such sentence could not be found, this means that some of the rules in $R$ made $r$ impossible to apply: for instance, by removing the same target with less conditions, or removing something from the context of $r$.
+This method was successful in finding such conflicts, when tested with grammars between 70--1000 rules.
+
+The previous paragraph summarises the past year of research, which led to this thesis. 
+For the rest of this section, we broaden the view: we discuss the implications of our work, 
+present new questions raised by our results, and try to find a spot for our contribution 
+in the grand scheme of CG research.
+
+
+\section{Contributions of this thesis}
+
+Let us refer back to \cite{lager_nivre01}. 
+Before starting their logical reconstruction of four different methods for POS tagging,
+they give a list of motivations why one would want to reconstruct a method in the first place.
+Below we quote a three of them, which we feel that apply to our work.
+
+\begin{quote}
+\begin{itemize}
+\item It allows us---even forces us---to clarify and make more precise a formulation of a method [$M$] which is vague and open to interpretation.
+\item It may put us in a position to find novel implementation techniques for $M$. 
+In particular, $T_M$ in combination with a theorem prover implementing $I_M$ may turn out to be a perfectly practical implementation of $M$.
+\item By factoring out the knowledge component $T_M$ from a method $M$, 
+we may be able to find interesting novel uses for $T_M$ which $M$ was not designed for in the first place.
+\end{itemize}
+\end{quote}
+
+
+\paragraph{Clarify and make more precise} This point hits very close to home.
+The ``accidentally implemented FSIG'' theme, which has been present throughout this thesis, was not chosen just for narrative purposes; it reflects quite accurately the course of events when starting to implement SAT-CG.
+We started out with the observation that CG rules resemble logical formulas; {\sc remove} and {\sc if } can be expressed as negations and implications respectively. 
+Translating the rules into implications is fairly straightforward, but a SAT-encoding cannot go further without implementation details, such as rule ordering and execution type. 
+%In other words, we noticed that just applying the rules and solving, we implement a parallel CG.
+% A single grammar expresses actions to cohorts, conditional on other cohorts in specified places; but the rules alone leave very much open to interpretation.
+% A grammar on its own does not specify rule ordering nor execution type; with strict vs. heuristic on one axis, and sequential vs. parallel on other. 
+
+Of course, ``translating CG rules into logical formulas, without a notion of order, corresponds to parallel CG'' is not a unique discovery---the referred article was published in 2001, and had we read it before starting our work, none of these properties would not have surprised us.
+What is, then, our contribution in clarifying and making something more precise?
+
+
+It is related to strict vs. heuristic on one axis, and sequential vs. parallel on other.
+Previously, all parallel systems assumed perfect interplay of rules, hence there would not be need for ordering.
+With our two schemes of conflict handling in Chapter~\ref{chapterCGSAT}, we have brought the notion of strict and heuristic also to parallel execution.
+
+
+
+\def\satcgMax{SAT-CG\textsubscript{Max}}
+\def\satcgOrd{SAT-CG\textsubscript{Ord}}
+
+\begin{table}
+\centering
+
+  \begin{tabular}{r | c | c | p{3cm}}
+           & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
+\textbf{Sequential}
+           & CG-1            & CG-2               & --           \\ 
+           & VISL CG-3       &                    &              \\ \hline
+\textbf{Parallel}
+		   & \satcgOrd       & \satcgMax          & FSIG \\ 
+		   &                 &                    & (SAT-CG, 
+		   											when no conflicts) \\
+  \end{tabular}
+  \label{table:nelikentta}
+  \caption{All combinations of rule ordering and execution type.}
+\end{table}
+
+
+\section{Open questions and future work}
+
+Philosophical questions: can CG rules {\em generate} language?
+When the sentence starts off as anything, the rules become truly declarative.
+We do not remove the verb after determiner, we prevent such sequence from being created in the first place.
+Of course, the rules are not written to generate text, but to remove ambiguities from a limited and predictable set of alternatives.
+However, some tendencies show already in the symbolic sentences generated in Chapter~\ref{chapterCGana}: for instance, the token for end of sentence (\t{<<<}) appears 
+(nearly\footnote{Word boundaries may be combined in the same set with other tags, such as commas: \t{SET~Boundary~=~>>>~OR~<<<~OR~","~OR~";"}. This set may then appear also in the middle of other conditions.}) 
+always as the rightmost condition.
+Thus, it is expected that word boundaries are not usually generated in the middle of the symbolic sentence.
+
+Check if the rules already enforce some trivial stuff, like not generating word boundaries in the middle of the symbolic sentence.
