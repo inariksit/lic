@@ -211,6 +211,10 @@ $$\begin{array}{ c | c | c | c | c}
 
 It seems like SAT-CG does worse than any standard CG implementation:
 the latter would just remove the verb, not give 5 different interpretations for a single rule.
+In fact, the rule \t{REMOVE v IF (-1 det)} alone behaves exactly like \t{REMOVE det IF (1 v)}.
+%This behaviour is explained by simple properties of logical formulas: 
+%the implication $\laDet \Rightarrow \neg \casaV$ can be expressed as a disjunction 
+%$\neg \laDet \vee \neg \casaV$
 But there is power to this property. Now, we add a second rule: \texttt{REMOVE n IF (-1 prn)}, which will form the clause $\laPrn \Rightarrow \neg \casaN$. The new clause
 %, together with $\laDet \Rightarrow \neg \casaV$, 
 prohibits the combination $\laPrn \ \casaN$, which rules out three models out of five. The disambiguation is shown in Figure~\ref{fig:modelsTwoRules}.
@@ -433,62 +437,44 @@ Now the procedure goes as follows:
       \ob{\laDet \Rightarrow \neg \casaV}^{\t{REMOVE v IF (-1 det)}}, \ 
       \ob{\grandeAdj \Rightarrow \neg \casaV}^{\t{REMOVE v IF (1 adj)}}, \ 
       \ob{\neg \casaN}^{\t{REMOVE n}} \}$
-\item No solution for all clauses: try to find a solution that satisfies maximally many clauses; however, default rule cannot be overridden.
+\item No solution for all clauses: try to find a solution that satisfies maximally many rule applications; however, default rule cannot be overridden.
 \end{enumerate}
 
-% Similarly to the previous, order-based scheme, we create a clause for each 
-% instance of the rule application. In the case of a conflict, we can 
-% only discard the clauses targeting the offending cohort, but the rule may apply 
-% elsewhere in the sentence.
+Similarly to the previous, order-based scheme, we create a clause for each 
+instance of the rule application. In the case of a conflict, we can 
+only discard the clauses targeting the offending cohort, but the rule may apply 
+elsewhere in the sentence.
 
 
-The problem of satisfying maximum amout of clauses is known as \emph{Maximum Satisfiability} (MaxSAT).
+The problem of satisfying maximum amount of clauses is known as \emph{Maximum Satisfiability} (MaxSAT).
 Whereas SAT is a decision problem, MaxSAT is an optimisation problem.
 However, optimisation can be expressed as a sequence of decision problems:
 first, we compute a solution, then we add a constraint ``the solution must be better than the one just found'', and ask for another one. 
 This process repeats until a better solution cannot be found; then we accept the 
 latest solution.
 
-Now let us define how is one solution ``better'' than other. 
-To start, remember that implications can be translated into disjunctions: 
-$\laDet \Rightarrow \neg\casaV$ is equivalent to $\neg\laDet \vee \neg\casaV$. 
-We can associate helper variables to these clauses with a simple trick.
-For each clause, we create a new variable $v$. Then we add 
-the negation of this variable to the corresponding clause, 
-so that it becomes $\neg{}v \vee \neg\laDet \vee \neg\casaV$.
+Now let us define how is one solution ``better'' than other,
+by using a simple trick. 
+%To start, remember that implications can be translated into disjunctions: 
+%$\laDet \Rightarrow \neg\casaV$ is equivalent to $\neg\laDet \vee \neg\casaV$. 
+%We will create a set of helper variables, and associate them to the clauses 
+%with a simple trick.
+For each clause $c$, we create a new variable $v$. 
+Instead of the original clause, we give the SAT-solver 
+an implication $v \Rightarrow c$. 
+This means that if $v$ is false, the SAT-solver can ignore the 
+actual clause $c$---the part that comes from the rule application.
+Conversely, if $v$ is true, then the SAT-solver must handle
+the original clause.
 Then, we ask for a solution where maximally many of these $v$s are true,
 and the question for improvement becomes ``can we make any more of the $v$s true''?
+The method of maximising the variables is based on ordering all possible solutions, 
+described in more detail in \cite{een06minisatplus}.
 
-What happens if a given $v$ is false? The SAT-solver has received all its clauses 
-with the added $\neg{}v$. 
-%Now, if we know that $\neg{}v$, then we know that the whole disjunction is true, without even considering the rest.
-%If we have a long disjunction and we know its first argument is true, then we see
-%immediately that the whole disjunction is true.
-Now, if $v$ is false, that is, $\neg{}v$ is true, then we know that 
-the whole disjunction $\neg{}v \vee \neg\laDet \vee \neg\casaV$ is true.
-This means that the SAT-solver can ignore the rest of the clause---the part that comes from the rule application.
-%Since this part comes from the rule application, the effect of this trick with $v$ means that the original rule application can be ignored.
-%It knows already that the whole disjunction is true, regardless if the original rule applies or not.
-Conversely, if $v$ is true, then its negation $\neg{}v$ is eliminated from the clause, 
-and the SAT-solver must handle the original constraint $\neg\laDet \vee \neg\casaV$.
-
-
-How, then, are the helper $v$s maximised? 
-For a problem with $n$ variables, there are $2^n$ possible assignments; 
-it is not practical to try them all and choose the solution with most $v$s.
-\formulation{However, there are methods for ordering different solutions, even before attempting to solve.
-Then, if we have tried the solutions with 10 $v$s and failed, we know that no solution with 11 or more $v$s would work either. The algorithm used in SAT-CG is like the one in \cite{een06minisatplus}.}
-
-
-
-
-
-% In the following, we show a modification to the parallel scheme, 
-% where the clauses are added to the formula incrementally, 
-% making sure that each new clause fits with the previously added.
-% %This allows us to emulate order, but still keep the benefits from the parallel
-% We contrast this with an alternative scheme; one that will be used in Chapter~\ref{chapterCGana}.
-
+As a alternative to creating a helper variable, we could also separate the variables into 
+contexts and targets, and maximise the set of contexts: for $\laDet \Rightarrow \neg \casaV$
+and $\grandeAdj \Rightarrow \neg \casaV$, maximise the set of $\{\laDet, \grandeAdj\}$.
+This variant would bring back the distinction between targets and contexts; given the design of most actually used CGs, it may be better suited for a practical implementation.
 
 
 % \subsection{Main differences between SAT-CG/FSIG/Lager98-almost-CG and good old sequential CG}
