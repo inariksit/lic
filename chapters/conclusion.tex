@@ -49,34 +49,46 @@ Translating the rules into implications is fairly straightforward, but a SAT-enc
 
 Of course, ``translating CG rules into logical formulas, without a notion of order, corresponds to parallel CG'' is not a unique discovery---the referred article was published in 2001, and had we read it before starting our work, none of these properties would not have surprised us.
 What is, then, our contribution in clarifying and making something more precise?
-
-
-It is related to strict vs. heuristic on one axis, and sequential vs. parallel on other.
-Previously, all parallel systems assumed perfect interplay of rules, hence there would not be need for ordering.
-With our two schemes of conflict handling in Chapter~\ref{chapterCGSAT}, we have brought the notion of strict and heuristic also to parallel execution.
-
-
+The answer is in Table~\ref{table:nelikentta}, which shows different CG systems 
+placed in a table, with rule order (strict vs. heuristic) on one axis, 
+and execution type (sequential vs. parallel) on other.
+Previously, all parallel systems assumed perfect interplay of rules, 
+and there was no way of discussing ordering \todo{is this true?}. 
+With our two methods of conflict handling in Chapter~\ref{chapterCGSAT}, 
+we have brought the notion of strict and heuristic also to parallel execution. 
 
 \def\satcgMax{SAT-CG\textsubscript{Max}}
 \def\satcgOrd{SAT-CG\textsubscript{Ord}}
 
-\begin{table}
+\begin{table}[h]
 \centering
 
-  \begin{tabular}{r | c | c | p{3cm}}
+  \begin{tabular}{r | c | c |@{~~...~}| p{3cm}}
            & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
 \textbf{Sequential}
-           & CG-1            & CG-2               & --           \\ 
-           & VISL CG-3       &                    &              \\ \hline
+           & CG-1            & CG-2  % (Tapanainen1996, p. 34
+           							              & --           \\ 
+           & VISL CG-3       \\ 
+           & Peltonen2011    \\ %Peltonen2011, p. 80
+           & Yli-Jyrä2011    \\ \hline
 \textbf{Parallel}
 		   & \satcgOrd       & \satcgMax          & FSIG \\ 
 		   &                 &                    & (SAT-CG, 
 		   											when no conflicts) \\
   \end{tabular}
   \label{table:nelikentta}
-  \caption{All combinations of rule ordering and execution type.}
+  \caption{All combinations of rule ordering and execution type. \todo{Fill the table with other implementations}}
 \end{table}
 
+\paragraph{Novel implementation techniques} Arguably the most obvious point---we have implemented a CG engine using a SAT-solver. 
+As we motivate in Section~\ref{sec:SAT-intro}, it is a smart idea to formulate a problem in SAT. 
+Parallel CG is an instance of a more abstract search problem; there is a whole research area that tries to optimise search. Hence it pays off to formulate a specific search problem as an instance of SAT-problem, and reap the benefits of decades of optimisation.
+%Whereas \cite{lager_nivre01} talk about the benefits of formulating a problem in logic---better understanding, fresh ideas by looking it from another angle, SAT-community has 
+
+\paragraph{Novel uses for the knowledge component of CG} 
+
+\todo{We may be interpreting this point too freely, but the point about generation fits here.
+The ``knowledge component'' would be all the bits of language description in rules; like, word boundaries don't appear in the middle of rules. Going to say something more sensible of this point later.}
 
 \section{Open questions and future work}
 
