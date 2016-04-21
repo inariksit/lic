@@ -158,7 +158,7 @@ CG is one in the family of shallow and reductionist grammar formalisms. In this 
 Disambiguation using constraint rules dates back to 1960s and 1970s---the closest system to modern CG was Taggit \cite{taggit}, which was used to tag the Brown Corpus.
 Karlsson \cite{karlsson1995constraint} lists various approaches to the disambiguation 
 problem, including manual intervention, statistical optimisation and Lambek calculus.
-For disambiguation rules based on local constraints, Karlsson mentions \cite{hindle1989disamrules,herz1990localSyntacticConstraints}.
+For disambiguation rules based on local constraints, Karlsson mentions \cite{hindle1989disamrules,herz1991local}.
 
 %Hindle (1983, 1989) uses 350 disambiguation rules, constituting half of the rules of Fidditch. Shieber (1983) postulated disambiguation rules for solving attachment ambiguities in connection with a shift-reduce parser. Herz – Rimon (1990) use local constraints disallowing certain sequences of tags from being in the near context of a target word with designated features. The local constraints are retrieved from a context-free grammar of the language.
 
@@ -355,8 +355,12 @@ bound to leak, and that necessary information for the syntactic analysis
 comes from the morphology, hence morphology is ``the cornerstone of
 syntax''. 
 In addition, \cite{karlsson1995constraint} argues CG to be a reasonable 
-psycholinguistic hypothesis; indeed, CG has been used in psycholinguistic research.
-\todo{cite some paper by CLEAR people} find CG appealing especially because all levels are accessible at the same time, from lexicon and morphology to semantics.
+psycholinguistic hypothesis: in generative formalisms, rule applications create 
+ambiguities, whereas in CG it is the opposite; this means less processing load 
+in order to achieve clarity. 
+
+% indeed, CG has been used in psycholinguistic research.
+%\todo{cite some paper by CLEAR people} find CG appealing especially because all levels are accessible at the same time, from lexicon and morphology to semantics.
 
 % In a CG, one has access to all levels at the same time,
 % ranging from morphology to syntax or dependency labels, or even
@@ -429,7 +433,7 @@ CG would, at worst, just leave that part ambiguous, and do as good a job it can 
 % already disambiguate a lot, whereas an incomplete phrase structure
 % grammar is nearly useless.
 
-\subsection{Ordering of the rules}\label{sec:ordering}
+\subsection{Ordering and execution of the rules}\label{sec:ordering}
 
 The previous properties of Constraint Grammar formalism and rules were specified in \cite{karlsson1995constraint}, and retained in further implementations. 
 However, in the two decades following the initial specification, 
