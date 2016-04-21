@@ -240,11 +240,12 @@ This is naturally represented as implications. We demonstrate both \textsc{remov
 %
 %
 \begin{align}
-\intertext{\cgrule{REMOVE adj IF (1 adj) (-1 n)} Conjunction of conditions.}
+\intertext{\cgrule{REMOVE adj IF (-1 n) (1 adj)} Conjunction of conditions.}
+\intertext{\cgrule{REMOVE adj IF (-1 n LINK 2 adj)} Linked conditions---identical to the above.}
 \cientificaAdj \wedge \aproximacionN & \impl \neg{}\masAdj \\
 %
 %
-\intertext{\cgrule{REMOVE adj IF ((1 adj)  OR (-1 n))} Disjunction of conditions (template).}
+\intertext{\cgrule{REMOVE adj IF ((-1 n) OR (1 adj))} Disjunction of conditions (template).}
 \cientificaAdj \vee \aproximacionN & \impl  \neg{}\masAdj \\
 %
 %
@@ -254,45 +255,66 @@ This is naturally represented as implications. We demonstrate both \textsc{remov
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n)} Scanning. Any noun before the target is a valid condition.}
 %
-\sobreN \vee \aproximacionN & \impl  \neg{}\masAdj \\
+\sobreN \vee \aproximacionN & \impl  \neg{}\masAdj \notag \\
+\sobreN \vee \aproximacionN & \impl  \neg{}\cientificaAdj \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1* n LINK 1 v)} Scanning and linked condition. Any noun before the target, followed immediately by a verb, is a valid condition.}
+%
+\sobreN \wedge (\unaPrsPThree  \vee \unaPrsPOne \vee \unaImp) & \impl  \neg{}\masAdj \notag \\
+\sobreN \wedge (\unaPrsPThree  \vee \unaPrsPOne \vee \unaImp) & \impl  \neg{}\cientificaAdj \\
+%
+%
+\intertext{\cgrule{REMOVE adj IF (-1* n LINK 1* adv)} Scanning and linked condition. Any noun before the target, followed anywhere by an adverb, is a valid condition.}
+%
+(\sobreN \wedge \masAdv) \vee (\aproximacionN \wedge \masAdv) & \impl  \neg{}\masAdj \notag \\
+(\sobreN \wedge \masAdv) \vee (\aproximacionN \wedge \masAdv) & \impl  \neg{}\cientificaAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n BARRIER det)} Scanning up to a barrier. Any noun before the target, up to a determiner, is a valid condition:
 %The noun reading of {\em sobre} is not a valid condition, if the determiner reading of {\em una} holds.
 $\sobreN$ is a valid condition only if $\unaDet$ is false.}
 %
-(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\masAdj 
+(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\masAdj \notag \\
+(\sobreN \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\cientificaAdj 
 %
 \intertext{\cgrule{REMOVE adj IF (-1* n CBARRIER det)} Scanning up to a careful barrier.
 Any noun before the target, up to an unambiguous determiner, is a valid condition.
 The variable $\unaDet$ fails to work as a barrier, if any of the other analyses of $\una$ is true.
 Let $\unaAny$ denote the disjunction $\unaPrn \vee \unaPrsPThree \vee \unaPrsPOne \vee \unaImp$.} %Then we write the condition as follows.}
-(\sobreN \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\masAdj 
+(\sobreN \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\masAdj \notag \\
+(\sobreN \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\cientificaAdj
 %
 %
 %
-\intertext{\cgrule{REMOVE adj IF (-1C* n)} Scanning with careful context}
+\intertext{\cgrule{REMOVE adj IF (-1C* n)} Scanning with careful context. Any unambiguous noun before the target is a valid condition: $\sobreN$ is a valid condition only if it is the only reading in its cohort, i.e. $\sobrePr$ is false.}
 %
-(\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \impl  \neg{}\masAdj \\
-%
-%
-\intertext{\cgrule{REMOVE adj IF (-1C* n BARRIER det)} Scanning with careful context, up to a barrier.}
+(\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \impl  \neg{}\masAdj \notag \\
+(\sobreN \wedge \neg \sobrePr) \vee \aproximacionN & \impl  \neg{}\cientificaAdj 
 %
 %
-(\sobreN \wedge \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\masAdj 
+\intertext{\cgrule{REMOVE adj IF (-1C* n BARRIER det)} Scanning with careful context, up to a barrier.
+Any unambiguous noun before the target, up to a determiner, is a valid condition:
+$\sobreN$ is a valid condition only if it is the only reading in its cohort ($\sobrePr$ is false), and there is no determiner between \sobre{} and the target ($\unaDet{}$ is false).}
+% $\sobreN$ is a valid condition only if it is the only reading, and $\una$ is not a determiner.}
 %
-\intertext{\cgrule{REMOVE adj IF (-1C* n CBARRIER det)} Scanning with careful context, up to a careful barrier.}
+%
+(\sobreN \wedge \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\masAdj \notag \\
+(\sobreN \wedge \neg \sobrePr \wedge \neg \unaDet) \vee \aproximacionN & \impl \neg{}\cientificaAdj 
+%
+\intertext{\cgrule{REMOVE adj IF (-1C* n CBARRIER det)} Scanning with careful context, up to a careful barrier. Like above, but \una{} fails to work as a barrier if it is not unambiguously determiner.}
 %
 %
-(\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\masAdj 
+(\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\masAdj \notag \\
+(\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN & \impl \neg{}\cientificaAdj 
 \end{align}
 
 
 \subsection{Inverted conditions}
 
 In the following, we demonstrate the effect of two inversion operators. 
-The keyword NOT inverts a single contextual test, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}. The keyword NEGATE inverts a whole conjunction of contextual tests, which may have any polarity: \cgrule{IF (NEGATE -2 det LINK NOT 1 noun)} means ``there may not be a determiner followed by a not-noun''; thus, ``det noun'' would be fine, or ``prn adj'', but not ``det adj''. %a sequence which matches the whole``
-Inversion cannot be applied to a BARRIER condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, that is, ``try to find a \emph{foo} until you see the first item that is not \emph{bar}'', a set complement operator must be used: \cgrule{(*) - bar}.
+The keyword {\sc not} inverts a single contextual test, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}. The keyword {\sc negate} inverts a whole conjunction of contextual tests, which may have any polarity: \cgrule{IF (NEGATE -2 det LINK NOT 1 noun)} means ``there may not be a determiner followed by a not-noun''; thus, ``det noun'' would be fine, or ``prn adj'', but not ``det adj''. %a sequence which matches the whole``
+Inversion cannot be applied to a {\sc barrier} condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, that is, ``try to find a \emph{foo} until you see the first item that is not \emph{bar}'', a set complement operator must be used: \cgrule{(*) - bar}.
 
 There is a crucial difference between matching positive and inverted conditions.
 If a positive condition is out of scope or the tag is not present in the initial analysis, the rule simply does not match, and no clauses are created. For instance, the conditions `10 adj' or `-1 punct', matched against our example passage, would not result in any action.
@@ -306,35 +328,43 @@ If we need to actually have a 10th word to the right, but that word may not be a
 
 
 \begin{align}
-\intertext{\cgrule{REMOVE adj IF (NOT 1 adj)} Single inverted condition.}
-\neg \cientificaAdj & \impl  \neg{}\masAdj \\
+\intertext{\cgrule{REMOVE adj IF (NOT 1 adj)} Single inverted condition. 
+There is no word following \cientifica{}, hence its adjective reading is removed unconditionally.}
+\neg \cientificaAdj & \impl  \neg{}\masAdj \notag \\
+                    & \impl \neg \cientificaAdj \\
 %
-\intertext{\cgrule{REMOVE adj IF (NOT 1 adj) (NOT -1 n)} Conjunction of inverted conditions.}
-\neg \cientificaAdj \wedge \neg \aproximacionN & \impl \neg{}\masAdj \\
+\intertext{\cgrule{REMOVE adj IF (NOT -1 n) (NOT 1 adj)} Conjunction of inverted conditions.}
+ \neg \aproximacionN \wedge \neg \cientificaAdj & \impl \neg{}\masAdj \notag \\
+                                                & \impl \neg \cientificaAdj
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 det LINK 1 n)} Inversion of a conjunction of conditions.}
 %
-\neg \sobrePr \vee \neg \unaDet \vee \neg \aproximacionN) & \impl \neg{}\masAdj \\
+\neg (\sobrePr \wedge \unaDet \wedge \aproximacionN) & \impl \neg{}\masAdj \notag \\
+                                                     & \impl \neg \cientificaAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NOT 1C adj)} Negated careful context. Condition cannot be unambiguously adjective.}
 %
-\cientificaN & \impl \neg{}\masAdj \\
+\neg (\cientificaAdj \wedge \neg \cientificaN) & \impl \neg{}\masAdj \notag \\
+                                               & \impl \neg \cientificaAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NOT -1* n)} Scanning. There must be no nouns before the target.}
 %
-\neg \sobreN \wedge \neg \aproximacionN & \impl  \neg{}\masAdj \\
+\neg (\sobreN \vee \aproximacionN) & \impl  \neg{}\masAdj \notag \\
+\neg (\sobreN \vee \aproximacionN) & \impl  \neg{}\cientificaAdj \\
 %
 \intertext{\cgrule{REMOVE adj IF (NOT -1* n BARRIER det)} Scanning up to a barrier. There must be no nouns before the target, up to a determiner.}
 %
-(\neg \sobreN \vee \unaDet) \wedge \neg \aproximacionN & \impl \neg{}\masAdj 
+\neg ( (\sobreN \wedge \unaDet) \vee \aproximacionN) & \impl \neg{}\masAdj \notag \\
+\neg ( (\sobreN \wedge \unaDet) \vee \aproximacionN) & \impl \neg{}\cientificaAdj \\
 %
 %
-\intertext{\cgrule{REMOVE adj IF (NOT -1* n CBARRIER det)} Scanning up to a careful barrier.}
+\intertext{\cgrule{REMOVE adj IF (NOT -1* n CBARRIER det)} Scanning up to a careful barrier. There must be no nouns before the target, up to an unambiguous determiner.}
 %
-(\neg \sobreN \vee \unaAny) \wedge \neg \aproximacionN & \impl \neg{}\masAdj 
+\neg ((\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN) & \impl \neg{}\masAdj \notag \\ 
+\neg ((\sobreN \wedge \neg \sobrePr \wedge \unaAny) \vee \aproximacionN) & \impl \neg{}\cientificaAdj 
 %
 %
 %
