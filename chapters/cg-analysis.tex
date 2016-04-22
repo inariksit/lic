@@ -66,11 +66,10 @@ SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} 
 
 The chapter follows with introduction of related work: namely, corpus-based methods to aid grammar writing, and automatic optimisation of a complete, human-written grammar. We continue by presenting our solution, along with a working implementation, and finally, evaluate its performance.
 
-
-\todo{From now on, the text is more of an early draft, and I intend change it a lot! Read if you want, but be prepared that it will change.}
-
 \section{Related work}
 \label{sec:CGanaRelated}
+
+\todo{Clean up this section!}
 
 We combine elements from the following aspects of CG research:
 
@@ -191,18 +190,21 @@ rule application takes effect immediately, is irreversible, and only allows chan
 There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1~det)} the same as \t{REMOVE~v~IF~(-1~det) ; REMOVE~v} is worth nothing. The first one is a true conflict, because the first rule has a broader condition; it removes the verb in any possible case. The second rule order is possible: there can always be a sentence that has a verb, but is not preceded by a determiner, hence the first rule would not match, and the verb is saved for the second rule.
 
 We need to model the state of the sentence after each rule application. 
-Luckily, we do not need to reinvent the wheel\footnote{of course we did. like, who reads other people's papers.}: 
-\cite{lager_nivre01} present CG as a composition of predicates, numbered by the rules in the grammar. Each predicate is applied to the result of the previous applications, 
-and the ``do not remove last reading'' property is checked each time.
+%Luckily, we do not need to reinvent the wheel\footnote{of course we did. like, who reads other people's papers.}: 
+This is done in \cite{lager_nivre01}: they present CG as a composition of predicates, 
+numbered by the rules in the grammar. Each predicate is applied to the result of the previous 
+applications, and the ``do not remove last reading'' property is checked each time.
 
+\todo{Make this transition smooth: \\
 To be clear, the encoding in \cite{lager_nivre01} is \emph{not} a SAT-problem: 
 there is no search involved, only manipulating Boolean expressions. 
 %in the beginning, all the analyses present are true, and they are removed from a list
-We modify the scheme in two crucial ways:
-\begin{inparaenum}
-\item[(a)] 
-\end{inparaenum}
+%We modify the scheme in two crucial ways:
+%\begin{inparaenum}
+%\item[(a)] 
+%\end{inparaenum}
 We present it in a way that is syntactically closer to what we have seen so far.
+}
 
 As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
 %But now, we assume that each variable starts off as true: 
@@ -241,18 +243,19 @@ $$\begin{array}{l @{~\rightarrow~} l}
 %\label{fig:after3Rules}
 %\end{figure}
 
-Now, we may ask, why is this not a SAT-problem? %We sure talk about Boolean values and build formulas.
-The answer lies in the first step, where all variables start off as true. All the new variables, created from the rule applications, get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
+\todo{Write rest of this section; merge with the stuff in paper!}
 
-Can we find something in this setup that would make an interesting SAT-problem? 
-If this question is too intimidating, let us just ask ``can we make it into \emph{any} kind of SAT-problem''? 
-Forget all ambition, just ask what we \emph{can} do.
-We can go back to the first step: instead of all variables starting off as true, we can keep them unassigned. If we do that, where is the uncertainty?
-All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
+% Now, we may ask, why is this not a SAT-problem? %We sure talk about Boolean values and build formulas.
+% The answer lies in the first step, where all variables start off as true. All the new variables, created from the rule applications, get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
+
+% Can we find something in this setup that would make an interesting SAT-problem? 
+% If this question is too intimidating, let us just ask ``can we make it into \emph{any} kind of SAT-problem''? 
+% Forget all ambition, just ask what we \emph{can} do.
+% We can go back to the first step: instead of all variables starting off as true, we can keep them unassigned. If we do that, where is the uncertainty?
+% All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
 
 % Huh. That is an interesting question on its own right, but not very useful for a CG engine: we do know which readings were originally true, and we do not want the SAT-solver to be extra helpful and remove something that is targeted by no rule. But in Chapter~\ref{chapterCGana}, the new setup will allow us to find conflicts in the grammar, approximate generation and answer questions about expressivity. 
 % For the remainder of this chapter, however, we keep the parallel scheme and wrap up what we have started. 
-
 
 
 
@@ -392,10 +395,12 @@ types introduced in CG-3, and only tested \textsc{remove} and \textsc{select} ru
 The results for Dutch and Spanish are shown in Table~\ref{table:res},
 and the results for Finnish in Table~\ref{table:resFin}.
 
-A natural follow-up evaluation would be to compare the performance of the
+A natural follow-up evaluation would be to compare the accuracy of the
 grammar in the original state, and after removing the conflicts found
-by our tool. Unfortunately, we did not have time to perform such
-evaluation, and in addition, we only have gold standard corpus (20~000~words) for Spanish.
+by our tool. We aim to perform such evaluation, when the toolset is more mature.
+
+% Unfortunately, we did not have time to perform such
+% evaluation, and in addition, we only have gold standard corpus (20~000~words) for Spanish.
 
 
 
@@ -579,7 +584,6 @@ writer intended.
 \begin{itemize}
 \item[\textsc{s$_3$.}] \t{REMOVE Sentar IF (0 Sentar) (..) ;}
 \item[] \t{SELECT PP IF (0 "estado") (..) ;}
-\end{verbatim}
 \end{itemize}
 
 The comments make it clear that the first rule is meant to disambiguate between \emph{sentar} and \emph{sentir}, but the rule does not mention anything about \emph{sentir}.
@@ -726,6 +730,10 @@ A downside in the ambiguity classes is that generating them takes a long time,
 and while the overhead may be acceptable when checking the full grammar,
 it is hardly so when analysing just a handful of rules. 
 We are working on an option to store and reuse the ambiguity class constraints.
+
+\section{Discussion/Conclusions/Summary}
+
+\todo{write it!}
 
 
 %%%%%%%

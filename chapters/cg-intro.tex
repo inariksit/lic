@@ -648,11 +648,10 @@ As we have learnt, CG is not a generative grammar---
 there are no production rules nor phrase structure,
 CG just needs a list of alternatives and finds the correct ones among them.
 More precisely, a grammar in CG describes a \emph{relation} between an input language 
-and an output language: say, $I = \{[laDet, laPrn],[casaN, casaV]\}$ and the output is
-$O = \{[laDet],[casaN]\}$. 
+and an output language. %: say, $I = \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}, \text{"bear" }\t{ verb}]\}$ and the output is$O =  \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}]\}$. 
 The question ``what can CG express?'' is ill-defined as such: 
 just to start with, there are different variants and implementations of CG, as we have seen in the previous section.
-Taking that into account, even ``what can strict and heuristic CG-2 express'' is not specific enough: 
+Taking that into account, even ``what can sequential and heuristic CG-2 express'' is not specific enough: 
 the answer depends on what is present in the input language, and is different for each grammar.
 
 In the following, we look at existing approaches to define the expressivity of reductionist formalisms, 
@@ -678,7 +677,7 @@ the contextual tests must be regular: we cannot write in a single rule ``remove 
 Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations, such as $(\Sigma - N)*A(\Sigma - V)*N$\footnote{IF (*1 A BARRIER N LINK *1 N BARRIER V)}; in turn, CG-2 \cite{tapanainen1996} can express this, but not e.g. repeated patterns. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{bick2015} did not exist at the time, \cite{tapanainen1999phd} does not include it in the hierarchy of the constraint formalisms.
 
 The expressivity of a single rule is well defined. However, the expressivity of the whole rule set is harder to define. 
-
+%
 %A CG has much more lightweight task than a generative grammar: the initial tokens, or symbols, come already with a list of alternatives.
 %Returning to the question of central embedding,
 %Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''.%---this contextual test is regular without question. 
@@ -687,17 +686,15 @@ The expressivity of a single rule is well defined. However, the expressivity of 
 %which exhibits non-regular phenomenon. 
 %Still, all of the rules have only regular contextual tests.
 %none of the rules needs to address anything but a regular phenomenon.
-
 %The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or a relative pronoun. Furthermore, it does not need to generate only the correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
-
 %That said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
-
+%
 Closest to answering this question is \cite{tapanainen1999phd}, who demonstrates the expressive power of another reductionist parsing formalism, Functional Dependency Grammar \cite{tapanainen97fdg}.
 Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language,% which consists of only well-nested sequences of \t{[} and \t{]}, 
 and another grammar, which correctly parses the context-sensitive language $a^nb^nc^n$. 
 Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can 
-conceive of such grammar quite easily. In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading. We call the set of readings $\Sigma$. In addition, we may need some helper labels $\Sigma'$, such as $\{even, odd, start, end\}$, which may not be present
-in the final analysis.
+conceive of such grammar quite easily. In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading. We call the set of readings $\Sigma$. 
+% In addition, we may need some helper labels $\Sigma'$, such as $\{even, odd, start, end\}$, which may not be present in the final analysis.
 Figure~\ref{fig:anbn} shows the input and output of a hypothetical CG, which takes cohorts
 of $\Sigma = \{a, b\}$ as an input, and removes $b$ from the first $n$ words, and $a$ from the last $n$ words. For strings of uneven length, the grammar would either leave it ambiguous, which would be interpreted as a sign of rejection, or use the {\sc remcohort} operation of VISL CG-3, and make the whole string empty.
 

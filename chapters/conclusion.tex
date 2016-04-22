@@ -2,8 +2,8 @@
 \label{chapterConclusions}
 
 We set out to express CG as a SAT-problem. 
-At the first attempt, we ended up reimplementing FSIG \cite{koskenniemi90}, 
-also known as parallel CG \cite{koskenniemi97}. 
+At the first attempt, we ended up implementing a parallel variant of CG.
+%reimplementing FSIG \cite{koskenniemi90}, also known as parallel CG \cite{koskenniemi97}. 
 A straight-forward translation of a sequential scheme, introduced in \cite{lager_nivre01}, 
 turned out not to be a SAT-problem: all that is needed is manipulation of Boolean expressions, 
 without any uncertainty, or need for search. 
@@ -40,7 +40,7 @@ we may be able to find interesting novel uses for $T_M$ which $M$ was not design
 
 
 \paragraph{Clarify and make more precise} This point hits very close to home.
-The ``accidentally implemented FSIG'' theme, which has been present throughout this thesis, was not chosen just for narrative purposes; it reflects quite accurately the course of events when starting to implement SAT-CG.
+The ``accidentally implemented PCG'' theme, which has been present throughout this thesis, was not chosen just for narrative purposes; it reflects quite accurately the course of events when starting to implement SAT-CG.
 We started out with the observation that CG rules resemble logical formulas; {\sc remove} and {\sc if } can be expressed as negations and implications respectively. 
 Translating the rules into implications is fairly straightforward, but a SAT-encoding cannot go further without implementation details, such as rule ordering and execution type. 
 %In other words, we noticed that just applying the rules and solving, we implement a parallel CG.
@@ -56,28 +56,33 @@ Previously, all parallel systems assumed perfect interplay of rules,
 and there was no way of discussing ordering \todo{is this true?}. 
 With our two methods of conflict handling in Chapter~\ref{chapterCGSAT}, 
 we have brought the notion of strict and heuristic also to parallel execution. 
+In the table, we have included related systems; they are written in a lighter colour.
 
 \def\satcgMax{SAT-CG\textsubscript{Max}}
 \def\satcgOrd{SAT-CG\textsubscript{Ord}}
+\def\noncg#1{{\color{blue} #1}}
 
 \begin{table}[h]
 \centering
 
-  \begin{tabular}{r | c | c |@{~~...~}| p{3cm}}
+  \begin{tabular}{r | p{2.5cm} | p{3.5 cm} | p{3.5cm}}
            & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
 \textbf{Sequential}
            & CG-1            & CG-2  % (Tapanainen1996, p. 34
            							              & --           \\ 
-           & VISL CG-3       \\ 
-           & Peltonen2011    \\ %Peltonen2011, p. 80
-           & Yli-Jyrä2011    \\ \hline
+           & VISL CG-3       & &\\ 
+           & Peltonen2011    & &\\ %Peltonen2011, p. 80
+           & Yli-Jyrä2011    & & \\ 
+           & Hulden2011~\todo{confirm} \\ \hline
 \textbf{Parallel}
-		   & \satcgOrd       & \satcgMax          & FSIG \\ 
-		   &                 &                    & (SAT-CG, 
-		   											when no conflicts) \\
+		   & \satcgOrd       & \satcgMax          & \noncg{FSIG (Koskenniemi 1990)} \\ 
+		   &                 & \noncg{FSIG (Voutilainen 1994)} \\
+		   &                 & \noncg{Oflazer 1997}  \\
+		   &                 & \noncg{Lindén \& Silfverberg 2009}
+
   \end{tabular}
   \label{table:nelikentta}
-  \caption{All combinations of rule ordering and execution type. \todo{Fill the table with other implementations}}
+  \caption{All combinations of rule ordering and execution type. \todo{Fill the table with other implementations and cite properly}}
 \end{table}
 
 \paragraph{Novel implementation techniques} Arguably the most obvious point---we have implemented a CG engine using a SAT-solver. 
@@ -102,3 +107,6 @@ always as the rightmost condition.
 Thus, it is expected that word boundaries are not usually generated in the middle of the symbolic sentence.
 
 Check if the rules already enforce some trivial stuff, like not generating word boundaries in the middle of the symbolic sentence.
+
+
+\todo{I'll write this chapter during weekend and send to Eckhard! Koen, you should read just the update of this chapter again on Monday---shouldn't be many pages.}
