@@ -478,7 +478,7 @@ Throughout the section, we will apply the rules to the following ambiguous passa
 aka. ``In which order are the rules applied to a single cohort?''
 
 An implementation with \emph{strict order} applies each rule in the order in 
-which they appear in the file. If a grammar contains the rules ``remove verb after determiner'' and ``remove noun after pronoun'' in the given order, the rule that removes the verb reading in \emph{question} will be applied first. After it has finished, there are no verb readings available anymore for the second rule to fire.
+which they appear in the file. If a grammar contains the rules \t{REMOVE v IF (-1 det)} and \t{REMOVE n IF (-1 pron)} in the given order, the rule that removes the verb reading in \emph{question} will be applied first. After it has finished, there are no verb readings available anymore for the second rule to fire.
 					
 How do we know which rule is the right one? There can be many rules that fit the context, but we choose the one that just happens to appear first in the rule file. 
 A common design pattern is to place rules with a long list of conditions first; 
@@ -496,7 +496,8 @@ status of \emph{what}.
 % \end{verbatim}
 % If a rare condition is met, the rare analysis is selected, and since it will be the only analysis, it will be protected from the remove rule. If the rare condition is not met, the rare analysis is removed.
 					
-An alternative solution to a strict order is to use a \emph{heuristic order}: when disambiguating a particular word, find the rule that has the longest and most detailed match. Now, assume that there is a rule with a longer context, such as ``select noun if -1 is determiner and +1 is verb'', even if this rule appears last in the file, it would be preferred to the shorter rules, because it is a more exact match.
+An alternative solution to a strict order is to use a \emph{heuristic order}: when disambiguating a particular word, find the rule that has the longest and most detailed match. Now, assume that there is a rule with a longer context, such as \t{SELECT n IF (-1 det) (1 v)}, even if this rule appears last in the file, it would be preferred to the shorter rules, because it is a more exact match.
+There are also methods that use explicit weights to favour certain rules, such as \cite{pirinen2015} for CG, and \cite{voutilainen1994designing,oflazer97votingconstraints,silfverberg2009conflict} for related formalisms. 
 					
 Both methods have their strengths and weaknesses. A strict order is more predictable, but it also means that the grammar writers need to pay more thought to rule interaction. A heuristic order frees the grammar writer from finding an optimal order, but it can give unexpected results, which are harder to debug.
 As for major CG implementations, \cite{karlsson1990cgp} and \cite{vislcg3} follow the strict scheme, whereas \cite{tapanainen1996} is heuristic.
@@ -508,32 +509,55 @@ aka. ``When does the rule application take effect?''
 %aka. ``Does the context change immediately after each rule is applied?''
 
 The input sentence can be processed in sequential or parallel manner.
-In \emph{sequential execution}, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule ``remove verb after determiner''.
+In \emph{sequential execution}, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule \t{REMOVE v IF (-1 det)}.
 
 
 In contrast, a \emph{parallel execution} scheme disambiguates all the words at the same 
-time, using their initial, ambiguous context. Both ``remove verb after determiner'' and 
-``remove noun after pronoun'' would match \emph{question}, because the original 
-input from the morphological analyser contains both determiner and pronoun as the 
-preceding word. Then, the final decision depends on any other rule that resolves \emph{what}.
-To give a minimal example, assume we have a single rule, \texttt{REMOVE verb IF (-1 verb)}, and the three words \emph{w1--w3}, shown below. 
-In parallel execution, both \emph{w2} and \emph{w3} lose their verb tag; in sequential only \emph{w2}.
+time, using their initial, ambiguous context. 
+%If we want to keep this variable orthogonal to the rule ordering, we may not assume anything about how the rules are ordered.
+To give a minimal example, assume we have a single rule, \texttt{REMOVE verb IF (-1 verb)}, and the three words \emph{can can can}, shown below. 
+In parallel execution, both \emph{can$_2$} and \emph{can$_3$} lose their verb tag; in sequential only \emph{can$_2$}.
 
 %Parallel and sequential would return a different result for the following passage: 
 
 \begin{figure}[h]
 \begin{tabular}{p{0.5cm} l   p{0.5cm} l    p{0.5cm} l}
-\t{"<w1>"}      &  & \t{"<w2>"}    & & \t{"<w3>"}      & \\
-   & \t{"w1" noun} & & \t{"w2" noun} & & \t{"w3" noun}   \\
-   & \t{"w1" verb} & & \t{"w2" verb} & & \t{"w3" verb} 
+\t{"<can$_1$>"}      &  & \t{"<can$_2$>"}  & & \t{"<can$_3$>"} & \\
+   & \t{"can" noun}  &  & \t{"can" noun} & & \t{"can" noun}   \\
+   & \t{"can" verb}  &  & \t{"can" verb} & & \t{"can" verb} 
 
 \end{tabular}
 \end{figure}
 
-Which execution scheme is better? For most purposes, sequential execution is preferred.  Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
+The question of parallel execution becomes more complicated if 
+there are multiple rules that apply for the same context. 
+Both \t{REMOVE v IF (-1 det)} and \t{REMOVE n IF (-1 pron)} 
+would match \emph{question}, because the original input 
+from the morphological analyser contains both determiner and 
+pronoun as the preceding word. 
+The result depends on various details: shall all the rules also act in parallel?
+If we allow rules to be ordered, then the result will not be any different from 
+the same grammar in sequential execution; that is, the later rule (later by any metric) 
+will not apply. 
+The only difference is the reason why not: ``context does not match'' in sequential,  
+and ``do not remove the last reading'' in parallel.
+
+However, usually parallel execution is combined with \emph{unordered} rules.
+In order to express the result of these two rules in such scheme, we need a concept 
+that has not been discussed so far, namely, disjunction:
+``the allowed combinations are {\em det}+{\em n} or {\em pron}+{\em v}''. 
+If we wanted to keep the purely list-based ontology of CG, but combine it with a parallel 
+and unordered execution, then the result would have to inconclusive and keep both readings; 
+both cannot be removed because that would leave {\em question} without any readings.
+The difference between the list-based and disjunction-based ontologies, corresponding to 
+CG and FSIG respectively, is explained with further detail in \cite{lager_nivre01}.
+
+
+Which execution scheme is better? For most purposes, sequential execution is preferred. 
+Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
 If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}: there are less possible rules that may apply. 
 Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other.
-\cite{koskenniemi90} states the following about FSIG, which is a related parallel system:
+\cite{koskenniemi90} states the following about FSIG:
 
  \begin{quote}
  Each constraint simply adds something to the discriminating power of the
