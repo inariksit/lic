@@ -13,7 +13,7 @@ Then, instead of ``Which readings are true after all rule applications?'', the S
 We exploited this property for grammar analysis: for each rule $r$, we tried to create a sentence 
 which has passed through all previous rules $R$, and could still trigger $r$.
 If such sentence could not be found, this means that some of the rules in $R$ made $r$ impossible to apply: for instance, by removing the same target with less conditions, or removing something from the context of $r$.
-This method was successful in finding such conflicts, when tested with grammars between 70--1000 rules.
+This method was successful in finding such conflicts, when tested with grammars between 60--1200 rules.
 
 The previous paragraph summarises the past year of research, which led to this thesis. 
 For the rest of this section, we broaden the view: we discuss the implications of our work, 
@@ -42,12 +42,49 @@ we may be able to find interesting novel uses for $T_M$ which $M$ was not design
 \paragraph{Clarify and make more precise} This point hits very close to home.
 The ``accidentally implemented PCG'' theme, which has been present throughout this thesis, was not chosen just for narrative purposes; it reflects quite accurately the course of events when starting to implement SAT-CG.
 We started out with the observation that CG rules resemble logical formulas; {\sc remove} and {\sc if } can be expressed as negations and implications respectively. 
-Translating the rules into implications is fairly straightforward, but a SAT-encoding cannot go further without implementation details, such as rule ordering and execution type. 
+Of course, ``translating CG rules into logical formulas, without a notion of order, corresponds to parallel CG'' is not a unique discovery---the article where Torbjörn Lager noted the same \cite{lager98} was published in 1998, and had we read it before starting our work, none of these properties would not have surprised us.
+
+%Translating the rules into implications is fairly straightforward, but a SAT-encoding cannot go further without implementation details, such as rule ordering and execution type. 
+
+Even the earliest specifications of CG seem to neglect these aspects;
+\cite{karlsson1995constraint} states the following: % (underline in original):
+
+
+\begin{quote}
+More generally, the formalism should be such that individual constraints are unordered and maximally independent of each other. These properties facilitate incremental adding of new constraints to the grammar, especially to a large one. (page 11)
+\end{quote}
+
+According to Karlsson's vision, CG is a black box with individual rules taking care of different parts of the input sentence, each removing readings from their target and not caring about other rules.
+In order for this to work, 
+\begin{inparaenum}
+\item[(a)] two rules cannot have the same targets, and furthermore,
+\item[(b)] a rule should not target a cohort that is a condition for another rule.
+\end{inparaenum}
+For any practical grammar, this will not be feasible
+
+% However, the combination ``unordered and maximally independent of each other'' is questionable. 
+% Shall we interpret ``unordered'' as  ``a rule may not act before or after other rules, but in combination with them''?
+% If that is the case, then the combination unordered and independent is simply impossible. Unordered means that all the rules are merged into one black box
+
+% \begin{quote}
+% Each single statement is true when examined in isolation, either absolutely or with some degree of certainty, depending upon how careful the grammar writer has been. Furthermore, disregarding morphosyntactic mappings, the constraints are \underline{unordered}. (page 17)
+% \end{quote}
+
+%in the same way as two-level morphology compared to generative phonology? 
+
+
+``parallel''? Then, shall we interpret ``parallel'' as ``a rule may not act before all the other rules have had their go''
+
+
+The moral of the story: CG is not just the rules, it is the rules, the rule ordering scheme (generalisable to ), and the execution scheme. 
+
+
+
 %In other words, we noticed that just applying the rules and solving, we implement a parallel CG.
 % A single grammar expresses actions to cohorts, conditional on other cohorts in specified places; but the rules alone leave very much open to interpretation.
 % A grammar on its own does not specify rule ordering nor execution type; with strict vs. heuristic on one axis, and sequential vs. parallel on other. 
 
-Of course, ``translating CG rules into logical formulas, without a notion of order, corresponds to parallel CG'' is not a unique discovery---the referred article was published in 2001, and had we read it before starting our work, none of these properties would not have surprised us.
+
 What is, then, our contribution in clarifying and making something more precise?
 The answer is in Table~\ref{table:nelikentta}, which shows different CG systems 
 placed in a table, with rule order (strict vs. heuristic) on one axis, 
