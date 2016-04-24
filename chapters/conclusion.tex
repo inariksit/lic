@@ -1,30 +1,39 @@
 \chapter{Conclusions}
 \label{chapterConclusions}
 
-We set out to express CG as a SAT-problem. 
-At the first attempt, we ended up implementing a parallel variant of CG.
-%reimplementing FSIG \cite{koskenniemi90}, also known as parallel CG \cite{koskenniemi97}. 
-A straight-forward translation of a sequential scheme, introduced in \cite{lager_nivre01}, 
-turned out not to be a SAT-problem: all that is needed is manipulation of Boolean expressions, 
+
+This chapter summarises the past year of research, which led to this thesis. 
+For the rest of this chapter, we broaden the view: we discuss the implications of our work, 
+present new questions raised by our results, and try to find a spot for our contribution 
+in the grand scheme of CG research.
+
+\section{Summary of the thesis}
+
+We set out to express CG as a SAT-problem with the observation that CG rules resemble logical formulas; {\sc remove} and {\sc if} can be expressed as negations and implications respectively. As we noticed, implementing such scheme results in a parallel CG---of course, this was noted already in 1998 by Torbjörn Lager \cite{lager98}.
+
+A straight-forward logical translation of a sequential scheme, introduced in \cite{lager_nivre01}, is a nice exercise in the precise definition of CG semantics, 
+but it is not a SAT-problem: all that is needed is manipulation of Boolean expressions, 
 without any uncertainty, or need for search. 
 However, we modified the problem in a crucial detail: instead of an actual sentence, 
 we applied the rules to a {\em symbolic sentence}, where every word contains every possible reading.
-Then, instead of ``Which readings are true after all rule applications?'', the SAT-problem became ``Which readings were originally true?''
-We exploited this property for grammar analysis: for each rule $r$, we tried to create a sentence 
+Then, instead of the original question ``Which readings are true after all rule applications?'', 
+we found a meaningful SAT-problem, with the question ``Which readings were originally true?''
+
+We exploited the newly found property for grammar analysis: 
+for each rule $r$, we tried to create a sentence 
 which has passed through all previous rules $R$, and could still trigger $r$.
 If such sentence could not be found, this means that some of the rules in $R$ made $r$ impossible to apply: for instance, by removing the same target with less conditions, or removing something from the context of $r$.
 This method was successful in finding such conflicts, when tested with grammars between 60--1200 rules.
 
-The previous paragraph summarises the past year of research, which led to this thesis. 
-For the rest of this section, we broaden the view: we discuss the implications of our work, 
-present new questions raised by our results, and try to find a spot for our contribution 
-in the grand scheme of CG research.
+%The tools described in Chapters~\ref{chapterCGSAT}~and~\ref{chapterCGana} are far from release quality. 
+%Realistically speaking, we see the CG engine from Chapter~\ref{chapterCGSAT} as a proof-of-concept tool with little practical use.
+%On the other hand, we see potential in the the grammar analysis tools from Chapter~\ref{chapterCGana}. 
 
 
-\section{Contributions of this thesis}
+\section{Gained insights and open questions}
 
 Let us refer back to \cite{lager_nivre01}. 
-Before starting their logical reconstruction of four different methods for POS tagging,
+Before starting their logical reconstruction of POS tagging methods, 
 they give a list of motivations why one would want to reconstruct a method in the first place.
 Below we quote a three of them, which we feel that apply to our work.
 
@@ -39,15 +48,9 @@ we may be able to find interesting novel uses for $T_M$ which $M$ was not design
 \end{quote}
 
 
-\paragraph{Clarify and make more precise} We find this point in both Chapter~\ref{chapterCGSAT}~and~\ref{chapterCGana} in this thesis. 
-We started out with the observation that CG rules resemble logical formulas; {\sc remove} and {\sc if} can be expressed as negations and implications respectively. Of course, implementing such scheme results in a parallel CG, 
-as noted already in 1998 by Torbjörn Lager \cite{lager98}.
-Systems using parallel execution have been implemented before; cf. \cite{koskenniemi90,voutilainen1994designing,oflazer1997votingconstraints}, 
-but those systems have a different rule formalism and expressivity of rules.
-%but none in a variant of a CG engine that would execute the same rules as its sequential counterpart.
-Our parser has the benefit that it reads the exact same CG files as CG-2 and CG-3; thus, we can compare the results directly. 
+\paragraph{Clarify and make more precise} %We find this point in both Chapter~\ref{chapterCGSAT}~and~\ref{chapterCGana} in this thesis. 
 
-
+There has never been a single specification of all the implementation details of CG; specifically, the rule ordering and the execution strategy.
 The lack of specification in CG formalism can be seen as a feature, rather than a bug---Karlsson states the following in the initial specification of the design goals of CG \cite{karlsson1995constraint} (page 11):
 
 \begin{quote}
@@ -60,20 +63,29 @@ More generally, the formalism should be such that individual constraints are uno
 The formalism specifies no particular rule ordering per se, and different implementations of the CG formalism apply rules in varying orders (Bick, 2000).  In this respect, it is up to the grammar writer to design the rules so that they operate correctly no matter in what order they are called upon. 
 \end{quote}
 
-\noindent If we were to take these requirements literally, we would run into problems with any realistic grammar; that is, if any two rules target the same cohort, or if a rule $r$ targets the context of another rule $r'$, we step out of the ideal of the maximal independence of rules.
-In any grammar of realistic coverage, rule interaction must be taken into account.
+\noindent If we were to take these requirements literally, we would run into problems with any real-life grammar; that is, if any two rules target the same cohort, or if a rule $r$ targets the context of another rule $r'$, we step out of the ideal of the maximal independence of rules.
+In any grammar of interesting coverage, rule interaction must be taken into account.
 
 According to our initial experiments, there are differences of 1-2 percentage points in the F-scores, when running the same grammar with different execution and ordering schemes. However, the results are not very conclusive, because the tested grammars were very small and poor quality.
-Running the same grammar with different rule orders have been tried before \cite{lager2001transformation}, with the result that a random order of \todo{\~1000?} rules gives \todo{a couple of} percentage points worse precision and recall. 
+Running the same grammar with different rule orders have been tried before; \cite{lager2001transformation} reports that randomising the order of the 902 learned rules 
+decreases both precision and recall around 1.3 \%, compared to the initial learned rule order. %---Lager reports the order to be optimised, in the sense that it only needs to apply once
 \cite{bick2013tuning} was able to improve the performance of a human-written grammar by automatically modifying a number of variants, including rule order.
-It would be an interesting complement to such studies, if we repeated our  experiments in Chapter~\ref{chapterCGSAT} with large, high-quality grammars.
-Then we could properly isolate the effects of rule ordering and execution schemes for different grammars.
+It would make an interesting addition to those studies, if we repeated our experiments in Chapter~\ref{chapterCGSAT} with large, high-quality grammars.
+Then we could better isolate the effects of rule ordering and execution schemes for different grammars.
+Compared to other parallel formalisms \cite{koskenniemi90,voutilainen1994designing,oflazer97votingconstraints,lager98}, SAT-CG has the benefit that it reads the exact same CG files as CG-2 and CG-3---this means that we can run the same grammars and compare the results directly. 
 
-In the same spirit, if we want to be able to implement grammar development and debugging facilities, we must specify an ordering scheme. 
+%but all of those systems use a different rule formalism.
+%but none in a variant of a CG engine that would execute the same rules as its sequential counterpart.
+
+
+
+In the same spirit, if we want to be able to implement grammar development and debugging facilities, we must specify an ordering scheme and an execution strategy. 
 Our grammar analysis tool, presented in Chapter~\ref{chapterCGana}, 
 is meant for strict and sequential variants of CG, especially VISL CG-3 \cite{vislcg3}. 
 
-The moral of the story is that CG is not just the rules; it is the rules, the rule ordering scheme (generalisable to a \emph{conflict solving scheme}), and the execution scheme. 
+The moral of the story is that CG cannot be defined just by a set of rules: 
+rather, it is the combination of rules, a rule ordering scheme (generalisable to a \emph{conflict solving scheme}), and an execution strategy. 
+%As described by Anssi Yli-Jyrä (2016, personal communication), kielioppi + jäsennysstrategia + syöte + tulos = oikein
 
 
 
@@ -81,7 +93,7 @@ The moral of the story is that CG is not just the rules; it is the rules, the ru
  
 % Of course, ``translating CG rules into logical formulas, without a notion of order, corresponds to parallel CG'' is not a unique discovery---the article where Torbjörn Lager noted the same \cite{lager98} was published in 1998, and had we read it before starting our work, none of these properties would not have surprised us.
 
-%Translating the rules into implications is fairly straightforward, but a SAT-encoding cannot go further without implementation details, such as rule ordering and execution type. 
+%Translating the rules into implications is fairly straightforward, but a SAT-encoding cannot go further without implementation details, such as rule ordering and execution strategy. 
 
 
 
@@ -117,30 +129,53 @@ The moral of the story is that CG is not just the rules; it is the rules, the ru
 
 %In other words, we noticed that just applying the rules and solving, we implement a parallel CG.
 % A single grammar expresses actions to cohorts, conditional on other cohorts in specified places; but the rules alone leave very much open to interpretation.
-% A grammar on its own does not specify rule ordering nor execution type; with strict vs. heuristic on one axis, and sequential vs. parallel on other. 
+% A grammar on its own does not specify rule ordering nor execution strategy; with strict vs. heuristic on one axis, and sequential vs. parallel on other. 
 
 
 % What is, then, our contribution in clarifying and making something more precise?
 
 
 
-\paragraph{Novel implementation techniques} Arguably the most obvious point---we have implemented a CG engine using a SAT-solver. 
-As we motivate in Section~\ref{sec:SAT-intro}, it is a smart idea to formulate a problem in SAT. 
-Parallel CG is an instance of a more abstract search problem; there is a whole research area that tries to optimise search. Hence it pays off to formulate a specific search problem as an instance of SAT-problem, and reap the benefits of decades of optimisation. 
-The performance of SAT-CG was an order of magnitude worse, compared to VISL CG-3. However, we can argue that the task of executing parallel CG is more difficult than sequential; also there are many differences in pure software engineering aspects between SAT-CG and VISL CG-3, such as the languages chosen, the experience of the developers and the time available to dedicate for maintenance. We would encourage experiments for developing a SAT-based FSIG parser.
+\paragraph{Novel implementation techniques} 
+% We have implemented a CG engine using a SAT-solver. 
+% . 
+Parallel CG is an instance of a more abstract constraint solving problem.
+As we motivate in Section~\ref{sec:SAT-intro}, it is a smart idea to formulate such task as a SAT-problem: the SAT-solving community has spent decades on optimising search. By spending one's individual effort in finding a SAT-encoding, one can reap the benefits of
+fast search, including any advances that will happen in the future.
+
+Despite the argument, our evaluations in Chapter~\ref{chapterCGSAT} show that the performance of SAT-CG was an order of magnitude slower, compared to VISL CG-3. 
+%Perhaps this shows that SAT is an overkill for such a simple problem as CG?
+However, we cannot conclude that the fault is at SAT; rather, we attribute some of the differences to pure software engineering aspects, such as the chosen programming languages, the experience of the developers and the time available to dedicate for the development.
+As an analogy, \cite{peltonen2011} presents an implementation of CG using FSTs, which runs 1,500 times slower than VISL CG-3---this was clearly not the last word on the performance of FST implementations. Only three years later, \cite{nemeskey14} evaluate different finite-state implementations of CG, and report more competetive figures for performance.
+
+From another point of view, we can argue that executing parallel CG is more complex than executing sequential CG.
+Hence the comparison between SAT-CG and VISL CG-3 would be unfair, because the two 
+engines would not be doing the same task. In order to investigate this hypothesis further, it would be interesting to experiment with a SAT-based parser for FSIG.
+% for a task that was known to be difficult and time-consuming; namely, parsing FSIG. 
+%We would encourage experiments with a SAT-based FSIG parser.
+
+For the grammar analysis tool, there is no pre-existing counterpart, with or without SAT. 
+In the spirit of ``novel implementation techniques'', we would like to throw the challenge to the community: can we replicate or improve the results of the SAT-based,
+semantic grammar analysis? 
 %Whereas \cite{lager_nivre01} talk about the benefits of formulating a problem in logic---better understanding, fresh ideas by looking it from another angle, SAT-community has 
 
 \paragraph{Novel uses for the knowledge component of CG} 
 
-What is the ``knowledge component'' of CG? 
 CG is first and foremost a parsing grammar, meant to reduce ambiguities that appear in real-life texts. 
-In order to do that, CG rules can take advantage of all pieces of information at hand; the analyses of the surrounding words, heuristics related to the frequency of words, or even semantic classes, given that there is a component in a pipeline that provides such analyses. 
-CG rules are written to target only what is needed to disambiguate real texts, not to provide a full description of language;  
+%In order to do that, CG rules can take advantage of all pieces of information at hand; the analyses of the surrounding words, heuristics related to the frequency of words, or even semantic classes, given that there is a component in a pipeline that provides such analyses. 
+Usually, CG rules are written to target only what is needed to disambiguate real texts, not to provide a full description of language;  
 %There would be no point to target analyses that are already unambiguous---
-a rule such as \t{SELECT punct IF (0 ".")} would be utterly redundant. However, these words may still appear frequently in the rules---as contexts. 
+a rule such as \t{SELECT~punct~IF~(0~".")} would be utterly redundant. However, these words may still appear frequently in the rules, as contexts. 
+
 Let us return back to the claim in \cite{bick2015}, of CG being a declarative whole of possibilities and impossibilities of a language or a genre. 
 Applying CG rules to a symbolic sentence, instead of real sentences from a corpus, 
-We do not remove the verb after determiner, we prevent such sequence from being created in the first place. 
+we can use CG in a more declarative way: \t{REMOVE~v~IF~(-1~det)} does not remove the 
+verb after determiner, it prevents such sequence from being created in the first place. 
+Thus, we can use CG for a task it was not designed for---creating language.
+The ``knowledge component'' of CG would be then all the hidden assumptions 
+about the targets and possible contexts for them.
+
+
 But do the rules contain enough information to actually create language? 
 Some tendencies show already in the symbolic sentences generated in 
 Chapter~\ref{chapterCGana}: for instance, the token for end of sentence (\t{<<<}) appears 
@@ -148,16 +183,11 @@ Chapter~\ref{chapterCGana}: for instance, the token for end of sentence (\t{<<<}
 always as the rightmost condition.
 Thus, it is expected that word boundaries are not usually generated in the middle of the sequence.
 
-
-
-
-\section{Open questions and future work}
-
-The tools described in Chapters~\ref{chapterCGSAT}~and~\ref{chapterCGana} are far from release quality. 
+Again, our experiments suffer from the lack of high-quality grammars to test with. 
 
 The question about expressivity deserves further investigation. 
 We believe that the symbolic sentence approach can help in that task too. 
-We have done initial experiments to show that VISL CG-3 grammar can be written for a context-free language; however, \formulation{there are no systematic studies to investigate whether even all regular languages could be encoded in CG.} Luckily, similar efforts exist for related formalisms \cite{tapanainen99phd,yli-jyra2005phd}; 
+We have performed initial experiments to show that a VISL CG-3 grammar can be written for the context-free language $a^nb^n$ and the context-sensitive language $a^nb^nc^n$\footnote{Only published as a blog post: \url{https://pepijnkokke.github.io/2016/constraint-grammar-can-count/}}; a possible direction would be to follow the footsteps of \cite{tapanainen99phd,yli-jyra2005phd}, and do a more systematic study. \formulation{For now, we do not even know whether all regular languages could be encoded in CG.} 
 
 % Philosophical questions: can CG rules {\em generate} language?
 % When the sentence starts off as anything, the rules become truly declarative.
@@ -167,5 +197,3 @@ We have done initial experiments to show that VISL CG-3 grammar can be written f
 
 % Check if the rules already enforce some trivial stuff, like not generating word boundaries in the middle of the symbolic sentence.
 
-
-\todo{I'll write this chapter during weekend and send to Eckhard! Koen, you should read just the update of this chapter again on Monday---shouldn't be many pages.}
