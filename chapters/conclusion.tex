@@ -42,19 +42,38 @@ we may be able to find interesting novel uses for $T_M$ which $M$ was not design
 \paragraph{Clarify and make more precise} We find this point in both Chapter~\ref{chapterCGSAT}~and~\ref{chapterCGana} in this thesis. 
 We started out with the observation that CG rules resemble logical formulas; {\sc remove} and {\sc if} can be expressed as negations and implications respectively. Of course, implementing such scheme results in a parallel CG, 
 as noted already in 1998 by Torbjörn Lager \cite{lager98}.
-Systems using parallel execution have been implemented before; cf. \cite{koskenniemi90,voutilainen1994designing,oflazer1997votingconstraints}, but not as a variant of a CG engine, one that would execute the same rules as its sequential counterpart.
+Systems using parallel execution have been implemented before; cf. \cite{koskenniemi90,voutilainen1994designing,oflazer1997votingconstraints}, 
+but those systems have a different rule formalism and expressivity of rules.
+%but none in a variant of a CG engine that would execute the same rules as its sequential counterpart.
 Our parser has the benefit that it reads the exact same CG files as CG-2 and CG-3; thus, we can compare the results directly. 
 
-The lack of specification in CG formalism can be seen as a feature, rather than a bug: \cite{hulden2011cg_engine} states the following:
 
-\begin{quote} 
-The formalism specifies no particular rule ordering per se, and different implementations of the CG formalism apply rules in varying orders (Bick, 2000).  In this respect, it is up to the grammar writer to design the rules so that they operate correctly no matter in what  order  they  are  called  upon. 
+The lack of specification in CG formalism can be seen as a feature, rather than a bug---Karlsson states the following in the initial specification of the design goals of CG \cite{karlsson1995constraint} (page 11):
+
+\begin{quote}
+More generally, the formalism should be such that individual constraints are unordered and maximally independent of each other. These properties facilitate incremental adding of new constraints to the grammar, especially to a large one.
 \end{quote}
 
-\noindent However, if we want to be able to implement grammar development and debugging facilities, we must commit to a specific ordering scheme. 
+\noindent The spirit is retained in later descriptions, cf. \cite{hulden2011cg_engine}:
 
-The moral of the story is that CG is not just the rules; it is the rules, the rule ordering scheme (generalisable to a \emph{conflict solving scheme}), and the execution scheme. CG is not black box with individual rules taking care of different parts of the input sentence, each removing readings from their target and not caring about other rules. 
-If any rule $r$ targets a cohort which happens to be the context of another rule $r'$, we step out of 
+\begin{quote} 
+The formalism specifies no particular rule ordering per se, and different implementations of the CG formalism apply rules in varying orders (Bick, 2000).  In this respect, it is up to the grammar writer to design the rules so that they operate correctly no matter in what order they are called upon. 
+\end{quote}
+
+\noindent If we were to take these requirements literally, we would run into problems with any realistic grammar; that is, if any two rules target the same cohort, or if a rule $r$ targets the context of another rule $r'$, we step out of the ideal of the maximal independence of rules.
+In any grammar of realistic coverage, rule interaction must be taken into account.
+
+According to our initial experiments, there are differences of 1-2 percentage points in the F-scores, when running the same grammar with different execution and ordering schemes. However, the results are not very conclusive, because the tested grammars were very small and poor quality.
+Running the same grammar with different rule orders have been tried before \cite{lager2001transformation}, with the result that a random order of \todo{\~1000?} rules gives \todo{a couple of} percentage points worse precision and recall. 
+\cite{bick2013tuning} was able to improve the performance of a human-written grammar by automatically modifying a number of variants, including rule order.
+It would be an interesting complement to such studies, if we repeated our  experiments in Chapter~\ref{chapterCGSAT} with large, high-quality grammars.
+Then we could properly isolate the effects of rule ordering and execution schemes for different grammars.
+
+In the same spirit, if we want to be able to implement grammar development and debugging facilities, we must specify an ordering scheme. 
+Our grammar analysis tool, presented in Chapter~\ref{chapterCGana}, 
+is meant for strict and sequential variants of CG, especially VISL CG-3 \cite{vislcg3}. 
+
+The moral of the story is that CG is not just the rules; it is the rules, the rule ordering scheme (generalisable to a \emph{conflict solving scheme}), and the execution scheme. 
 
 
 
@@ -101,40 +120,8 @@ If any rule $r$ targets a cohort which happens to be the context of another rule
 % A grammar on its own does not specify rule ordering nor execution type; with strict vs. heuristic on one axis, and sequential vs. parallel on other. 
 
 
-What is, then, our contribution in clarifying and making something more precise?
-The answer is in Table~\ref{table:nelikentta}, which shows different CG systems 
-placed in a table, with rule order (strict vs. heuristic) on one axis, 
-and execution type (sequential vs. parallel) on other. 
-With our two methods of conflict handling in Chapter~\ref{chapterCGSAT}, 
-we have brought the notion of strict and heuristic also to parallel execution. 
-In the table, we have included related systems; they are written in a lighter colour.
+% What is, then, our contribution in clarifying and making something more precise?
 
-\def\satcgMax{SAT-CG\textsubscript{Max}}
-\def\satcgOrd{SAT-CG\textsubscript{Ord}}
-\def\noncg#1{{\color{blue} #1}}
-
-\begin{table}[h]
-\centering
-
-  \begin{tabular}{r | p{2.5cm} | p{3.5 cm} | p{3.5cm}}
-           & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
-\textbf{Sequential}
-           & CG-1            & CG-2  % (Tapanainen1996, p. 34
-           							              & --           \\ 
-           & VISL CG-3       & &\\ 
-           & Peltonen2011    & &\\ %Peltonen2011, p. 80
-           & Yli-Jyrä2011    & & \\ 
-           & Hulden2011~\todo{confirm} \\ \hline
-\textbf{Parallel}
-		   & \satcgOrd       & \satcgMax          & \noncg{FSIG (Koskenniemi 1990)} \\ 
-		   &                 & \noncg{FSIG (Voutilainen 1994)} \\
-		   &                 & \noncg{Oflazer 1997}  \\
-		   &                 & \noncg{Lindén \& Silfverberg 2009}
-
-  \end{tabular}
-  \label{table:nelikentta}
-  \caption{All combinations of rule ordering and execution type. \todo{Fill the table with other implementations and cite properly}}
-\end{table}
 
 
 \paragraph{Novel implementation techniques} Arguably the most obvious point---we have implemented a CG engine using a SAT-solver. 
@@ -146,24 +133,39 @@ The performance of SAT-CG was an order of magnitude worse, compared to VISL CG-3
 \paragraph{Novel uses for the knowledge component of CG} 
 
 What is the ``knowledge component'' of CG? 
+CG is first and foremost a parsing grammar, meant to reduce ambiguities that appear in real-life texts. 
+In order to do that, CG rules can take advantage of all pieces of information at hand; the analyses of the surrounding words, heuristics related to the frequency of words, or even semantic classes, given that there is a component in a pipeline that provides such analyses. 
+CG rules are written to target only what is needed to disambiguate real texts, not to provide a full description of language;  
+%There would be no point to target analyses that are already unambiguous---
+a rule such as \t{SELECT punct IF (0 ".")} would be utterly redundant. However, these words may still appear frequently in the rules---as contexts. 
 Let us return back to the claim in \cite{bick2015}, of CG being a declarative whole of possibilities and impossibilities of a language or a genre. 
+Applying CG rules to a symbolic sentence, instead of real sentences from a corpus, 
+We do not remove the verb after determiner, we prevent such sequence from being created in the first place. 
+But do the rules contain enough information to actually create language? 
+Some tendencies show already in the symbolic sentences generated in 
+Chapter~\ref{chapterCGana}: for instance, the token for end of sentence (\t{<<<}) appears 
+(nearly\footnote{Word boundaries may be combined in the same set with other tags, such as commas: \t{SET~Boundary~=~>>>~OR~<<<~OR~","~OR~";"}. This set may then appear also in the middle of other conditions.}) 
+always as the rightmost condition.
+Thus, it is expected that word boundaries are not usually generated in the middle of the sequence.
 
 
-We may be interpreting this point too freely, but the point about generation fits here.
-The ``knowledge component'' would be all the bits of language description in rules; like, word boundaries don't appear in the middle of rules. Going to say something more sensible of this point later.}
+
 
 \section{Open questions and future work}
 
-Philosophical questions: can CG rules {\em generate} language?
-When the sentence starts off as anything, the rules become truly declarative.
-We do not remove the verb after determiner, we prevent such sequence from being created in the first place.
-Of course, the rules are not written to generate text, but to remove ambiguities from a limited and predictable set of alternatives.
-However, some tendencies show already in the symbolic sentences generated in Chapter~\ref{chapterCGana}: for instance, the token for end of sentence (\t{<<<}) appears 
-(nearly\footnote{Word boundaries may be combined in the same set with other tags, such as commas: \t{SET~Boundary~=~>>>~OR~<<<~OR~","~OR~";"}. This set may then appear also in the middle of other conditions.}) 
-always as the rightmost condition.
-Thus, it is expected that word boundaries are not usually generated in the middle of the symbolic sentence.
+The tools described in Chapters~\ref{chapterCGSAT}~and~\ref{chapterCGana} are far from release quality. 
 
-Check if the rules already enforce some trivial stuff, like not generating word boundaries in the middle of the symbolic sentence.
+The question about expressivity deserves further investigation. 
+We believe that the symbolic sentence approach can help in that task too. 
+We have done initial experiments to show that VISL CG-3 grammar can be written for a context-free language; however, \formulation{there are no systematic studies to investigate whether even all regular languages could be encoded in CG.} Luckily, similar efforts exist for related formalisms \cite{tapanainen99phd,yli-jyra2005phd}; 
+
+% Philosophical questions: can CG rules {\em generate} language?
+% When the sentence starts off as anything, the rules become truly declarative.
+% We do not remove the verb after determiner, we prevent such sequence from being created in the first place.
+% Of course, the rules are not written to generate text, but to remove ambiguities from a limited and predictable set of alternatives.
+
+
+% Check if the rules already enforce some trivial stuff, like not generating word boundaries in the middle of the symbolic sentence.
 
 
 \todo{I'll write this chapter during weekend and send to Eckhard! Koen, you should read just the update of this chapter again on Monday---shouldn't be many pages.}
