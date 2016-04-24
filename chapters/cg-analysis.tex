@@ -743,13 +743,18 @@ We are working on an option to store and reuse the ambiguity class constraints.
 
 \section{Discussion/Conclusions/Summary}
 
+\subsection{More serious implementation}
+
+In order to attract the attention of the CG community, it would be desirable to incorporate the tools as a part of existing CG software. 
+Currently, the described software consists of just under 3000 lines of Haskell code, including both the CG engine and the grammar analysis tool.
+The grammar used for parsing the original CG files is written in BNFC \todo{cite}, and it is missing many constructs in CG-3. 
+Given these factors, the preferred option would be a full reimplementation and integration as a part of VISL CG-3, or any other CG engine. We believe this would make the tools easier to use, more cohesive and syncronised with the main CG engine, and likely much faster. Of course, it is up to the community and the developers to decide if our tools are of interest.
+
 \subsection{More features}
 
-\noindent Automatic 0-flagging. 
+\noindent Automatic 0-flagging; Nicer representation of lexical forms; all the other stuff from paper.
 
-\noindent Nicer representation of lexical forms.
-
-It could identify pairs for a potential ``feeding order''. Say we have the following rule sequence:
+\noindent \todo{I might just be hallucinating and this is totally not feasible with SAT. But I got the idea, so documenting it here in case.} It could identify pairs for a potential ``feeding order''. Say we have the following rule sequence:
 
 \begin{verbatim}
 REMOVE:r1 x IF (-1C y)
@@ -759,10 +764,10 @@ SELECT:s2 y IF (...)
 If $s2$ appears before $r1$, if makes way for $r1$ to act later on the same round. 
 However, if the rules are ordered as shown, and \todo{y} is not unambiguous from the beginning, then $r1$ has to wait for the next round to be applied.
 
-Lager \cite{lager2001transformation} observed that the rule sequence learned by the $\mu$TBL system did not remove further ambiguities after its first run, and concluded that the sequence was ``optimal''. 
-It would be interesting to recreate the goals in \cite{lager2001transformation} and \cite{bick2013tuning}, to see if this semantic analysis of rule dependencies could lead also to better ordering within a grammar.
+Lager \cite{lager01transformation} observed that the rule sequence learned by the $\mu$TBL system did not remove further ambiguities after its first run, and concluded that the sequence was ``optimal''. 
+It would be interesting to recreate the goals in \cite{lager01transformation} and \cite{bick2013tuning}, to see if this semantic analysis of rule dependencies could lead also to better ordering within a grammar.
 
-\todo{write it!}
+
 
 
 %%%%%%%
