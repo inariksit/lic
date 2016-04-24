@@ -187,7 +187,9 @@ showing that such sequence cannot be created.
 
 In order to analyse real-life CGs, we need to model the semantics of sequential CG: 
 rule application takes effect immediately, is irreversible, and only allows changes in the target.
-There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1~det)} the same as \t{REMOVE~v~IF~(-1~det) ; REMOVE~v} is worth nothing. The first one is a true conflict, because the first rule has a broader condition; it removes the verb in any possible case. The second rule order is possible: there can always be a sentence that has a verb, but is not preceded by a determiner, hence the first rule would not match, and the verb is saved for the second rule.
+There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1~det)} the same as \t{REMOVE~v~IF~(-1~det) ; REMOVE~v} is worth nothing. The first one is a true conflict, because the first rule has a broader condition; it removes the verb in any possible case. The second rule order is possible: there can always be a sentence that has a verb, but is not preceded by a determiner, hence the first rule would not match, and the verb is saved for the second rule. 
+
+
 
 We need to model the state of the sentence after each rule application. 
 %Luckily, we do not need to reinvent the wheel\footnote{of course we did. like, who reads other people's papers.}: 
@@ -207,6 +209,13 @@ We present it in a way that is syntactically closer to what we have seen so far.
 }
 
 As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
+
+Last time, we handled order by introducing clauses in order. All clauses operated on the same variables. Now, we must modify our approach. The state of a reading is expected to change during the execution of the rules---this is what rule application does. However, in the system of interconnected clauses, application of rule number 100 may not only affect the target of rule number 1, but conditions as well. 
+A reading may be removed from a symbolic word between rules 1 and 100, if there is a rule that targets it among r2--r99. But if r1 requires w1 to be a noun, and r100 requires it to not be noun, this condition of r100 is not enough to make w1 change its nounhood at random.
+
+We solve this problem by creating a new variable for a reading each time when it is targeted. The symbolic word is created with `w1<n>`, `w1<v>`, and after the first rule that targets nouns for removal (either `REMOVE n` or `SELECT ¬n`), we create `w1'<n>`. We allow `w1<n>` to be true and `w1'<n>` be false; both true; both false, but not `w1<n>` to be false and `w1'<n>` true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
+\todo{would there be some nice connection to the generative phonology terms ``feeding order'' and ``bleeding order''? not sure if I should expect my audience to know that but not CG. :-P}
+
 %But now, we assume that each variable starts off as true: 
 %all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
 At each rule application, we create a new variable \newVar{} for each targeted reading \oldVar{}.
@@ -257,7 +266,8 @@ $$\begin{array}{l @{~\rightarrow~} l}
 % Huh. That is an interesting question on its own right, but not very useful for a CG engine: we do know which readings were originally true, and we do not want the SAT-solver to be extra helpful and remove something that is targeted by no rule. But in Chapter~\ref{chapterCGana}, the new setup will allow us to find conflicts in the grammar, approximate generation and answer questions about expressivity. 
 % For the remainder of this chapter, however, we keep the parallel scheme and wrap up what we have started. 
 
-
+\todo{Make some nice example }
+To borrow the terms from generative phonology, the first
 
 \subsection{Preliminaries}
 
