@@ -70,7 +70,9 @@ This explicitly reductionistic approach does not seem to have any obvious counte
 Throughout its history, CG has been very practically oriented, with 
 little studies on its formal properties, or attempts to relate it to existing
 frameworks.
-Notable exeptions are \cite{lager_nivre01}, who model CG in logic, and \cite{nemeskey14}, who evaluate different finite-state based implementations.
+Notable exeptions are \cite{lager_nivre01}, who model CG in logic, and 
+\cite{tapanainen1999phd}, who define the expressivity of rules.
+%\cite{nemeskey14}, who evaluate different finite-state based implementations.
 %\todo{find "Hulden (2011) showed that if the rules are compiled to transducers ..." -- what kind of scheme was that? is there an ordered FST-based CG engine?}
 This brings us to the yet unmentioned part of the title.
 We model CG in the framework of \emph{Boolean satisfiability}, abbreviated \emph{SAT}.
@@ -109,10 +111,14 @@ Another desirable facility in the grammar development environment would be a mec
 The most important contribution of this thesis is, however, practical. 
 %Encoding CG rules in SAT is highly interesting for grammar analysis.
 %While this is not necessarily a desirable property in a CG engine---it is hard to justify the loss of robustness---it is nevertheless interesting for grammar analysis. 
-The SAT-encoding enables us to track the effect of each rule, and in case 
-of a conflict, we can find out which rules cause it.
-In addition, we have found practical use for the generation property, 
-to give grammarians feedback on the rules they are writing.
+The SAT-encoding enables us to find out if there are rules that contradict other rules. 
+We do this by using the generation property: for a given set of rules, we ask for a sentence that would pass through all of them and still be able to trigger the last one. 
+If such sentence cannot be created, it means that some rule prevents the last rule from applying, regardless of the input sentence; for instance, if an earlier rule removes all verbs unconditionally, then any rule that removes verbs in some specific context may not apply. 
+
+%track the effect of each rule, and in case 
+%of a conflict, we can find out which rules cause it.
+In addition to finding conflicts, we have found the generation property to be helpful in the process of grammar writing, 
+to give grammarians feedback on the rules under development.
 For instance, a grammar writer can take a set of rules and ask for a sequence that triggers some of them and not others.
 In Chapter~\ref{chapterCGana}, we describe a method and a working 
 implementation on grammar analysis, as well as evaluation on real grammars. 
