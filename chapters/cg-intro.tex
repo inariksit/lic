@@ -183,7 +183,7 @@ Like CG, Brill tagging is known to be efficient and accurate. The contextual tes
 has automatically learned both Brill rules and CG rules, using the same system.
 
 Similar ideas to CG have been also explored in the finite-state framework, such as Local grammars \cite{gross1997local} and finite-state contextual rules \cite{grana2003fst}, as well as logic programming \cite{oflazer97votingconstraints,lager98} and dependency syntax \cite{tapanainen97fdg}.
- In addition, there are a number of reimplementations of CG using finite-state methods \cite{ylijyra2011cg_engine,hulden2011cg_engine,peltonen2011}. 
+ In addition, there are a number of reimplementations of CG using finite-state methods \cite{yli-jyra2011cg_engine,hulden2011cg_engine,peltonen2011}. 
 
 
 %\todo{All the other things that the standard CG-related papers/theses cite}
@@ -553,24 +553,64 @@ The difference between the list-based and disjunction-based ontologies, correspo
 CG and FSIG respectively, is explained with further detail in \cite{lager_nivre01}.
 
 
-Which execution scheme is better? For most purposes, sequential execution is preferred. 
-Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
-If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}: there are less possible rules that may apply. 
-Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other.
-\cite{koskenniemi90} states the following about FSIG:
+% Which execution scheme is better? For most purposes, sequential execution is preferred. 
+% Sequential execution–--together with strict or heuristic rule order---makes the rule take action immediately, and updates the context for the following words. 
+% If we know the correct part-of-speech for \emph{what}, then it is easier to disambiguate \emph{question}: there are less possible rules that may apply. 
+% Parallel execution may have uses in more marginal cases: for instance, if we have a small rule set and we want to find out if the rules are consistent with each other.
+% \cite{koskenniemi90} states the following about FSIG:
 
- \begin{quote}
- Each constraint simply adds something to the discriminating power of the
- whole grammar. No constraint rule may ever forbid something that would
- later on be accepted as an exception. This, maybe, puts more strain for
- the grammar writer but gives us better hope of understanding the grammar
- we write.
- \end{quote}
+%  \begin{quote}
+%  Each constraint simply adds something to the discriminating power of the
+%  whole grammar. No constraint rule may ever forbid something that would
+%  later on be accepted as an exception. This, maybe, puts more strain for
+%  the grammar writer but gives us better hope of understanding the grammar
+%  we write.
+%  \end{quote}
 
-Perhaps unsurprisingly, nearly all of the existing CG implementations are sequential.
-There are other, parallel formalisms, such as FSIG \cite{koskenniemi90} and the system of voting constraints \cite{oflazer97votingconstraints}; however, for pure CG, all mainstream implementations follow the sequential scheme.
-The CG engine presented in \cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} in this thesis is parallel, as well as the ``CG-like'' system in \cite{lager98}, but both of these systems are mostly proof of concept.
+% Perhaps unsurprisingly, nearly all of the existing CG implementations are sequential.
+% There are other, parallel formalisms, such as FSIG \cite{koskenniemi90} and the system of voting constraints \cite{oflazer97votingconstraints}; however, for pure CG, all mainstream implementations follow the sequential scheme.
+% The CG engine presented in \cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} in this thesis is parallel, as well as the ``CG-like'' system in \cite{lager98}, but both of these systems are mostly proof of concept.
 
+
+
+\def\satcgMax{SAT-CG\textsubscript{Max}}
+\def\satcgOrd{SAT-CG\textsubscript{Ord}}
+\def\noncg#1{{\em #1}}
+
+\begin{table}[h!]
+\centering
+
+  \begin{tabular}{r | p{2.5cm} | p{3.5 cm} | p{3.5cm}}
+           & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
+\textbf{Sequential}
+           & CG-1 \cite{karlsson1990cgp}   
+                             & CG-2 \cite{tapanainen1996} % (Tapanainen1996, p. 34
+                                                  & --           \\ 
+           & VISL CG-3 \cite{vislcg3}      
+                             & Weighted CG-3 \cite{pirinen2015} & \\ 
+           & Peltonen2011 \cite{peltonen2011}  &  &\\ %Peltonen2011, p. 80
+           & Yli-Jyrä2011 \cite{yli-jyra2011cg_engine}  & & \\ 
+           & Hulden2011 \cite{hulden2011cg_engine} \\ \hline
+\textbf{Parallel}
+           & \satcgOrd       & \satcgMax          & \noncg{Lager 1998 \cite{lager98}} \\ 
+           &                 & \noncg{FSIG (Voutilainen) \cite{voutilainen1994designing}} 
+                                                  & \noncg{FSIG (Koskenniemi) \cite{koskenniemi90}} \\
+           &                 & \noncg{Voting constraints \cite{oflazer1997votingconstraints}}  \\
+
+
+  \end{tabular}
+  \label{table:nelikentta}
+  \caption{Combinations of rule ordering and execution type. \todo{see if Yli-Jyrä says something more about FSIG ordering in his PhD thesis!!!}}
+\end{table}
+
+
+Table~\ref{table:nelikentta} shows different systems of the constraint rule family, 
+with rule order (strict vs. heuristic) on one axis, 
+and execution type (sequential vs. parallel) on other. 
+With our two methods of conflict handling in Chapter~\ref{chapterCGSAT}, 
+we have brought the notion of strict and heuristic also to parallel execution. 
+CG implementations are shown in xxx font; related systems in cursive font.
+\satcgMax and \satcgOrd refer to the systems by the author; they are presented in \cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} in this thesis.
 
 % A notable exception is the system proposed in \cite{koskenniemi90}, known by the names 
 % Finite-State Intersection Grammar (FSIG) or Parallel Constraint Grammar (PCG) .
