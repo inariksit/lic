@@ -87,24 +87,23 @@ However, since our work is aimed to aid the process of hand-crafting rules, we o
 \paragraph{Corpus-based methods in manual grammar development}
 
 Hand-annotated corpora are commonly used in the development of CGs, because they give immediate feedback whether a new rule increases or decreases accuracy \cite{voutilainen2004}.
-This helps the grammar writer to arrange the rules in appropriate sections, with safest and most effective rules coming first.
-However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve.
-
-\cite{voutilainen2004} gives a detailed account about best practices of grammar writing and efficient use of corpora to aid the grammar development.
+% This helps the grammar writer to arrange the rules in appropriate sections, with safest and most effective rules coming first.
+% However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve.
+Voutilainen gives a detailed account about best practices of grammar writing and efficient use of corpora to aid the grammar development.
 For a language with no free or tagset-compatible corpus available, \cite{tyers_reynolds2015} describe a method where they apply their rules to unannotated Wikipedia texts and pick 100 examples at random for manual check.
 
 CG rules are usually arranged in sections, and run in the following manner. 
 First apply rules from section 1, and repeat until nothing changes in the text. Then apply rules from sections 1--2, then 1--3 and so on, until the set includes all rules.
 The best strategy is to place the safest and most effective rules in the first sections,
 so that they make way for the following, more heuristic and less safe rules to act on.
-
 A representative corpus is arguably the best way to get concrete numbers---how many times a rule applied and how often it was correct---and to arrange the rules in sections based on that feedback.
-However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve.
 
 \cite{voutilainen2004} state that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
-\todo{move this bit to the end/discussion? \\
-This figure is nice and encouraging. It's very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms. However, this does not guarantee a coherent whole of rules. 
-While the coverage information is easy to obtain from a corpus, there is no tool that would aid grammar writers to write a grammar with a wide coverage of different linguistic phenomena.}
+This figure is nice and encouraging. It's very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms.
+However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve; neither does it guarantee a coherent whole of rules. 
+While the coverage information is easy to obtain from a corpus, there is no tool that would aid grammar writers in including wide coverage of different linguistic phenomena.
+
+
 
 
 \paragraph{Automatic optimisation of hand-written grammars }
@@ -129,7 +128,8 @@ The whole method requires only a morphological lexicon, no corpus.
 
 \paragraph{Conflict}
 
-We define \emph{conflict} as follows: a list of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input.
+We define \emph{conflict} as follows: a list of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input. 
+This can be seen as a generalisation of the concept \emph{bleeding order} in generative phonology \todo{cite Kiparsky?}; however, we include also rule-internal conflicts.
 Some examples of conflicts follow:
 
 \begin{itemize}
@@ -214,7 +214,6 @@ Last time, we handled order by introducing clauses in order. All clauses operate
 A reading may be removed from a symbolic word between rules 1 and 100, if there is a rule that targets it among r2--r99. But if r1 requires w1 to be a noun, and r100 requires it to not be noun, this condition of r100 is not enough to make w1 change its nounhood at random.
 
 We solve this problem by creating a new variable for a reading each time when it is targeted. The symbolic word is created with `w1<n>`, `w1<v>`, and after the first rule that targets nouns for removal (either `REMOVE n` or `SELECT ¬n`), we create `w1'<n>`. We allow `w1<n>` to be true and `w1'<n>` be false; both true; both false, but not `w1<n>` to be false and `w1'<n>` true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
-\todo{would there be some nice connection to the generative phonology terms ``feeding order'' and ``bleeding order''? not sure if I should expect my audience to know that but not CG. :-P}
 
 %But now, we assume that each variable starts off as true: 
 %all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
@@ -267,7 +266,6 @@ $$\begin{array}{l @{~\rightarrow~} l}
 % For the remainder of this chapter, however, we keep the parallel scheme and wrap up what we have started. 
 
 \todo{Make some nice example }
-To borrow the terms from generative phonology, the first
 
 \subsection{Preliminaries}
 
@@ -743,18 +741,88 @@ We are working on an option to store and reuse the ambiguity class constraints.
 
 \section{Discussion/Conclusions/Summary}
 
-\subsection{More serious implementation}
+We set out to design and implement an automatic analysis of constraint grammars that can find problematic rules and rule combinations, without the need for a corpus.
+Our evaluation indicates that the tool indeed finds non-trivial conflicts and dead rules
+from actual grammars. 
 
-In order to attract the attention of the CG community, it would be desirable to incorporate the tools as a part of existing CG software. 
-Currently, the described software consists of just under 3000 lines of Haskell code, including both the CG engine and the grammar analysis tool.
-The grammar used for parsing the original CG files is written in BNFC \todo{cite}, and it is missing many constructs in CG-3. 
-Given these factors, the preferred option would be a full reimplementation and integration as a part of VISL CG-3, or any other CG engine. We believe this would make the tools easier to use, more cohesive and syncronised with the main CG engine, and likely much faster. Of course, it is up to the community and the developers to decide if our tools are of interest.
+We did not have a volunteer to test the tool in
+the process of grammar writing, so we cannot conclude whether the
+constructed examples are useful for getting new insights on the rules.
+In any case, there are still a number of features to improve and add.
+Future work can be divided in roughly three categories: 
+\begin{inparaenum}
+\item[(a)] general improvement of the tool
+\item[(b)] thorough evaluation in contact with user base, and
+\item[(c)] integration as a part of CG development framework.
+\end{inparaenum}
 
-\subsection{More features}
+\subsection{General improvement}
 
-\noindent Automatic 0-flagging; Nicer representation of lexical forms; all the other stuff from paper.
+In the following, we list improvements 
+The following is a list of improvements to the current features; we 
 
-\noindent \todo{I might just be hallucinating and this is totally not feasible with SAT. But I got the idea, so documenting it here in case.} It could identify pairs for a potential ``feeding order''. Say we have the following rule sequence:
+\paragraph{Combining morphological and lexical tags}
+
+Our solution to hardcode the tag combinations in the readings is
+feasible for simple morphology, but it can cause problems with more
+complex morphology.
+Currently, if we add one new lemma to the set of readings, we need to
+create as many new variables as there are inflectional forms
+for that lemma. %easily hundreds for languages with rich morphology. 
+
+We are currently working on adding the concepts of lemmas and word
+forms directly to the representation of the possible readings.
+A possible solution would be to make each tag a variable, and ask the
+question ``can this reading be a noun? singular? 
+conditional?'' separately for each tag. Then we could lift the
+restriction of tag combinations into the SAT side: make SAT-clauses
+that prohibit a comparative to go with a verb, or conditional with a noun.
+Alternatively, we can still hardcode the set of morphological readings, and 
+only use SAT-clauses to restrict which lexical form can go with which morphological analysis.
+
+\paragraph{Heuristic checks for common issues} 
+As mentioned earlier, some grammar design choices  
+are common sources of misinterpretation.
+Many of these issues concern the case where the conditions include 
+the target cohort---does \t{SELECT foo IF (0 bar)} mean that ``foo'' and ``bar'' 
+should be in the same reading or in different readings? 
+Lemmas and word forms are another source of confusion, which is easy to check automatically against the lexicon. Ideally, these checks should be included in a special ``paranoid mode'', to not clutter the analysis.
+
+
+\paragraph{Full expressivity of CG-3}
+As for longer-term goals, we want to handle the full expressivity of CG-3,
+with \textsc{map}, \textsc{add},  \textsc{append} and
+\textsc{substitute} rules, as well as dependency structure. 
+This also means finding different kinds of conflicts.
+In order to implement rules that may add new readings, or new tags to
+existing readings, we need to modify our approach in the SAT-encoding.
+Even if the lexicon gives all readings that exist in the lexicon, the
+user might give a nonexistent reading, or in the case of {\sc map}, a
+syntactic tag, which is (by definition) not in the lexicon. We may need to move
+to a more scalable solution.
+
+\subsection{Evaluation with user base}
+
+Our next step is to evaluate our tools together with actual grammar writers,
+in comparison with a corpus-based method or machine learning. 
+Below, we envision some properties that 
+
+; however, we would be interested in getting feedback from actual grammarians and adding features based on what is needed.
+
+\paragraph{Reformatting a rule}
+
+Another possible feature is to suggest reformattings for a rule. Recall
+Figure~\ref{fig:infrules} from the introduction; in the case on the right, the
+original rule was written by the original author, and another
+grammarian thought that the latter form is nicer to read. Doing the
+reverse operation could also be possible. If a rule with long
+disjunctions conflicts, it may be useful to split it into smaller
+conditions, and eliminate one at a time, in order to find the
+reason(s) for the conflict.
+
+
+\paragraph{Suggesting alternative orders} \todo{I might just be hallucinating and this is totally not feasible with SAT. But I got the idea, so documenting it here in case.} 
+On a speculative note, it could be interesting to identify pairs for a potential ``feeding order'' that is missed in the grammar. Say we have the following rule sequence:
 
 \begin{verbatim}
 REMOVE:r1 x IF (-1C y)
@@ -762,10 +830,26 @@ SELECT:s2 y IF (...)
 \end{verbatim}
 
 If $s2$ appears before $r1$, if makes way for $r1$ to act later on the same round. 
-However, if the rules are ordered as shown, and \todo{y} is not unambiguous from the beginning, then $r1$ has to wait for the next round to be applied.
+However, if the rules are ordered as shown, and $y$ is not unambiguous from the beginning, then $r1$ has to wait for the next round to be applied.
 
 Lager \cite{lager01transformation} observed that the rule sequence learned by the $\mu$TBL system did not remove further ambiguities after its first run, and concluded that the sequence was ``optimal''. 
 It would be interesting to recreate the goals in \cite{lager01transformation} and \cite{bick2013tuning}, to see if this semantic analysis of rule dependencies could lead also to better ordering within a grammar.
+
+Of course, it remains to be seen if any of these improvements would make a difference in performance; VISL CG-3 is already very fast, when the grammars are run multiple times.
+
+\paragraph{More cohesive grammar} \cite{voutilainen2004} state that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
+This figure is nice and encouraging. It's very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms. However, this does not guarantee a coherent whole of rules. 
+While the coverage information is easy to obtain from a corpus, our SAT-based tool could potentially compliment the process, and guide grammar writers towards a wide coverage of different linguistic phenomena.
+
+\section{Integration as a part of CG development environment}
+
+In order to attract the attention of the CG community, it would be desirable to incorporate the tools as a part of existing CG software. 
+Currently, the described software consists of just under 3000 lines of Haskell code, including both the CG engine and the grammar analysis tool.
+The grammar used for parsing the original CG files is written in BNFC \todo{cite}, and it is missing many constructs in CG-3. 
+Given these factors, the preferred option would be a full reimplementation and integration as a part of VISL CG-3, or any other CG development framework. We believe this would make the tools easier to use, more cohesive and syncronised with the main CG engine, and likely much faster. Of course, it is up to the community and the developers to decide if these tools are of interest.
+
+
+
 
 
 

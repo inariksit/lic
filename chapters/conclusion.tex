@@ -175,19 +175,37 @@ Thus, we can use CG for a task it was not designed for---creating language.
 The ``knowledge component'' of CG would be then all the hidden assumptions 
 about the targets and possible contexts for them.
 
-
 But do the rules contain enough information to actually create language? 
-Some tendencies show already in the symbolic sentences generated in 
-Chapter~\ref{chapterCGana}: for instance, the token for end of sentence (\t{<<<}) appears 
-(nearly\footnote{Word boundaries may be combined in the same set with other tags, such as commas: \t{SET~Boundary~=~>>>~OR~<<<~OR~","~OR~";"}. This set may then appear also in the middle of other conditions.}) 
-always as the rightmost condition.
-Thus, it is expected that word boundaries are not usually generated in the middle of the sequence.
+Some tendencies would be expected to show: for instance, word boundaries usually appear 
+as the left- or rightmost condition in any rule, thus, they would likely appear at the borders in the generated sequences as well.
+For more general phenomena, our experiments in Chapter~\ref{chapterCGana} 
+did not result in very meaningful sequences; 
+however, as we state in conclusions of the said chapter, there is a lot of room for improvement 
+As another factor, we have only tested the approach with grammars of low coverage---it is possible that a high-quality grammar would contain more information, and generate sequences with more resemblance to real sentences.
 
-Again, our experiments suffer from the lack of high-quality grammars to test with. 
+%\footnote{Word boundaries may be combined in the same set with other tags, such as commas: \t{SET~Boundary~=~>>>~OR~<<<~OR~","~OR~";"}. This set may then appear also in the middle of other conditions.}
+\todo{Does the following make any sense? I can't tell, it's 4 AM.}
+The question about expressivity of CG deserves further investigation. 
+We believe that the concepts and methods developed in the present thesis can help. 
+If the input language is standardised to the maximally ambiguous sentence, 
+where every cohort contains all the readings in $\Sigma*$, 
+we may be able to define grammars for interesting languages more easily. 
+The SAT-based grammar analysis tool may also be of use: recall that it can answer 
+the question ``Is a given output possible after applying rules $R$?''
+%For instance, if we had a grammar with the output language $a^nb^n$, 
+This property could be used to prove that it is not just {\em possible} to output 
+a sequence that belongs to that language, but that it is {\em impossible} to output 
+any sequence that is not in the language.
+This would give us the tools to prove the equivalent of ``only the set of grammatical sequences'' from generative grammars.
 
-The question about expressivity deserves further investigation. 
-We believe that the symbolic sentence approach can help in that task too. 
-We have performed initial experiments to show that a VISL CG-3 grammar can be written for the context-free language $a^nb^n$ and the context-sensitive language $a^nb^nc^n$\footnote{Only published as a blog post: \url{https://pepijnkokke.github.io/2016/constraint-grammar-can-count/}}; a possible direction would be to follow the footsteps of \cite{tapanainen99phd,yli-jyra2005phd}, and do a more systematic study. \formulation{For now, we do not even know whether all regular languages could be encoded in CG.} 
+
+\todo{Finally, some nice conclusion of the conclusions.}
+
+%We have performed initial experiments to show that a VISL CG-3 grammar can be written for the context-free language $a^nb^n$ and the context-sensitive language $a^nb^nc^n$\footnote{Only published as a blog post: \url{https://pepijnkokke.github.io/2016/constraint-grammar-can-count/}}; a possible direction would be to follow the footsteps of \cite{tapanainen99phd,yli-jyra2005phd}, and do a more systematic study for CG.
+%As described by Anssi Yli-Jyrä (2016, personal communication), kielioppi + jäsennysstrategia + syöte + tulos = oikein
+
+
+
 
 % Philosophical questions: can CG rules {\em generate} language?
 % When the sentence starts off as anything, the rules become truly declarative.
