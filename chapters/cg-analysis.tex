@@ -129,17 +129,20 @@ The whole method requires only a morphological lexicon, no corpus.
 \paragraph{Conflict}
 
 We define \emph{conflict} as follows: a list of rules $R$ is in conflict with the rule $r$, if applying $R$ makes it impossible to apply $r$, regardless of input. 
-This can be seen as a generalisation of the concept \emph{bleeding order} in generative phonology \todo{cite Kiparsky?}; however, we include also rule-internal conflicts.
 Some examples of conflicts follow:
 
 \begin{itemize}
 \item If two equivalent rules $r$ and $r'$ occur in the grammar, the second occurrence will be disabled by the first
-\item Rule $r$ selects something in a context, and $r'$ removes it
+\item A list of rules $R$ selects something in a context, and $r'$ removes it
+\item A list of rules $R$ removes something in a context, and $r'$ selects it
 \item A list of rules $R$ removes something from the context of a rule $r'$, so $r'$ can never apply
 \item A rule $r$ has an internal conflict, such as non-existent
 tag combination, or contradictory requirements for a context word
 \end{itemize}
-In the above examples, $R$ can also be a single rule or a list of rules: for instance, if one rule removes a verb in
+
+This definition is very similar to the concept \emph{bleeding order} in generative phonology \todo{cite Kiparsky}; however, since we are talking about an explicit list of 
+human-written rules, we include also rule-internal conflicts in our classification.
+The conflicting (or ``bleeding'') $R$ can be a single rule or a list of rules: for instance, if one rule removes a verb in
 context $C$, and another in context $\neg C$, together these rules
 remove a verb in all possible cases, disabling any future rule that
 targets verbs.
@@ -213,7 +216,7 @@ As before, a sentence is a vector of cohorts, which is, in turn, a vector of var
 Last time, we handled order by introducing clauses in order. All clauses operated on the same variables. Now, we must modify our approach. The state of a reading is expected to change during the execution of the rules---this is what rule application does. However, in the system of interconnected clauses, application of rule number 100 may not only affect the target of rule number 1, but conditions as well. 
 A reading may be removed from a symbolic word between rules 1 and 100, if there is a rule that targets it among r2--r99. But if r1 requires w1 to be a noun, and r100 requires it to not be noun, this condition of r100 is not enough to make w1 change its nounhood at random.
 
-We solve this problem by creating a new variable for a reading each time when it is targeted. The symbolic word is created with `w1<n>`, `w1<v>`, and after the first rule that targets nouns for removal (either `REMOVE n` or `SELECT ¬n`), we create `w1'<n>`. We allow `w1<n>` to be true and `w1'<n>` be false; both true; both false, but not `w1<n>` to be false and `w1'<n>` true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
+We solve this problem by creating a new variable for a reading each time when it is targeted. The symbolic word is created with \t{w1<n>}, \t{w1<v>}, and after the first rule that targets nouns for removal (either \t{REMOVE n} or \t{SELECT $\neg$n}), we create \t{w1'<n>}. We allow \t{w1<n>} to be true and \t{w1'<n>} be false; both true; both false, but not \t{w1<n>} to be false and \t{w1'<n>} true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
 
 %But now, we assume that each variable starts off as true: 
 %all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
@@ -251,7 +254,7 @@ $$\begin{array}{l @{~\rightarrow~} l}
 %\label{fig:after3Rules}
 %\end{figure}
 
-\todo{Write rest of this section; merge with the stuff in paper!}
+\todo{Write rest of this section; merge with the stuff in paper; make a nice example!}
 
 % Now, we may ask, why is this not a SAT-problem? %We sure talk about Boolean values and build formulas.
 % The answer lies in the first step, where all variables start off as true. All the new variables, created from the rule applications, get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
@@ -265,7 +268,6 @@ $$\begin{array}{l @{~\rightarrow~} l}
 % Huh. That is an interesting question on its own right, but not very useful for a CG engine: we do know which readings were originally true, and we do not want the SAT-solver to be extra helpful and remove something that is targeted by no rule. But in Chapter~\ref{chapterCGana}, the new setup will allow us to find conflicts in the grammar, approximate generation and answer questions about expressivity. 
 % For the remainder of this chapter, however, we keep the parallel scheme and wrap up what we have started. 
 
-\todo{Make some nice example }
 
 \subsection{Preliminaries}
 
@@ -739,7 +741,7 @@ and while the overhead may be acceptable when checking the full grammar,
 it is hardly so when analysing just a handful of rules. 
 We are working on an option to store and reuse the ambiguity class constraints.
 
-\section{Discussion/Conclusions/Summary}
+\section{Conclusions and future work}
 
 We set out to design and implement an automatic analysis of constraint grammars that can find problematic rules and rule combinations, without the need for a corpus.
 Our evaluation indicates that the tool indeed finds non-trivial conflicts and dead rules
@@ -758,8 +760,7 @@ Future work can be divided in roughly three categories:
 
 \subsection{General improvement}
 
-In the following, we list improvements 
-The following is a list of improvements to the current features; we 
+The following is a list of improvements to the current features; we have found 
 
 \paragraph{Combining morphological and lexical tags}
 
@@ -805,9 +806,7 @@ to a more scalable solution.
 
 Our next step is to evaluate our tools together with actual grammar writers,
 in comparison with a corpus-based method or machine learning. 
-Below, we envision some properties that 
-
-; however, we would be interested in getting feedback from actual grammarians and adding features based on what is needed.
+Below, we envision some properties that might be interesting; however, we would be interested in getting feedback from actual grammarians and adding features based on what is needed.
 
 \paragraph{Reformatting a rule}
 

@@ -396,9 +396,14 @@ Strict ordering substitutes the question with a simpler one: ``which rule comes 
 Heuristic rule order asks ``out of all the rules that target this cohort, which one has the best matching context?''
 If the competitors are \cgrule{REMOVE n IF (-1 prn)} and \cgrule{REMOVE v IF (-1 det) (1 adj)}, then the second one will win. However, if the rules are both as good a match, which happens in Figure~\ref{fig:modelsTwoRules}, we need to resort to mere guessing, or fall back to ordering.
 
-However, we can ask yet another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?''
-This approach is similar to \todo{add the sources that Anssi mentioned!}.
-With a SAT-solver, we can address the question in the following way.
+However, we can ask yet another question: ``Out of all the rules that target this cohort, which one is a best fit \emph{with other rules that will apply to this whole sentence}?'' 
+%We are not looking at just the initial context, but all the other rules that are going to apply to the same sentence---all of them are going to perform some changes,
+As opposed to heuristic or weighted approaches \cite{voutilainen1994designing,oflazer97votingconstraints}, here all the individual rule applications are 
+equally important; we just want to find the largest possible subset of rule applications that can act together without conflict.
+We will explain the procedure in the following.
+%This way is more similar to resolving conflicts in two-level morphology \todo{cite}
+%This approach is similar to \todo{add the sources that Anssi mentioned!}.
+%With a SAT-solver, we can address the question in the following way.
 %Addressing this is beyond the means of previous FSIG implementations \todo{confirm}, but with a SAT-solver, we can answer this question. 
 
 
@@ -705,23 +710,8 @@ We tested the effect of sentence length also for the Finnish grammar.
 All the sentences in FinnTreeBank were very short, so we created an 251-token ``sentence'' 
 by pasting together 22 short sentences and replacing sentence boundaries with commas.
 
-\todo{Remove or make the claims less bold \\
-The results in Table~\ref{table:timeVentero} are promising: the execution time does not grow
-unbearably, even with the unusually long sentence.
-To give some context, let us consider the performance of parallel CG compared to sequential CG in 1998.
-\cite{voutilainen1998} reports the performance of a 3,500-rule CG: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule FSIG grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.  
-As another CG result from the late 1990s, \cite{tapanainen1999phd} reports an average time of 5 seconds for parsing 15-word sentences in CG-2.
 
-Compared to the parsing times of sequential and parallel CGs nearly 20 years ago, 
-our results demonstrate a smaller difference, and much less steep curve in the execution time
-related to sentence length. 
-Of course, we cannot ignore the fact that \cite{voutilainen1998} uses different grammars
-for the CG part and the FSIG part; the FSIG grammar contains more global phenomena, 
-which makes the constraint problem larger. In order to properly contrast this experiment to 
-\cite{voutilainen1998}, we should isolate the effect of the grammar and the effect of the execution scheme.}
-
-
-\begin{table}[ht]
+\begin{table}[t]
   \centering
 \begin{tabular}{ l | c c | c c }
        & \multicolumn{2}{c}{Spanish (261 rules)} & \multicolumn{2}{c}{Finnish (1185 rules)}  \\
@@ -736,6 +726,25 @@ which makes the constraint problem larger. In order to properly contrast this ex
   On the right, Finnish 1185-rule grammar parsing an articifially constructed 251-token sentence.}
   \label{table:timeVentero}
 \end{table}
+
+The results in Table~\ref{table:timeVentero} are promising: the execution time does not grow
+unbearably, even with the unusually long sentence.
+To give some context, let us consider the performances of the sequential CG-2 and the parallel FSIG in 1998.
+%, which is another parallel system, 1998, compared to sequential CG .
+\cite{voutilainen1998} reports the performance of a 3,500-rule CG: ``On a 266 MHz Pentium running Linux, EngCG-2 tags around 4,000 words per second''. In contrast, a 2,600-rule FSIG grammar is unable to find a correct parse in the allowed time, 100 seconds per sentence, for most sentences longer than 15 words.  
+As another CG result from the late 1990s, \cite{tapanainen1999phd} reports an average time of 5 seconds for parsing 15-word sentences in CG-2.
+
+Compared to the parsing times of sequential CG and FSIG nearly 20 years ago, 
+our results demonstrate a smaller difference, and much less steep curve in the execution time
+related to sentence length. 
+Of course, the FSIG grammar used in \cite{voutilainen1998} 
+contains much more difficult operations, which makes the constraint problem larger. 
+Our expriments have just shown the lack of blowup for a small grammar.
+In order to properly contrast this experiment to 
+\cite{voutilainen1998}, we should try SAT-CG for parsing real FSIG grammars.
+%isolate the effect of the grammar and the effect of the execution strategy.
+
+
 
 
 
@@ -761,7 +770,6 @@ which makes the constraint problem larger. In order to properly contrast this ex
 
 \subsection{Effect on grammar writing}
 
-\todo{Address Fran's feedback!!! philosophical points, not technical. so Koen, you probably won't find the same critiques here.}
 
 Throughout the implementation of SAT-CG, we have predicted that the more declarative features would influence the way rules are written. 
 We hoped to combine the best parts of SCG and PCG: 
@@ -870,7 +878,7 @@ such grammar to go that extra mile; however, based on the experiments so far, th
 # la casa (en que vivo)
 SELECT:i01_s_det Det IF (NOT 1C VerbFin) ;  # TOP 1
 
-# (el novio) la casa
+# (el sacerdote) la casa (con el novio)
 SELECT:i08_s_pro PrnIndep IF (1C VerbFin) ; # TOP 8    
 \end{verbatim}
 \label{fig:rulesAreBiased}
