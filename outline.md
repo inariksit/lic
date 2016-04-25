@@ -248,6 +248,8 @@ There is potential in the "wait before acting" property. No decision is lost---w
 
 # CG analysis with SAT (20-30 pages)
 
+
+
 ## Motivation
 
 Same reasons that make CG robust and intuitive make it possible to conflict.  
@@ -340,11 +342,7 @@ Try to find more gold standard corpora and run experiments?
 
 We find non-trivial conflicts from real grammars.
 
-Philosophical questions: can CG rules *generate* language?
-When the sentence starts off as anything, the rules become truly declarative.
-We do not remove the verb after determiner, we prevent such sequence from being created in the first place.
 
-Check if the rules already enforce some trivial stuff, like not generating word boundaries in the middle of the symbolic sentence.
 
 # Conclusions
 

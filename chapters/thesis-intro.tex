@@ -28,7 +28,8 @@ The disambiguation component completes the job: $wish_V$ for the first one, and 
 \end{enumerate}
 
 Method number 3 is known as \emph{Constraint Grammar} \cite{karlsson1995constraint}, abbreviated as \emph{CG} throughout this thesis. 
-CG is a formalism for writing disambiguation rules for an initially ambiguous input. The rules describe the impossibilities and improbabilities of a given language, such that after a successful run of the rules, only correct analyses remain.
+CG is a formalism for writing disambiguation rules for an initially ambiguous input. The rules describe the impossibilities and improbabilities of a given language, such that after a successful run of the rules, 
+only the analyses which are most adequate in the current context remain.
 
 How does the disambiguation work?
 In the spirit of approach 1, we can look at the context words for help. 
@@ -68,7 +69,7 @@ This explicitly reductionistic approach does not seem to have any obvious counte
 \end{quote}
 
 Throughout its history, CG has been very practically oriented, with 
-little studies on its formal properties, or attempts to relate it to existing
+few studies on its formal properties, or attempts to relate it to existing
 frameworks.
 Notable exeptions are \cite{lager_nivre01}, who model CG in logic, and 
 \cite{tapanainen1999phd}, who define the expressivity of rules.

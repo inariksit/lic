@@ -182,7 +182,7 @@ one tag into another, based on contextual tests.
 Like CG, Brill tagging is known to be efficient and accurate. The contextual tests are very similar; \cite{lager01transformation} 
 has automatically learned both Brill rules and CG rules, using the same system.
 
-Similar ideas to CG have been also explored in the finite-state framework, such as Local grammars \cite{gross1997local} and finite-state contextual rules \cite{grana2003fst}, as well as logic programming \cite{oflazer97votingconstraints,lager98} and dependency syntax \cite{tapanainen97fdg}.
+Similar ideas to CG have been also explored in the finite-state framework, such as Local grammars \cite{gross1997local} and finite-state contextual rules \cite{grana2003fst}, as well as logic programming \cite{oflazer97votingconstraints,lager98} and dependency syntax \cite{tapanainen97fdg}. \todo{cite Lluís Padró }
  In addition, there are a number of reimplementations of CG using finite-state methods \cite{yli-jyra2011cg_engine,hulden2011cg_engine,peltonen2011}. 
 
 
@@ -302,7 +302,7 @@ most likely meaning is ``a table'' instead of ``juniper table''\footnote{Compoun
 %CG allows the rules to be as fine-grained or broad as we want: 
 CG rules can be as fine-grained or broad as we want: 
 \texttt{SELECT det IF (1 noun) (0 noun)} would match any determiner and any noun, 
-and succesfully disambiguate \emph{en} in this case. 
+and successfully disambiguate \emph{en} in this case. 
 We can also enforce grammaticality by writing \texttt{SELECT (det~utr~sg) IF (1~noun~utr~sg) (0~noun~utr~sg)}%\footnote{the counterpart neuter determiner is not ambiguous with noun, so \texttt{SELECT det neutr sg IF (1 noun neutr sg) (0 noun)} would be redundant. Though it can be ambiguous with the numeral `1'. So actually maybe it's good anyway.}
 . In that case, nothing in the grammatically incorrect phrase matches, and it is left ambiguous.
 
@@ -364,8 +364,9 @@ bound to leak, and that necessary information for the syntactic analysis
 comes from the morphology, hence morphology is ``the cornerstone of
 syntax''. 
 In addition, \cite{karlsson1995constraint} argues CG to be a reasonable 
-psycholinguistic hypothesis: in generative formalisms, rule applications create 
-ambiguities, whereas in CG it is the opposite; this means less processing load 
+psycholinguistic hypothesis: 
+in generative formalisms, rule applications create ambiguities,
+whereas in CG, rule applications reduce ambiguity. This means less processing load 
 in order to achieve clarity. 
 
 % indeed, CG has been used in psycholinguistic research.
@@ -575,7 +576,7 @@ CG and FSIG respectively, is explained with further detail in \cite{lager_nivre0
 
 \def\satcgMax{SAT-CG\textsubscript{Max}}
 \def\satcgOrd{SAT-CG\textsubscript{Ord}}
-\def\noncg#1{{\em #1}}
+\def\noncg#1{{\em \color{gray} #1}}
 
 \begin{table}[h!]
 \centering
@@ -595,7 +596,7 @@ CG and FSIG respectively, is explained with further detail in \cite{lager_nivre0
            & \satcgOrd       & \satcgMax          & \noncg{Lager 1998 \cite{lager98}} \\ 
            &                 & \noncg{FSIG (Voutilainen) \cite{voutilainen1994designing}} 
                                                   & \noncg{FSIG (Koskenniemi) \cite{koskenniemi90}} \\
-           &                 & \noncg{Voting constraints \cite{oflazer1997votingconstraints}}  \\
+           &                 & \noncg{Voting constraints \cite{oflazer97votingconstraints}}  \\
 
 
   \end{tabular}
@@ -607,7 +608,7 @@ CG and FSIG respectively, is explained with further detail in \cite{lager_nivre0
 Table~\ref{table:nelikentta} shows different systems of the constraint rule family, 
 with rule order (strict vs. heuristic) on one axis, 
 and execution strategy (sequential vs. parallel) on other. 
-Traditional CG implementations are shown in xxx font; other, related systems in cursive font.
+Traditional CG implementations are shown in a normal font; other, related systems in cursive font and lighter colour.
 \satcgMax and \satcgOrd refer to the systems by the author; they are presented in \cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} in this thesis.
 
 % A notable exception is the system proposed in \cite{koskenniemi90}, known by the names 
@@ -726,8 +727,9 @@ The expressivity of a single rule is well defined. However, the expressivity of 
 %
 Closest to answering this question is 
 \cite{yli-jyra2003describing,yli-jyra2004fsig_dependency} \todo{cite all relevant Yli-Jyrä},
-who investigates the computational complexity of the related formalism FSIG; 
-\todo{\cite{yli-jyra2004fsig_dependency} shows that certain FSIGs are closely related to some mildly context-sensitive grammars.} In \cite{yli-jyra2005phd}, Yli-Jyrä defines the set of \emph{grammatical model strings} 
+who investigates the computational complexity of the related formalism FSIG.
+%\todo{\cite{yli-jyra2004fsig_dependency} shows that certain FSIGs are closely related to some mildly context-sensitive grammars.} 
+In \cite{yli-jyra2005phd}, Yli-Jyrä defines the set of \emph{grammatical model strings} 
 as those sentences which satisfy all the constraints in the grammar. In addition, Yli-Jyrä \cite{yli-jyra2005phd} defines the \emph{language} of each FSIG as the set of grammatical model strings; ignoring the input language of the relation, FSIGs become superficially comparable to generative grammars.
 % ``In this dissertation, the language of each FSIG will be uniquely the set of grammatical model strings, which makes FSIG superficially comparable to GES grammars.
 
@@ -749,7 +751,8 @@ and better answering the question about expressivity.
 \begin{figure}[t]
 \centering
 
-\begin{tabular}{cl @{\hspace{2cm}} rl}
+%\begin{tabular}{cl @{\hspace{2cm}} rl}
+\begin{tabular}{cl @{\hspace{0.3cm}}|@{\hspace{0.3cm}} rl}
 
 % ``<w>''  &        &  ``<w>'' &        \\
 %          & ``a''  &          & ``a''  \\
@@ -764,7 +767,7 @@ and better answering the question about expressivity.
 %          & ``a''  &          & ``b''  \\
 %          & ``b''  &          &        \\
 
-Input &         & Output & \\ \hline
+\multicolumn{2}{c}{\textbf{Input}} & \multicolumn{2}{c}{\textbf{Output}} \\ \hline
 
 \t{"<w>"}  &        &  \t{"<w>"} &        \\
          & \t{"a"}  &          & \t{"a"}  \\
