@@ -475,8 +475,7 @@ Conversely, if $v$ is true, then the SAT-solver must handle
 the original clause.
 Then, we ask for a solution where maximally many of these $v$s are true,
 and the question for improvement becomes ``can we make any more of the $v$s true''?
-The method of maximising the variables is based on ordering all possible solutions, 
-described in more detail in \cite{een06minisatplus}.
+The method of maximising the variables is described in \cite{een06minisatplus}.
 
 As a alternative to creating a helper variable, we could also separate the variables into 
 contexts and targets, and maximise the set of contexts: for $\laDet \Rightarrow \neg \casaV$

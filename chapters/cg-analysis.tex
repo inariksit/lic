@@ -389,7 +389,42 @@ However, it could be that past participles (pp) only ever get confused with adje
  By removing the adjective reading, the first rule selects the past participle reading, making it an instance of ``$r$ selects something in a context, $r'$ removes~it''. 
 The additional constraints will prevent the SAT-solver from creating an ambiguity outside the allowed classes, and such a case would be caught as a conflict.
 
+\subsection{Use cases}
 
+In the beginning of this chapter, we gave a list of questions, regarding the rules in Figure~\ref{fig:infrules}. After describing our implementation, we return to these questions, and explain how a SAT-solver can answer them.
+
+
+\paragraph{Are all the rules distinct?} We gave the example of two rules in the Portuguese grammar, where one had the condition \t{(-1 Prep)} and the other \t{(-1 Para OR De)}. A grammarian who has some knowledge of Portugues could tell that {\em para} and {\em de} are both prepositions, so these two rules seem to do almost the same thing.
+
+How can we verify this? To start, we apply all candidate rules to the same initial symbolic sentence. For the resulting symbolic sentence, we can ask for solutions with certain requirements.
+For instance, ``give me a model where a reading $a \notin \t{Inf}$ is true''.
+There are less such models allowed after \t{SELECT Inf IF (-1 Prep)}
+---if a non-infinitive reading is in place, it means that the previous word cannot be any determiner---
+and they are all in the set of models allowed \t{SELECT Inf IF (-1 Para OR De)}. Thus, we can show that the first rule implies the second. It is in the hands of the grammar writer to decide whether to keep the stronger or the weaker rule, or if they should be placed in different sections.
+
+
+\paragraph{Could two or more rules be merged?} This example concerns two or more rules with the same target but different conditions in the same position. 
+All the six rules in Figure~\ref{fig:infrules} have conditions in position -1; four of them also in 0. Some of them have an additional careful context, and some do not.
+A grammar writer might think that \t{IF (-1C Vbmod (0C V))} and \t{IF (-1C Vbmod) (0 Ser))} are very similar, and could be merged into \t{SELECT Inf IF (-1C Vbmod) (0C V OR Ser)}. But could there be some unintended side effects in merging these two rules? Why is there a C in the first rule, but not in the second rule? 
+
+The procedure is similar to the previous one. We initialise two symbolic sentences; on one we run the original rules in a sequence, and on the other the merged rule. 
+Then, we can perform tests on the resulting symbolic sentences. Assuming that the ambiguity class constraints are in place, the result may show that C is not needed for the condition about {\em ser}, simply because {\em ser} is not ambiguous with anything else in the lexicon; hence the merged rule can safely have the condition \t{(0C V OR Ser)}. However, if {\em ser} can be ambiguous with something else, then this merged rule is stricter than the two original rules. If the grammar writer is still unsure whether there would be any meaningful sequences that would be missed, they can ask the SAT-solver to generate all those cases---this requires that the ambiguity classes are in place, \formulation{otherwise the number of solutions would be exponential on all possible readings in the lexicon.} 
+
+
+\paragraph{What is the best order for the rules?}
+We can generate variants of the rule order, and run all of them to an initial symbolic sentence. Then, for the resulting symbolic sentences, we can query which one is the most restricted, that is, has the least models.
+
+As a variant, we may be interested in the placement of just one rule in the sequence.
+
+\paragraph{Generate a sequence that triggers rule(s) $R$ but not rule(s) $R'$.}
+For any given rule, we can extract three requirements that would make it trigger. We illustrate them for the rule \t{REMOVE v IF (-1 det)}. In order to trigger the rule, the sequence must have
+\begin{itemize}
+\item target readings: at least one reading with the \emph{v} tag in the target position
+\item conditions: at least one reading with the \emph{det} tag in the cohort preceding the target
+\item ambiguity: at least one reading without the \emph{v} tag in the target position; if there are only \emph{v}-readings in the target, the would not fire.
+\end{itemize}
+
+We can extract these requirements from both the rules that must be triggered, and the rules that must be not triggered. Then, we can request a solution from the SAT-solver.
 
 \section{Evaluation}
 \label{sec:eval}
@@ -820,7 +855,7 @@ conditions, and eliminate one at a time, in order to find the
 reason(s) for the conflict.
 
 
-\paragraph{Suggesting alternative orders} \todo{I might just be hallucinating and this is totally not feasible with SAT. But I got the idea, so documenting it here in case.} 
+\paragraph{Suggesting alternative orders} 
 On a speculative note, it could be interesting to identify pairs for a potential ``feeding order'' that is missed in the grammar. Say we have the following rule sequence:
 
 \begin{verbatim}
@@ -830,6 +865,8 @@ SELECT:s2 y IF (...)
 
 If $s2$ appears before $r1$, if makes way for $r1$ to act later on the same round. 
 However, if the rules are ordered as shown, and $y$ is not unambiguous from the beginning, then $r1$ has to wait for the next round to be applied.
+
+
 
 Lager \cite{lager01transformation} observed that the rule sequence learned by the $\mu$TBL system did not remove further ambiguities after its first run, and concluded that the sequence was ``optimal''. 
 It would be interesting to recreate the goals in \cite{lager01transformation} and \cite{bick2013tuning}, to see if this semantic analysis of rule dependencies could lead also to better ordering within a grammar.
