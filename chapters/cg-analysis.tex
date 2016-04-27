@@ -14,7 +14,7 @@ Recall the design principles of CG from Section~\ref{sec:properties}:
 by design, the grammars are shallow and low-level.
 There is no particular hierarchy between lexical, morphological,
 syntactic or even semantic tags: individual rules can be written to address any
-property, such as ``verb'', ``copula verb in first person singular'',
+property, such as ``verb'', ``auxiliary verb in first person singular'',
 or ``the word form \emph{sailor}, preceded by \emph{drunken} anywhere in the
 sentence''. This makes it possible to treat very particular edge
 cases without touching the more general rule: we would simply write
@@ -35,9 +35,10 @@ ask the following questions.
 
 
 \begin{itemize}
-\item Are all the rules distinct? (e.g. \texttt{Para} and \texttt{De} may be included in \texttt{Prep})
+\item Are all the Portuguese rules distinct? (e.g. \texttt{Para} and \texttt{De} may be included in \texttt{Prep})
 \item Could two or more rules be merged? (e.g. \texttt{SELECT Inf IF -1 Prep OR Vai OR Vbmod ...})
 \item What is the best order for the rules?
+\item Can the Finnish rule on the left be rewritten in the form shown on the right?
 \item Generate a sequence that triggers rule(s) $R$ but not rule(s) $R'$. 
 \end{itemize}
 
@@ -47,7 +48,7 @@ ask the following questions.
 \begin{figure}[t]
 \ttfamily
 \centering
-\begin{tabular}{l | l  l}
+\begin{tabular}{l | @{~~~} l  l}
 SELECT Inf IF ... & \multicolumn{2}{c}{SELECT V + Prs/Imprt + Act + Neg IF ...} \\
 ~~(-1 Prep) (0C V) ;       & (*-1C Negv LINK NOT *1 Vfin)  & (NOT *-1 Niin OR Neg)  \\
 ~~(-1 Para OR De) (0C V) ; & (NOT 0 N) (NOT 0 Pron)        & (*-1C Negv \\
@@ -69,18 +70,9 @@ The chapter follows with introduction of related work: namely, corpus-based meth
 \section{Related work}
 \label{sec:CGanaRelated}
 
-\todo{Clean up this section!}
-
-We combine elements from the following aspects of CG research:
-
-\begin{itemize}
-\item Corpus-based methods in manual grammar development \cite{voutilainen2004}
-\item Optimising hand-written CGs~\cite{bick2013tuning}
-\end{itemize}
-
+There has been previous research on corpus-based methods in manual grammar development \cite{voutilainen2004}, as well as optimisation of hand-written CGs~\cite{bick2013tuning}.
 In addition, there is a large body of research on automatically
-inducing rules, e.g. \cite{inducing_cg1996}, \cite{lindberg_eineborg98ilp},
-\cite{lager01transformation} and \cite{asfrent14}.
+inducing rules, e.g. \cite{inducing_cg1996,lindberg_eineborg98ilp,lager01transformation,asfrent14}.
 However, since our work is aimed to aid the process of hand-crafting rules, we omit those works from our discussion.
 
 
