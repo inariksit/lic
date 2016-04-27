@@ -156,7 +156,7 @@ each rule fires; if some rule never fires, we can suspect there is something wro
 in the rule itself, or in the interaction with previous rules. 
 But it can also be that $r$ just targets a rare phenomenon, and there was no sentence in the corpus that would trigger it.
 
-Of course, corpus is an extremely useful tool for many questions in CG analysis.
+Of course, tagged corpora are extremely useful for many questions in CG analysis.
 A corpus can show which rules are the most used, or which rules give false analyses. 
 Luckily, we have already methods for finding such statistics---the question 
 about conflicts is orthogonal to those, and the solution needs to address only 
@@ -186,32 +186,32 @@ There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1
 
 
 
-We need to model the state of the sentence after each rule application. 
+%We need to model the state of the sentence after each rule application. 
 %Luckily, we do not need to reinvent the wheel\footnote{of course we did. like, who reads other people's papers.}: 
-This is done in \cite{lager_nivre01}: they present CG as a composition of predicates, 
-numbered by the rules in the grammar. Each predicate is applied to the result of the previous 
-applications, and the ``do not remove last reading'' property is checked each time.
+% This is done in \cite{lager_nivre01}: they present CG as a composition of predicates, 
+% numbered by the rules in the grammar. Each predicate is applied to the result of the previous 
+% applications, and the ``do not remove last reading'' property is checked each time.
 
-\todo{Make this transition smooth: \\
-To be clear, the encoding in \cite{lager_nivre01} is \emph{not} a SAT-problem: 
-there is no search involved, only manipulating Boolean expressions. 
-%in the beginning, all the analyses present are true, and they are removed from a list
-%We modify the scheme in two crucial ways:
-%\begin{inparaenum}
-%\item[(a)] 
-%\end{inparaenum}
-We present it in a way that is syntactically closer to what we have seen so far.
-}
+% \todo{Make this transition smooth: \\
+% To be clear, the encoding in \cite{lager_nivre01} is \emph{not} a SAT-problem: 
+% there is no search involved, only manipulating Boolean expressions. 
+% %in the beginning, all the analyses present are true, and they are removed from a list
+% %We modify the scheme in two crucial ways:
+% %\begin{inparaenum}
+% %\item[(a)] 
+% %\end{inparaenum}
+% We present it in a way that is syntactically closer to what we have seen so far.
+% }
 
-As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
 
-Last time, we handled order by introducing clauses in order. All clauses operated on the same variables. Now, we must modify our approach. The state of a reading is expected to change during the execution of the rules---this is what rule application does. However, in the system of interconnected clauses, application of rule number 100 may not only affect the target of rule number 1, but conditions as well. 
-A reading may be removed from a symbolic word between rules 1 and 100, if there is a rule that targets it among r2--r99. But if r1 requires w1 to be a noun, and r100 requires it to not be noun, this condition of r100 is not enough to make w1 change its nounhood at random.
-
-We solve this problem by creating a new variable for a reading each time when it is targeted. The symbolic word is created with \t{w1<n>}, \t{w1<v>}, and after the first rule that targets nouns for removal (either \t{REMOVE n} or \t{SELECT $\neg$n}), we create \t{w1'<n>}. We allow \t{w1<n>} to be true and \t{w1'<n>} be false; both true; both false, but not \t{w1<n>} to be false and \t{w1'<n>} true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
+Last time, we only used ordering as a way to choose the which rules to apply.
+But there was no state: all clauses operated in parallel, on the same variables. 
+Now, we need a new variable for a reading every time when it is targeted; 
+that is, when its state potentially changes.
 
 %But now, we assume that each variable starts off as true: 
 %all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
+As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
 At each rule application, we create a new variable \newVar{} for each targeted reading \oldVar{}.
 The new variable \newVar{} is true iff 
 
@@ -224,7 +224,7 @@ The new variable \newVar{} is true iff
 \end{tabular}
 \end{figure}
 
-\noindent In another notation, application of \t{REMOVE v IF (-1 det)} looks like the following:
+\noindent We keep the same example sequence from Chapter~\ref{chapterCGSAT}, {\em la casa grande}. In the following, we apply the rule \t{REMOVE v IF (-1 det)} to it.
 
 $$\begin{array}{r l}
 \text{New variable } \casa{}'_\v 
@@ -234,38 +234,61 @@ $$\begin{array}{r l}
 \end{array}$$
 
 
-\noindent After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. A sentence vector may look like following after two rules which target verbs and one which targets nouns:
+\noindent After the application, we replace each \oldVar with \newVar in the sentence vector; those variables that are not touched by the rule, will be carried over to the next round unchanged. 
+For example, if we apply two rules which target verbs and one which targets pronouns, 
+the sentence vector will look like the following. 
 
 
 %\begin{figure}
 $$\begin{array}{l @{~\rightarrow~} l}
-1 & \{\laDet, \laPrn \} \\
-2 & \{\casa{}''_\v, \casa{}'_\n \} \\
+1 & \{\laDet, \la{}'_\prn \} \\
+2 & \{\casa{}''_\v, \casaN \} \\
 3 & \{ \grandeAdj \} \\
 \end{array}$$
 %\label{fig:after3Rules}
 %\end{figure}
 
-\todo{Write rest of this section; merge with the stuff in paper; make a nice example!}
 
-% Now, we may ask, why is this not a SAT-problem? %We sure talk about Boolean values and build formulas.
-% The answer lies in the first step, where all variables start off as true. All the new variables, created from the rule applications, get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
+\subsection{Generating a sequence}
 
-% Can we find something in this setup that would make an interesting SAT-problem? 
-% If this question is too intimidating, let us just ask ``can we make it into \emph{any} kind of SAT-problem''? 
-% Forget all ambition, just ask what we \emph{can} do.
-% We can go back to the first step: instead of all variables starting off as true, we can keep them unassigned. If we do that, where is the uncertainty?
-% All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
-
-% Huh. That is an interesting question on its own right, but not very useful for a CG engine: we do know which readings were originally true, and we do not want the SAT-solver to be extra helpful and remove something that is targeted by no rule. But in Chapter~\ref{chapterCGana}, the new setup will allow us to find conflicts in the grammar, approximate generation and answer questions about expressivity. 
-% For the remainder of this chapter, however, we keep the parallel scheme and wrap up what we have started. 
+We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the conditions at the time. Similarly, $\casa{}''_\v$ will be created based on $\casa{}'_\v$. 
+%If there is a pronoun in its conditions, and the rule which targest
+We have not specified yet what is the status of the variables in the beginning. 
+In fact, that decision makes a crucial difference. 
+If all variables start off as true, then we have, in effect, reimplemented the logical encoding in \cite{lager_nivre01}. 
+This encoding is not really a SAT-problem: there is no search involved, it is simply a matter of manipulating Boolean expressions. 
+All the new variables, created from the rule applications, would get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. 
+%There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
 
 
-\subsection{Preliminaries}
+%However, when all the readings start off as unassigned, the SAT-problem becomes 
+%``Which readings were true before any rule applications?''
+In order to turn this problem into a SAT-problem, we will have the readings start off
+unassigned. All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
+For implementing a CG engine, this question does not make much sense: we know which readings were given by the morphological analyser. 
+But our task now is to {\em generate} the original sentence. 
+Here comes the final trick: we will apply the rules to something we call {\em symbolic sentence}. 
+Every cohort contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
 
-Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
-Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}:
-every cohort contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
+
+
+% The state of a given variable can still be affected by a condition, but in a more restricted way.
+% We allow \t{w1<n>} to be true and \t{w1'<n>} be false; both true; both false, but not \t{w1<n>} to be false and \t{w1'<n>} true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
+
+
+
+
+% In the system of interconnected clauses, application of rule number 100 may not only affect the target of rule number 1, but conditions as well. 
+% A reading may be removed from a symbolic word between rules 1 and 100, if there is a rule that targets it among r2--r99. But if r1 requires w1 to be a noun, and r100 requires it to not be noun, this condition of r100 is not enough to make w1 change its nounhood at random.
+
+
+
+
+\subsection{Width of a rule}
+
+% Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
+% Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}:
+
 
 Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too. In our experiments, the number of readings has ranged from about 300 to about 9000. 
 
@@ -294,10 +317,10 @@ This hints that there is something special about the verb \emph{zijn}, compared 
 
 \begin{itemize}
  \item[] 
-\begin{verbatim}zijn:zijn<det><pos><mfn><pl>
-zijn:zijn<det><pos><mfn><sg>
-zijn:zijn<vbser><inf>
-zijn:zijn<vbser><pres><pl>
+\begin{verbatim}zijn:zijn<det~pos~mfn~pl>
+zijn:zijn<det~pos~mfn~sg>
+zijn:zijn<vbser~inf>
+zijn:zijn<vbser~pres~pl>
 \end{verbatim}
 \end{itemize}
 
@@ -397,7 +420,7 @@ and they are all in the set of models allowed \t{SELECT Inf IF (-1 Para OR De)}.
 
 \paragraph{Could two or more rules be merged?} This example concerns two or more rules with the same target but different conditions in the same position. 
 All the six rules in Figure~\ref{fig:infrules} have conditions in position -1; four of them also in 0. Some of them have an additional careful context, and some do not.
-A grammar writer might think that \t{IF (-1C Vbmod (0C V))} and \t{IF (-1C Vbmod) (0 Ser))} are very similar, and could be merged into \t{SELECT Inf IF (-1C Vbmod) (0C V OR Ser)}. But could there be some unintended side effects in merging these two rules? Why is there a C in the first rule, but not in the second rule? 
+A grammar writer might think that \t{IF (-1C Vbmod) (0C V)} and \t{IF (-1C Vbmod) (0 Ser)} are very similar, and could be merged into \t{SELECT Inf IF (-1C Vbmod) (0C V OR Ser)}. But could there be some unintended side effects in merging these two rules? Why is there a C in the first rule, but not in the second rule? 
 
 The procedure is similar to the previous one. We initialise two symbolic sentences; on one we run the original rules in a sequence, and on the other the merged rule. 
 Then, we can perform tests on the resulting symbolic sentences. Assuming that the ambiguity class constraints are in place, the result may show that C is not needed for the condition about {\em ser}, simply because {\em ser} is not ambiguous with anything else in the lexicon; hence the merged rule can safely have the condition \t{(0C V OR Ser)}. However, if {\em ser} can be ambiguous with something else, then this merged rule is stricter than the two original rules. If the grammar writer is still unsure whether there would be any meaningful sequences that would be missed, they can ask the SAT-solver to generate all those cases---this requires that the ambiguity classes are in place, \formulation{otherwise the number of solutions would be exponential on all possible readings in the lexicon.} 
@@ -494,7 +517,6 @@ As the tool matures and we add new features, a more in-depth analysis
 will be needed.
 
 \subsection{Dutch} The Dutch grammar had two kinds of errors: rule-internal and rule interaction. As for rule-internal conflicts, one was due to a misspelling in the list definition for personal pronouns, which rendered 5 rules ineffective. The other was about subreadings: the genitive \emph{s} is analysed as a subreading in the Apertium morphological lexicon, but it appeared in one rule as the main reading. 
-
 There was one genuine conflict with rule interaction, shown below:
 
 \begin{itemize}
@@ -506,7 +528,7 @@ REMOVE Adv IF (-1 Det) (0 Adj) (1 N) ;
 
 % These two rules both remove an adverb, but the first one has a broader condition:
 % remove adverb if followed by a noun. In contrast, the second rule has a stricter condition: only remove adverb if it is preceded by a determiner, the adverb itself is ambiguous with an adjective, and followed by a noun. 
-These two rules share a target: both remove an adverb.
+\noindent These two rules share a target: both remove an adverb.
 The problem is that the first rule has a broader condition than the second, hence the second will not have any chance to act. 
 If the rules were in the opposite order, then there would be no problem.
 
@@ -520,8 +542,8 @@ The following rule was one of them:
 \texttt{SELECT DetPos IF (-1 (vbser pres p3 sg)) (0 "zijn") (1 Noun);}
 \end{itemize} 
 
-As per VISL CG-3, the condition \texttt{(0 "zijn")} does not require
- \emph{zijn} to be in the same reading with the target \emph{DetPos}.
+\noindent As per VISL CG-3, the condition \texttt{(0 "zijn")} does not require
+ \emph{zijn} to be in the same reading with the target \t{DetPos}.
 It just means that at index 0,
 there is a reading with any possessive determiner, and a reading with any \emph{zijn}.
 However, the intended action is to select a ``det pos \emph{zijn}'' all in one reading;
@@ -534,14 +556,14 @@ Can we catch this imprecise formulation with our tool? The SAT-solver will not m
 
 \begin{itemize}
 \item[a)] \begin{verbatim}
-"w2"
-    w2<det><pos><f><sg>
-    zijn<vbser><inf>
+"<w2>"
+    "w2" det pos f sg
+    "zijn" vbser inf
 \end{verbatim}
 
 \item[b)] \begin{verbatim}
-"w2"
-    zijn<det><pos><mfn><pl>
+"<w2>"
+    "zijn" det pos mfn pl
 \end{verbatim}
 \end{itemize}
 
@@ -605,7 +627,7 @@ OR instead of +:
 
 If it was used in any rule, that rule would have been marked as
 conflicting. We noticed the error by accident, when the program
-offered the reading \texttt{w2<n><adj><det><preadv><adv><prn>}
+offered the reading ``\emph{w2}~n~adj~det~preadv~adv~prn''
 in an example sequence meant for another rule.
 
 
@@ -781,7 +803,7 @@ In any case, there are still a number of features to improve and add.
 Future work can be divided in roughly three categories: 
 \begin{inparaenum}
 \item[(a)] general improvement of the tool
-\item[(b)] thorough evaluation in contact with user base, and
+\item[(b)] evaluation with users, and 
 \item[(c)] integration as a part of CG development framework.
 \end{inparaenum}
 
