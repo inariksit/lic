@@ -1,5 +1,12 @@
 \def\newcite#1{\cite{#1}}
 
+\def\noun{\textsc{Noun}}
+\def\verb{\textsc{Verb}}
+\def\sg{\textsc{Sg}}
+\def\pl{\textsc{Pl}}
+\def\detdef{\textsc{DetDef}}
+
+
 \chapter{Grammar analysis using SAT}
 \label{chapterCGana}
 
@@ -182,28 +189,17 @@ showing that such sequence cannot be created.
 
 In order to analyse real-life CGs, we need to model the semantics of sequential CG: 
 rule application takes effect immediately, is irreversible, and only allows changes in the target.
-There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1~det)} the same as \t{REMOVE~v~IF~(-1~det) ; REMOVE~v} is worth nothing. The first one is a true conflict, because the first rule has a broader condition; it removes the verb in any possible case. The second rule order is possible: there can always be a sentence that has a verb, but is not preceded by a determiner, hence the first rule would not match, and the verb is saved for the second rule. 
-
-
-
+%There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1~det)} the same as \t{REMOVE~v~IF~(-1~det) ; REMOVE~v} is worth nothing. The first one is a true conflict, because the first rule has a broader condition; it removes the verb in any possible case. The second rule order is possible: there can always be a sentence that has a verb, but is not preceded by a determiner, hence the first rule would not match, and the verb is saved for the second rule. 
+%
+%
+%
 %We need to model the state of the sentence after each rule application. 
 %Luckily, we do not need to reinvent the wheel\footnote{of course we did. like, who reads other people's papers.}: 
 % This is done in \cite{lager_nivre01}: they present CG as a composition of predicates, 
 % numbered by the rules in the grammar. Each predicate is applied to the result of the previous 
 % applications, and the ``do not remove last reading'' property is checked each time.
-
-% \todo{Make this transition smooth: \\
-% To be clear, the encoding in \cite{lager_nivre01} is \emph{not} a SAT-problem: 
-% there is no search involved, only manipulating Boolean expressions. 
-% %in the beginning, all the analyses present are true, and they are removed from a list
-% %We modify the scheme in two crucial ways:
-% %\begin{inparaenum}
-% %\item[(a)] 
-% %\end{inparaenum}
-% We present it in a way that is syntactically closer to what we have seen so far.
-% }
-
-
+%
+%
 Last time, we only used ordering as a way to choose the which rules to apply.
 But there was no state: all clauses operated in parallel, on the same variables. 
 Now, we need a new variable for a reading every time when it is targeted; 
@@ -249,14 +245,14 @@ $$\begin{array}{l @{~\rightarrow~} l}
 %\end{figure}
 
 
-\subsection{Generating a sequence}
+\paragraph{From disambiguation to generation}
 
 We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the conditions at the time. Similarly, $\casa{}''_\v$ will be created based on $\casa{}'_\v$. 
 %If there is a pronoun in its conditions, and the rule which targest
 We have not specified yet what is the status of the variables in the beginning. 
 In fact, that decision makes a crucial difference. 
 If all variables start off as true, then we have, in effect, reimplemented the logical encoding in \cite{lager_nivre01}. 
-This encoding is not really a SAT-problem: there is no search involved, it is simply a matter of manipulating Boolean expressions. 
+This encoding is not a SAT-problem: there is no search involved, it is simply a matter of manipulating Boolean expressions. 
 All the new variables, created from the rule applications, would get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. 
 %There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
 
@@ -272,8 +268,84 @@ Every cohort contains every possible reading, and rule applications are responsi
 
 
 
-% The state of a given variable can still be affected by a condition, but in a more restricted way.
-% We allow \t{w1<n>} to be true and \t{w1'<n>} be false; both true; both false, but not \t{w1<n>} to be false and \t{w1'<n>} true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
+\paragraph{Width of a rule}
+
+% Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
+% Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}
+
+Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too. In our experiments, the number of readings has ranged from about 300 to about 9000. 
+
+Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule mentioned in the introduction, the width is 2.
+
+If the context contains a \t{*} (context word can be anywhere),
+we may need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis.
+%we create sentences that are up to 3 words wider than the context without \verb!*!, and try them all.
+
+
+
+\paragraph{Example: conflict}
+
+Let us look at the following rules. For simplicity, we assume that the full set of readings in the language is $\{ \t{det def, noun sg, noun pl, verb sg, verb pl} \}$.
+
+
+\begin{figure}[h]
+\centering
+\begin{verbatim}
+REMOVE verb IF (-1 det) ;
+REMOVE verb IF (-1 det) (1 noun) ;
+\end{verbatim}
+\end{figure}
+
+We want to know if the last rule is able to apply, after going through the rules that come before it---in this case, there is only one such rule. 
+The width of the last rule is three: one condition to the left of the target, one to the right, so we create a symbolic sentence of three words.
+
+
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l p{0.6cm} l }
+\t{"<w1>"}    &                     &  \t{"<w2>"}  &           &  \t{"<w3>"}    \\
+              & \t{"w1" det def}    & &      \t{"w2" det def}  & &  \t{"w3" det def} \\
+              & \t{"w1" noun sg}    & &      \t{"w2" noun sg}  & &  \t{"w3" noun sg} \\
+              & \t{"w1" noun pl}    & &      \t{"w2" noun pl}  & &  \t{"w3" noun pl} \\
+              & \t{"w1" verb sg}    & &      \t{"w2" verb sg}  & &  \t{"w3" verb sg} \\
+              & \t{"w1" verb pl}    & &      \t{"w2" verb pl}  & &  \t{"w3" verb pl} \\
+\end{tabular}
+
+
+After applying the first rule, we have a situation which looks much like the one in the previous chapter, Figure~\ref{fig:modelsOneRule}. 
+If the symbolic word {\em w1} is a determiner, then {\em w2} cannot be a verb; 
+the only exception is the case where verb is the only analysis of {\em w2}. 
+As before, the verb analysis {\em w2} can also be false, even if {\em w1} 
+is not a determiner. The exact same dependencies are created between the 
+symbolic words {\em w2} and {\em w3}; the first word {\em w1} is excluded, 
+because it has no preceding word.
+Below we see the newly created variables after the first rule application:
+
+$$\begin{array}{l @{~\rightarrow~} l}
+1 & \{w1_{\detdef}, w1_{\noun\sg}, w1_{\noun\pl}, w1_{\verb\sg}, w1_{\verb\pl} \} \\
+2 & \{w2_{\detdef}, w2_{\noun\sg}, w2_{\noun\pl}, w2'_{\verb\sg}, w2'_{\verb\pl} \} \\
+3 & \{w3_{\detdef}, w3_{\noun\sg}, w3_{\noun\pl}, w3'_{\verb\sg}, w3'_{\verb\pl} \} \\
+\end{array}$$
+
+There is no ``final sentence'' yet, simply constraints on the possible combinations of determiners and verbs. If we asked for a solution now, it could be anything; for instance, all three words are determiners. Just asking for a freely chosen sequence is not very interesting; there are so many possibilities, and even after applying more rules, most of the combinations are not explicitly prohibited. 
+We want to know if there is a sequence that can trigger the last rule.
+In order to trigger the rule, the sequence must have the following three features:
+\begin{itemize}
+\item target readings: at least one reading with the \emph{verb} tag in the target position {\em w2}
+\item ambiguity: at least one reading without the \emph{verb} tag in the target position; if there are only \emph{verb} readings in the target, the rule would not fire.
+\item conditions: at least one reading with a \emph{det} tag in the cohort preceding the target, and at least one reading with a \emph{noun} tag in the cohort following the target
+\end{itemize}
+
+
+We can see that some of these requirements can be fulfilled: there are models where the target readings are in place in {\em w2}. If the rule had been \t{REMOVE verb}, that is, unconditionally remove all verbs, then this requirement could not be fulfilled. But so far we have not run into the wall. 
+The second requirement for ambiguity is no problem either: there have been no rules that target the other readings of {\em w2}, so we are free to choose anything.
+As for conditions, the part about \t{(1 noun)} can be fulfilled: nothing prevents {\em w3} from being a noun. But the first condition, \t{(-1 det)}, cannot be true with the target being verb: we have already had a rule that has prohibited such combination. 
+Thus, when we try to ask for a solution where all these requirements hold, we will get a conflict. This shows us that the rule \t{REMOVE verb IF (-1 det) (1 noun)} cannot ever apply, if the rule \t{REMOVE verb IF (-1 det)} has been already applied.
+
+\paragraph{Example: no conflict}
+This was a rather simple example of a conflict. Furthermore, the order was not really crucial. We will show another example, where we illustrate why is it important to create new variables, and how conditions can affect the state of the variables, but in a more limited way.
+
+
+The state of a given variable can still be affected by a condition, but in a more restricted way.
+We allow \t{w1<n>} to be true and \t{w1'<n>} be false; both true; both false, but not \t{w1<n>} to be false and \t{w1'<n>} true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
 
 
 
@@ -284,23 +356,10 @@ Every cohort contains every possible reading, and rule applications are responsi
 
 
 
-\subsection{Width of a rule}
 
-% Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
-% Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}:
+\subsection{Towards realistic language}
 
-
-Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too. In our experiments, the number of readings has ranged from about 300 to about 9000. 
-
-Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule mentioned in the introduction, the width is 2.
-
-If the context contains a \verb!*! (context word can be anywhere),
-we may need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis.
-%we create sentences that are up to 3 words wider than the context without \verb!*!, and try them all.
-
-
-
-\subsection{Creating realistic readings}
+\paragraph{Creating realistic readings}
 \label{sec:realistic_readings}
 
 Earlier we have shown an example with 5 readings (``det def'', ``noun sg'', ...). In a realistic case, we operate between hundreds and thousands of possible readings. 
@@ -355,7 +414,7 @@ the underspecified readings from the grammar may be an adequate solution.
 %In fact, it may even catch interaction conflicts between rules which have an internal conflict
 
 
-\subsection{Creating realistic ambiguities}
+\paragraph{Creating realistic ambiguities}
 
 
 
