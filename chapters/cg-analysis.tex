@@ -1,7 +1,7 @@
 \def\newcite#1{\cite{#1}}
 
-\def\noun{\textsc{Noun}}
-\def\verb{\textsc{Verb}}
+\def\noun{\textsc{N}}
+\def\verb{\textsc{V}}
 \def\sg{\textsc{Sg}}
 \def\pl{\textsc{Pl}}
 \def\detdef{\textsc{DetDef}}
@@ -184,7 +184,9 @@ showing that such sequence cannot be created.
 \def\invConds{\text{invalid condition}}
 \def\onlyTrgLeft{\text{only target left}}
 
-\subsection{SAT-encoding of sequential CG}
+\subsection{From disambiguation to generation}
+
+\paragraph{SAT-encoding of sequential CG}
 \label{sec:orderedScheme}
 
 In order to analyse real-life CGs, we need to model the semantics of sequential CG: 
@@ -224,7 +226,7 @@ The new variable \newVar{} is true iff
 
 $$\begin{array}{r l}
 \text{New variable } \casa{}'_\v 
-      & \Leftrightarrow \casaV\ 
+      & \Longleftrightarrow \quad \casaV\ 
         \wedge\: ( \; \ob{\neg\laDet}^{\invConds} 
         \vee  \ob{(\casaV \wedge \neg \casaN) }^{\onlyTrgLeft} ) \\
 \end{array}$$
@@ -245,15 +247,16 @@ $$\begin{array}{l @{~\rightarrow~} l}
 %\end{figure}
 
 
-\paragraph{From disambiguation to generation}
+\paragraph{Symbolic sentence}
 
 We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the conditions at the time. Similarly, $\casa{}''_\v$ will be created based on $\casa{}'_\v$. 
 %If there is a pronoun in its conditions, and the rule which targest
-We have not specified yet what is the status of the variables in the beginning. 
+But what is the status of the variables in the beginning?
+%We have not specified yet what is the status of the variables in the beginning. 
 In fact, that decision makes a crucial difference. 
 If all variables start off as true, then we have, in effect, reimplemented the logical encoding in \cite{lager_nivre01}. 
 This encoding is not a SAT-problem: there is no search involved, it is simply a matter of manipulating Boolean expressions. 
-All the new variables, created from the rule applications, would get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow True \wedge \neg (True \wedge \neg True)$. 
+All the new variables, created from the rule applications, would get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow \text{\em True} \wedge \neg (\text{\em True} \wedge \neg \text{\em True})$. 
 %There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
 
 
@@ -262,24 +265,22 @@ All the new variables, created from the rule applications, would get their value
 In order to turn this problem into a SAT-problem, we will have the readings start off
 unassigned. All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
 For implementing a CG engine, this question does not make much sense: we know which readings were given by the morphological analyser. 
-But our task now is to {\em generate} the original sentence, that will pass through the rules. 
+But our task now is to {\em generate} the original sentence, which will pass through the rules. 
 Here comes the most important modification: we will apply the rules to something we call {\em symbolic sentence}. 
 Every cohort, called {\em symbolic word}, contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
-
-
-
-%\paragraph{Width of a rule}
 
 % Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
 % Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}
 
 Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too; we will explain this in more detail in the coming sections. In our experiments, the number of readings has ranged from about 300 to about 9000. 
 
+\paragraph{Width of a rule}
 Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule \t{REMOVE v IF (-1 det)}, the width is 2.
 If the context contains a \t{*} (context word can be anywhere),
 we may need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis.
 %we create sentences that are up to 3 words wider than the context without \verb!*!, and try them all.
 
+\paragraph{Rule application}
 Finally, we define what does it mean for a sentence to ``pass through'' a rule. 
 Let us enumerate the cases:
 \begin{enumerate}
@@ -304,18 +305,21 @@ Now we have the definitions in place. In the following, we are going to show two
 
 \paragraph{Example 1: conflict}
 
-Let us look at the following rules. For simplicity, we assume that the full set of readings in the language is $\{ \t{det def, noun sg, noun pl, verb sg, verb pl} \}$.
+Let us look at a conflicting case. For simplicity, we assume that the full set of readings in the language is $\{ \emph{det def, noun sg, noun pl, verb sg, verb pl} \}$. We ignore all lexical readings for now, and assume dummy words of the form \emph{w$_{i}$}, where $i$ refers to the index of the word.
+The rules are as follows:
 
 
 \begin{verbatim}
-REMOVE verb IF (-1 det) ;
-REMOVE verb IF (-1 det) (1 noun) ;
+r1 = REMOVE verb IF (-1 det) ;
+r2 = REMOVE verb IF (-1 det) (1 noun) ;
 \end{verbatim}
 
+
 We want to know if the last rule is able to apply, after going through the rules that come before it---in this case, there is only one such rule. 
-The width of the last rule is three: one condition to the left of the target, one to the right, so we create a symbolic sentence of three words. Below, we show the symbolic sentence, consisting of three symbolic words: {\em w1, w2} and {\em w3}.
+The width of the last rule is three: one condition to the left of the target, one to the right, so we create a symbolic sentence of three words. Below, we show the symbolic sentence, consisting of the symbolic words {\em w1, w2} and {\em w3}.
 
 \begin{figure}[h]
+\centering
 \begin{tabular}{p{0.6cm} l  p{0.6cm} l p{0.6cm} l }
 \t{"<w1>"}    &                     &  \t{"<w2>"}  &           &  \t{"<w3>"}    \\
               & \t{"w1" det def}    & &      \t{"w2" det def}  & &  \t{"w3" det def} \\
@@ -331,15 +335,15 @@ If the symbolic word {\em w1} is a determiner, then {\em w2} cannot be a verb;
 the only exception is the case where verb is the only analysis of {\em w2}. 
 As before, the verb analysis {\em w2} can also be false, even if {\em w1} 
 is not a determiner. The exact same dependencies are created between the 
-symbolic words {\em w2} and {\em w3}; the first word {\em w1} is excluded, 
-because it has no preceding word.
-Below we see the newly created variables after the first rule application:
+symbolic words {\em w2} and {\em w3}.
+The first word {\em w1} is out of scope of the condition, because it has no preceding word. 
+Below we see the affected readings after the first rule application, with newly created variables:
 
 \begin{figure}[h]
 $$\begin{array}{l @{~\rightarrow~} l}
-1 & \{w1_{\detdef}, w1_{\noun\sg}, w1_{\noun\pl}, w1_{\verb\sg}, w1_{\verb\pl} \} \\
-2 & \{w2_{\detdef}, w2_{\noun\sg}, w2_{\noun\pl}, w2'_{\verb\sg}, w2'_{\verb\pl} \} \\
-3 & \{w3_{\detdef}, w3_{\noun\sg}, w3_{\noun\pl}, w3'_{\verb\sg}, w3'_{\verb\pl} \} \\
+1 & \{w1_{\detdef}, \  w1_{\noun\sg}, \  w1_{\noun\pl}, \ w1_{\verb\sg}, \ w1_{\verb\pl} \} \\
+2 & \{w2_{\detdef}, \  w2_{\noun\sg}, \  w2_{\noun\pl}, \ w2'_{\verb\sg}, \ w2'_{\verb\pl} \} \\
+3 & \{w3_{\detdef}, \  w3_{\noun\sg}, \  w3_{\noun\pl}, \ w3'_{\verb\sg}, \ w3'_{\verb\pl} \} \\
 \end{array}$$
 \end{figure}
 
@@ -348,21 +352,23 @@ There is no ``final sentence'' yet, simply constraints on the possible combinati
 We want to know if there is a sequence that can trigger the last rule.
 In order to trigger the rule, the sequence must have the following three features:
 \begin{itemize}
-\item target readings: at least one reading with the \emph{verb} tag in the target position {\em w2}
-\item ambiguity: at least one reading without the \emph{verb} tag in the target position; if there are only \emph{verb} readings in the target, the rule would not fire.
-\item conditions: at least one reading with a \emph{det} tag in the cohort preceding the target, and at least one reading with a \emph{noun} tag in the cohort following the target
+\item Target readings: at least one reading with a \emph{verb} tag in the target position {\em w2}.
+\item Ambiguity: at least one reading without a \emph{verb} tag in the target position; if there are only \emph{verb} readings in the target, the rule would not fire.
+\item Conditions: at least one reading with a \emph{det} tag in the cohort preceding the target, and at least one reading with a \emph{noun} tag in the cohort following the target.
 \end{itemize}
 
 
-We can see that some of these requirements can be fulfilled: there are models where the target readings are in place in {\em w2}. If the rule had been \t{REMOVE verb}, that is, unconditionally remove all verbs, then this requirement could not be fulfilled. But so far we have not run into the wall. 
-The second requirement for ambiguity is no problem either: there have been no rules that target the other readings of {\em w2}, so we are free to choose anything.
-As for conditions, the part about \t{(1 noun)} can be fulfilled: nothing prevents {\em w3} from being a noun. But the first condition, \t{(-1 det)}, cannot be true with the target being verb: we have already had a rule that has prohibited such combination. 
-Thus, when we try to ask for a solution where all these requirements hold, we will get a conflict. This shows us that the rule \t{REMOVE verb IF (-1 det) (1 noun)} cannot ever apply, if the rule \t{REMOVE verb IF (-1 det)} has been already applied. 
+We can see that some of these requirements can be fulfilled: the first rule allows models where {\em w2} contains \emph{target readings}. If the rule had been \t{REMOVE verb}, that is, unconditionally remove all verbs, then this requirement could not be fulfilled. But so far we have not run into the wall. 
+The second requirement, for \emph{ambiguity} is no problem either: other readings of {\em w2} have not been targeted, so we are free to choose anything.
+
+As for \emph{conditions}, the part about \t{(1 noun)} can be fulfilled; nothing prevents {\em w3} from being a noun. But the first condition, \t{(-1 det)}, cannot be true, if the target {\em w2} has to be a verb---the first rule has prohibited exactly that combination.
+Therefore, when we try to ask for a solution where all these requirements hold, we will get a conflict. The result shows us that the rule \t{REMOVE~verb~IF~(-1~det)~(1~noun)} cannot ever apply, if the rule \t{REMOVE~verb~IF~(-1~det)} has been already applied. 
 %For any pair of two rules \t{REMOVE x IF C1} and \t{REMOVE x IF C2}, if $C2 \subseteq C1$, then the latter rule will not have a chance to apply; simply because there is no condition that would fulfil C2 but not C1.
 % As we see later from the evaluation, recognising such pairs is not always easy.
 
 \paragraph{Example: no conflict}
-The previous was a simple example of a conflict: two rules target the same reading, and the conditions were chosen such that the first rule applies in more cases than the second.
+The previous was a simple example of a conflict: two rules target the same reading, and the first one had broader conditions. 
+%and the conditions were chosen such that the first rule applies in more cases than the second.
 Since we had only one preceding rule, we could not demonstrate why is it important to apply all the rules in order---even with a longer list of rules, the previous example could have also worked unordered, as long as the last rule is separated from rules before it.
 %two rules had the same target, and the first mentioned had a broader set of conditions.
 %Furthermore, the order was not really crucial. 
@@ -374,10 +380,28 @@ r2 = SELECT det  IF ( 1 verb) ;
 r3 = REMOVE verb IF (-1 det) ;
 \end{verbatim}
 
-To begin, let us only look at the first and the last rule. Like in the previous example, they target the same reading, but now the order is good: the first rule is the one with a narrower condition, which means that it is possible for a sequence to pass through it, and still have the verb reading in {\em w2} intact. %---it just needs to have something else in addition to the determiner in {\em w1}
-The following is an example of such sequence---if we stopped after $r1$ and asked for a solution that triggers $r3$, we might get just that.
+\noindent The width of the last rule is 2, thus we create a symbolic sentence with only {\em w1} and {\em w2}. The sentence is shown below:
 
 \begin{figure}[h]
+\centering 
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l }
+\t{"<w1>"}    &                     &  \t{"<w2>"}  &           \\
+              & \t{"w1" det def}    & &      \t{"w2" det def}  \\
+              & \t{"w1" noun sg}    & &      \t{"w2" noun sg}  \\
+              & \t{"w1" noun pl}    & &      \t{"w2" noun pl}  \\
+              & \t{"w1" verb sg}    & &      \t{"w2" verb sg}  \\
+              & \t{"w1" verb pl}    & &      \t{"w2" verb pl}  \\
+\end{tabular}
+% \label{fig:ambiguousDet}
+% \caption{After $r1$, the symbolic word {\em w1} has to be determiner, but ambiguously so.}
+\end{figure}
+
+
+To begin, let us only look at {\em r1} and {\em r3}. Like in the previous example, they target the same reading, but now the order is good: the first rule is the one with a narrower condition, which means that it is possible for a sequence to pass through it, and still have the verb reading in {\em w2} intact---it just needs to have something else in addition to the determiner in {\em w1}.
+The following is an example of such sequence (false readings not shown). %---if we stopped after $r1$ and asked for a solution that triggers $r3$, we might get just that.
+
+\begin{figure}[h]
+\centering
 \begin{tabular}{p{0.6cm} l  p{0.6cm} l }
 \t{"<w1>"}    &                     &  \t{"<w2>"}  &           \\
               & \t{"w1" det def}    & &      \t{"w2" noun pl}  \\
@@ -388,16 +412,20 @@ The following is an example of such sequence---if we stopped after $r1$ and aske
 \end{figure}
 
 
-To recap, we passed through $r1$ with the case ``condition does not hold, target not removed''. Now, let us add $r2$: \t{SELECT det IF (1 verb)}. 
-We must, in fact, select the determiner: 
-the condition of $r2$ happens to be the target of $r3$, so it must hold. 
+So far, we have passed through {\em r1} with the case ``condition does not hold, target not removed''. Now, let us add {\em r2}: \t{SELECT det IF (1 verb)}. 
+We must, in fact, select the determiner and remove everything else: 
+the condition of {\em r2} happens to be the target of {\em r3}, so it must hold. 
 %if the condition of $r2$ did not hold, then $r3$ would not have its target.
 But we have the notion of state now, so this is no problem.
-At time $t1$, the symbolic word {\em w1} had to be ambiguous---that is, one of the variables $w1_{\noun\sg}, w1_{\noun\pl}, w1_{\verb\sg}, w1_{\verb\pl}$ must be true. 
-But at time $t2$, all of the variables $w1'_{\noun\sg}, w1'_{\noun\pl}, w1'_{\verb\sg}, w1'_{\verb\pl}$ must be false.
-We have arrived to the situation where {\em w1} at time $t1$ does not trigger $r1$, 
-and {\em w1} at time $t3$ triggers $r3$.
-Since the clauses by $r1$, $r2$ and $r3$ operate on different variables, there is no conflict.
+On arriving to {\em r1}, the symbolic word {\em w1} had to be ambiguous---that is, one of the variables $w1_{\noun\sg}, \  w1_{\noun\pl}, \ w1_{\verb\sg}, \ w1_{\verb\pl}$ must be true. 
+But after passing through {\em r2}, the state of {\em w1} has changed:
+it contains a set of new variables $w1'_{\noun\sg}, \ w1'_{\noun\pl}, \ w1'_{\verb\sg}, \ w1'_{\verb\pl}$, and all of them must be false.
+Since the clauses formed by {\em r1} and {\em r3} get access to different variables, there is no conflict.
+
+% Thanks to the distinction, the initial {\em w1}, with the primeless variables, does not trigger {\em r1}. 
+% The {\em w1} changed by {\em r2} is not visible to {\em r1}, so 
+% We have arrived to the situation where {\em w1} at time {\em t1} does not trigger {\em r1}, 
+% but {\em w1} at time {\em t3} triggers {\em r3}.
 
 
 % The state of a given variable can still be affected by a condition, but in a more restricted way.
