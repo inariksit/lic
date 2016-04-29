@@ -262,44 +262,60 @@ All the new variables, created from the rule applications, would get their value
 In order to turn this problem into a SAT-problem, we will have the readings start off
 unassigned. All the other variables computed along the way depend on the original variables, so the question to the SAT-solver becomes: \emph{``Which readings were originally true?''}
 For implementing a CG engine, this question does not make much sense: we know which readings were given by the morphological analyser. 
-But our task now is to {\em generate} the original sentence. 
-Here comes the final trick: we will apply the rules to something we call {\em symbolic sentence}. 
-Every cohort contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
+But our task now is to {\em generate} the original sentence, that will pass through the rules. 
+Here comes the most important modification: we will apply the rules to something we call {\em symbolic sentence}. 
+Every cohort, called {\em symbolic word}, contains every possible reading, and rule applications are responsible for shaping the sentence into a concrete one.
 
 
 
-\paragraph{Width of a rule}
+%\paragraph{Width of a rule}
 
 % Our analysis operates on a rule $r$, which is preceded by a list of rules $R$, and is concerned with answering the following question: ``Does there exist an input sentence $S$ that can trigger rule $r$, even after passing all rules $R$ that came before $r$?''
 % Instead of concrete sentences from a corpus, we apply rules on {\em symbolic sentences}
 
-Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too. In our experiments, the number of readings has ranged from about 300 to about 9000. 
+Before we can do any analysis any of the rules, we need to find out what the set of all possible readings of a word is. We can do this by extracting this information from a lexicon, but there are other ways too; we will explain this in more detail in the coming sections. In our experiments, the number of readings has ranged from about 300 to about 9000. 
 
-Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule mentioned in the introduction, the width is 2.
-
+Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule \t{REMOVE v IF (-1 det)}, the width is 2.
 If the context contains a \t{*} (context word can be anywhere),
 we may need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis.
 %we create sentences that are up to 3 words wider than the context without \verb!*!, and try them all.
 
+Finally, we define what does it mean for a sentence to ``pass through'' a rule. 
+Let us enumerate the cases:
+\begin{enumerate}
+\item The sentence is out of scope; target not removed
+\item The conditions of the rule do not hold; target not removed
+\item The target is the only possible reading left; target not removed
+\item The target was never in place
+\item The target is removed
+\end{enumerate}
+%In a symbolic sentence, we cannot properly distinguish between the last two cases. 
+Let us illustrate the difference between the last two cases with a rule that targets pronouns, say, \t{REMOVE prn IF (1 v)}. 
+If the target was never in place, then both the original $\laPrn$ and the newly created $\la{}'_\prn$ end up as false. 
+If the target is removed, then $\laPrn$ will be true and $\la{}'_\prn$ false.
+This means that a rule with the condition \t{IF (-1 prn)} behaves differently depending on where in the rule sequence it is placed: 
+if it is applied before \t{REMOVE prn IF (1 v)}, then it will match the original reading $\laPrn$. Any rule applied after that will get the newly created variable $\la{}'_\prn$.
+
+%that is, whether the new variable depends on $\laPrn$ or  $\la{}'_\prn$.
+%The difference between the last two cases is that, say we have the readings $\laPrn$ and $\la{}'_\prn$
+
+Now we have the definitions in place. In the following, we are going to show two examples; first one a very simple conflict, and the second one with more complicated interaction.
 
 
-\paragraph{Example: conflict}
+\paragraph{Example 1: conflict}
 
 Let us look at the following rules. For simplicity, we assume that the full set of readings in the language is $\{ \t{det def, noun sg, noun pl, verb sg, verb pl} \}$.
 
 
-\begin{figure}[h]
-\centering
 \begin{verbatim}
 REMOVE verb IF (-1 det) ;
 REMOVE verb IF (-1 det) (1 noun) ;
 \end{verbatim}
-\end{figure}
 
 We want to know if the last rule is able to apply, after going through the rules that come before it---in this case, there is only one such rule. 
-The width of the last rule is three: one condition to the left of the target, one to the right, so we create a symbolic sentence of three words.
+The width of the last rule is three: one condition to the left of the target, one to the right, so we create a symbolic sentence of three words. Below, we show the symbolic sentence, consisting of three symbolic words: {\em w1, w2} and {\em w3}.
 
-
+\begin{figure}[h]
 \begin{tabular}{p{0.6cm} l  p{0.6cm} l p{0.6cm} l }
 \t{"<w1>"}    &                     &  \t{"<w2>"}  &           &  \t{"<w3>"}    \\
               & \t{"w1" det def}    & &      \t{"w2" det def}  & &  \t{"w3" det def} \\
@@ -308,7 +324,7 @@ The width of the last rule is three: one condition to the left of the target, on
               & \t{"w1" verb sg}    & &      \t{"w2" verb sg}  & &  \t{"w3" verb sg} \\
               & \t{"w1" verb pl}    & &      \t{"w2" verb pl}  & &  \t{"w3" verb pl} \\
 \end{tabular}
-
+\end{figure}
 
 After applying the first rule, we have a situation which looks much like the one in the previous chapter, Figure~\ref{fig:modelsOneRule}. 
 If the symbolic word {\em w1} is a determiner, then {\em w2} cannot be a verb; 
@@ -319,13 +335,16 @@ symbolic words {\em w2} and {\em w3}; the first word {\em w1} is excluded,
 because it has no preceding word.
 Below we see the newly created variables after the first rule application:
 
+\begin{figure}[h]
 $$\begin{array}{l @{~\rightarrow~} l}
 1 & \{w1_{\detdef}, w1_{\noun\sg}, w1_{\noun\pl}, w1_{\verb\sg}, w1_{\verb\pl} \} \\
 2 & \{w2_{\detdef}, w2_{\noun\sg}, w2_{\noun\pl}, w2'_{\verb\sg}, w2'_{\verb\pl} \} \\
 3 & \{w3_{\detdef}, w3_{\noun\sg}, w3_{\noun\pl}, w3'_{\verb\sg}, w3'_{\verb\pl} \} \\
 \end{array}$$
+\end{figure}
 
 There is no ``final sentence'' yet, simply constraints on the possible combinations of determiners and verbs. If we asked for a solution now, it could be anything; for instance, all three words are determiners. Just asking for a freely chosen sequence is not very interesting; there are so many possibilities, and even after applying more rules, most of the combinations are not explicitly prohibited. 
+
 We want to know if there is a sequence that can trigger the last rule.
 In order to trigger the rule, the sequence must have the following three features:
 \begin{itemize}
@@ -338,14 +357,51 @@ In order to trigger the rule, the sequence must have the following three feature
 We can see that some of these requirements can be fulfilled: there are models where the target readings are in place in {\em w2}. If the rule had been \t{REMOVE verb}, that is, unconditionally remove all verbs, then this requirement could not be fulfilled. But so far we have not run into the wall. 
 The second requirement for ambiguity is no problem either: there have been no rules that target the other readings of {\em w2}, so we are free to choose anything.
 As for conditions, the part about \t{(1 noun)} can be fulfilled: nothing prevents {\em w3} from being a noun. But the first condition, \t{(-1 det)}, cannot be true with the target being verb: we have already had a rule that has prohibited such combination. 
-Thus, when we try to ask for a solution where all these requirements hold, we will get a conflict. This shows us that the rule \t{REMOVE verb IF (-1 det) (1 noun)} cannot ever apply, if the rule \t{REMOVE verb IF (-1 det)} has been already applied.
+Thus, when we try to ask for a solution where all these requirements hold, we will get a conflict. This shows us that the rule \t{REMOVE verb IF (-1 det) (1 noun)} cannot ever apply, if the rule \t{REMOVE verb IF (-1 det)} has been already applied. 
+%For any pair of two rules \t{REMOVE x IF C1} and \t{REMOVE x IF C2}, if $C2 \subseteq C1$, then the latter rule will not have a chance to apply; simply because there is no condition that would fulfil C2 but not C1.
+% As we see later from the evaluation, recognising such pairs is not always easy.
 
 \paragraph{Example: no conflict}
-This was a rather simple example of a conflict. Furthermore, the order was not really crucial. We will show another example, where we illustrate why is it important to create new variables, and how conditions can affect the state of the variables, but in a more limited way.
+The previous was a simple example of a conflict: two rules target the same reading, and the conditions were chosen such that the first rule applies in more cases than the second.
+Since we had only one preceding rule, we could not demonstrate why is it important to apply all the rules in order---even with a longer list of rules, the previous example could have also worked unordered, as long as the last rule is separated from rules before it.
+%two rules had the same target, and the first mentioned had a broader set of conditions.
+%Furthermore, the order was not really crucial. 
+Now we will show another example, where we illustrate why is it important to create new variables, and how conditions can affect the state of the variables, but in a more limited way. The set of readings is the same, and the rules are as follows.
+
+\begin{verbatim}
+r1 = REMOVE verb IF (-1C det) ;
+r2 = SELECT det  IF ( 1 verb) ;
+r3 = REMOVE verb IF (-1 det) ;
+\end{verbatim}
+
+To begin, let us only look at the first and the last rule. Like in the previous example, they target the same reading, but now the order is good: the first rule is the one with a narrower condition, which means that it is possible for a sequence to pass through it, and still have the verb reading in {\em w2} intact. %---it just needs to have something else in addition to the determiner in {\em w1}
+The following is an example of such sequence---if we stopped after $r1$ and asked for a solution that triggers $r3$, we might get just that.
+
+\begin{figure}[h]
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l }
+\t{"<w1>"}    &                     &  \t{"<w2>"}  &           \\
+              & \t{"w1" det def}    & &      \t{"w2" noun pl}  \\
+              & \t{"w1" noun sg}    & &      \t{"w2" verb sg}  \\
+\end{tabular}
+% \label{fig:ambiguousDet}
+% \caption{After $r1$, the symbolic word {\em w1} has to be determiner, but ambiguously so.}
+\end{figure}
 
 
-The state of a given variable can still be affected by a condition, but in a more restricted way.
-We allow \t{w1<n>} to be true and \t{w1'<n>} be false; both true; both false, but not \t{w1<n>} to be false and \t{w1'<n>} true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
+To recap, we passed through $r1$ with the case ``condition does not hold, target not removed''. Now, let us add $r2$: \t{SELECT det IF (1 verb)}. 
+We must, in fact, select the determiner: 
+the condition of $r2$ happens to be the target of $r3$, so it must hold. 
+%if the condition of $r2$ did not hold, then $r3$ would not have its target.
+But we have the notion of state now, so this is no problem.
+At time $t1$, the symbolic word {\em w1} had to be ambiguous---that is, one of the variables $w1_{\noun\sg}, w1_{\noun\pl}, w1_{\verb\sg}, w1_{\verb\pl}$ must be true. 
+But at time $t2$, all of the variables $w1'_{\noun\sg}, w1'_{\noun\pl}, w1'_{\verb\sg}, w1'_{\verb\pl}$ must be false.
+We have arrived to the situation where {\em w1} at time $t1$ does not trigger $r1$, 
+and {\em w1} at time $t3$ triggers $r3$.
+Since the clauses by $r1$, $r2$ and $r3$ operate on different variables, there is no conflict.
+
+
+% The state of a given variable can still be affected by a condition, but in a more restricted way.
+% We allow \t{w1<n>} to be true and \t{w1'<n>} be false; both true; both false, but not \t{w1<n>} to be false and \t{w1'<n>} true. In other words, a reading may be in place all the time; absent all the time; or in place earlier and get removed later. No other changes are allowed.
 
 
 
