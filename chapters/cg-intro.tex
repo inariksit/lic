@@ -6,8 +6,8 @@
 
 Constraint Grammar (CG) is a formalism for 
 disambiguating morphologically analysed text. 
-It was first introduced by
-\cite{karlsson1995constraint}, and has been used for many tasks in
+It was first introduced by Fred Karlsson  
+\cite{karlsson1990cgp,karlsson1995constraint}, and has been used for many tasks in
 computational linguistics, such as POS tagging, surface syntax and
 machine translation \cite{bick2011}.
 CG-based taggers are reported to achieve F-scores of over 99 \% for morphological disambiguation, 
@@ -105,7 +105,7 @@ finished.
 The following rules could be applied to the example sentence. The
 letter `C' after the position marker means \emph{careful} context: e.g. 
 \texttt{(-1C noun)} requires the previous word to be unambiguously
-noun. Such rule would not fire if the previous word has any other
+noun. Such a rule would not fire if the previous word has any other
 reading in addition to the noun reading.
 
 \begin{itemize}
@@ -157,20 +157,20 @@ CG is one in the family of shallow and reductionist grammar formalisms. In this 
 
 Disambiguation using constraint rules dates back to 1960s and 1970s---the closest system to modern CG was Taggit \cite{taggit}, which was used to tag the Brown Corpus.
 Karlsson \cite{karlsson1995constraint} lists various approaches to the disambiguation 
-problem, including manual intervention, statistical optimisation and Lambek calculus.
+problem, including manual intervention, statistical optimisation, unification and Lambek calculus. 
 For disambiguation rules based on local constraints, Karlsson mentions \cite{hindle1989disamrules,herz1991local}.
 
 %Hindle (1983, 1989) uses 350 disambiguation rules, constituting half of the rules of Fidditch. Shieber (1983) postulated disambiguation rules for solving attachment ambiguities in connection with a shift-reduce parser. Herz – Rimon (1990) use local constraints disallowing certain sequences of tags from being in the near context of a target word with designated features. The local constraints are retrieved from a context-free grammar of the language.
 
 CG itself was introduced in 1990. Around the same time, a related formalism was proposed: 
-finite-state parsing and disambiguation system using constraint rules \cite{koskenniemi90}, which was later named Finite-State Intersection Grammar \cite{piitulainen1995}. 
+finite-state parsing and disambiguation system using constraint rules \cite{koskenniemi90}, which was later named Finite-State Intersection Grammar (FSIG) in \cite{piitulainen1995}. 
 Like CG, a FSIG grammar contains a set of rules which remove impossible readings based on contextual tests, 
 in a parallel manner: a sentence must satisfy all individual rules in a given FSIG. 
 Due to these similarities, the name Parallel Constraint Grammar was also suggested \cite{koskenniemi97}.
 However, FSIG rules usually target syntactic phenomena, and the rules allow for more expressive contextual tests than CG. 
 In this thesis, we use the name FSIG to refer to the framework that is aimed at producing a full syntactic analysis with the more expressive rules, 
 and PCG to describe any CG-variant which happens to be parallel.
-Thus, we will call implementations such as \cite{voutilainen1994designing} an \emph{FSIG grammar} and an engine that parses it an \emph{FSIG parser}.
+Thus, we will call implementations such as \cite{voutilainen1994designing} an \emph{FSIG grammar} and a program that parses it an \emph{FSIG parser}.
 Conversely, the CG parser in \cite{listenmaa_claessen2015} 
 and the ``CG-like'' system in \cite{lager98} are instances of PCG.
 We return to the comparison with FSIG in Sections~\ref{sec:ordering}~and~\ref{sec:expressivity}.
@@ -195,7 +195,7 @@ and dependency syntax \cite{tapanainen97fdg}.
 
 \section{Properties of Constraint Grammar}\label{sec:properties}
 
-\cite{karlsson1995constraint} lists 24 design principles and describes
+Karlsson \cite{karlsson1995constraint} lists 24 design principles and describes
 related work at the time of writing.
 Here we summarise a set of main features, and relate CG to the developments in grammar formalism since the initial description.
 
@@ -255,16 +255,16 @@ licencing grammar will accept no string.
 % processing, the less unambiguous information.
 % \end{quote}
 
-According to the initial specification, CG is meant for analysis---\cite{karlsson1995constraint} does not see it fit for generation:
+According to the initial specification, CG is meant for analysis---Karlsson \cite{karlsson1995constraint} does not see it fit for generation:
 
 \begin{quote}
 %It would be optimal if the formalism were general and abstract enough [--] to be used both for sentence analysis and sentence generation. 
 %Constraint Grammar takes no explicit stand on this issue. 
 In practice, however, constraints are geared towards parsing, and Constraint Grammars are analysis grammars. It remains to be demonstrated that full-scale syntax can be done by one and the same reversible grammar.
 \end{quote}
-\noindent Two decades later, \cite{bick2015} describe CG as ``a
-declarative whole of contextual possibilities and impossibilities for
-a language or genre'', which is nevertheless implemented in a
+\noindent Two decades later, Eckhard Bick and Tino Didriksen \cite{bick2015} 
+describe CG as ``a declarative whole of contextual possibilities and impossibilities 
+for a language or genre'', which is nevertheless implemented in a
 low-level way: selecting and removing readings from individual words,
 without explicit connection between the rules. Bick and Didriksen
 argue that as a side effect, the rules actually manage to describe language.
@@ -362,12 +362,12 @@ As a result, readings may look like the following:
 In other words, we may use syntactic or semantic features to help in morphological disambiguation, and vice versa.
 
 This lack of deep structure is intentional in the design of CG.
-\cite{karlsson1995constraint} justifies the choice with a number of
+Karlsson \cite{karlsson1995constraint} justifies the choice with a number of
 theoretical principles: that language is open-ended and grammars are
 bound to leak, and that necessary information for the syntactic analysis
 comes from the morphology, hence morphology is ``the cornerstone of
 syntax''. 
-In addition, \cite{karlsson1995constraint} argues CG to be a reasonable 
+In addition, Karlsson \cite{karlsson1995constraint} argues CG to be a reasonable 
 psycholinguistic hypothesis: 
 in generative formalisms, rule applications create ambiguities,
 whereas in CG, rule applications reduce ambiguity. This means less processing load 
@@ -395,13 +395,16 @@ in order to achieve clarity.
 
 As for the level of abstraction, CG rules lie somewhere between 
 traditional grammar formalisms, such as HPSG, and purely statistical methods.
-The rules do not usually handle long-distance dependencies; 
+The rules for morphological disambiguation do not usually handle long-distance dependencies; 
 they operate on a unit of a few words, nor do they abstract away from surface features such as word order.
+
 The rule that removes a verb reading after a determiner
-does not describe the whole abstract category ``noun phrase''; we need a second
-rule to remove a verb after a determiner and an adjective (\emph{the happy bear}) 
-or an adjectival phrase (\emph{the very happy bear}).
-Some rules may be purely lexical, and some rules may target the whole class of nouns or determiners; these decisions are motivated by what is needed for disambiguating real-life texts, rather than formulating the most elegant and concise rules possible.
+does not describe the whole abstract category ``noun phrase''; 
+we need a second rule to remove a verb after a determiner and an adjective 
+(\emph{the happy bear})  or an adjectival phrase (\emph{the very happy bear}).
+There is a template feature, present already in CG-1, which allows to list alternatives under a single name, such as ``\t{det~n}'', ``\t{det~adj~n}'' and ``\t{adj~n}'' under \t{NP}. But this is just syntactic sugar: one rule with a condition \t{IF -1 NP} is expanded into three rules, with the respective conditions \t{IF~(-2~det)~(-1~n)}, \t{IF~(-3~det)~(-2~adj)~(-1~n)} and \t{IF~(-2~adj)~(-1~n)}.
+
+Finally, some rules may be purely lexical, such as \t{REMOVE v IF (-1 "bear")}, and some rules may target the whole class of nouns, or something in between, such as all finite verb forms. These decisions are motivated by what is needed for disambiguating real-life texts, rather than formulating the most elegant and concise rules possible.
 %A phenomenon that is expressed with one big rule in a deep formalism is split into many low-level rules.
 
 
@@ -467,16 +470,56 @@ schemes. In the present section, we describe the different parameters of orderin
 % \end{quote}
 %
 % The execution of the rules depends on the following parameters: strict vs. heuristic ordering, and sequential vs. parallel execution. These parameters may combine freely: strict and sequential, strict and parallel, heuristic and sequential, or heuristic and parallel. 
-Throughout the section, we will apply the rules to the following ambiguous passage:
+Throughout the section, we will apply the rules to the following ambiguous passage, ``{\em What question is that}'':
 
-\begin{tabular}{p{0.6cm} l  p{0.6cm} l}
-\t{"<what>"}     &                      &  \t{"<is>"}           & \\
-                 & \t{"what" det}       & &      \t{"be" verb}    \\
-                 & \t{"what" pron}      &                       & \\
-\t{"<question>"} &                      & \t{"<that>"}         & \\
-                 & \t{"question" noun}  & &      \t{"that" det}   \\
-                 & \t{"question" verb}  & &      \t{"that" rel}
+\begin{tabular}{p{0.6cm} l  p{0.6cm} l p{0.6cm} l p{0.6cm} l}
+\t{"<what>"}     &                      &  \t{"<question>"}        &  & \t{"<is>"}         & & \t{"<that>"} \\
+                 & \t{"what" det}       & &      \t{"question" noun}  &  &    \t{"be" verb}  & &    \t{"that" det}  \\
+                 & \t{"what" pron}      & &      \t{"question" verb}  &  &                   & &    \t{"that" rel} \\
 \end{tabular}
+
+% \begin{tabular}{p{0.6cm} l  p{0.6cm} l}
+% \t{"<what>"}     &                      &  \t{"<is>"}           & \\
+%                  & \t{"what" det}       & &      \t{"be" verb}    \\
+%                  & \t{"what" pron}      &                       & \\
+% \t{"<question>"} &                      & \t{"<that>"}         & \\
+%                  & \t{"question" noun}  & &      \t{"that" det}   \\
+%                  & \t{"question" verb}  & &      \t{"that" rel}
+% \end{tabular}
+
+
+
+
+
+\def\satcgMax{SAT-CG\textsubscript{Max}}
+\def\satcgOrd{SAT-CG\textsubscript{Ord}}
+\def\noncg#1{{\em \color{gray} #1}}
+
+\begin{table}[h!]
+\centering
+
+  \begin{tabular}{r | p{2.5cm} | p{3.5 cm} | p{3.5cm}}
+           & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
+\textbf{Sequential}
+           & CG-1 \cite{karlsson1990cgp}   
+                             & CG-2 \cite{tapanainen1996} % (Tapanainen1996, p. 34
+                                                  & --           \\ 
+           & VISL CG-3  \cite{vislcg3}      
+                             & Weighted CG-3 \cite{pirinen2015} & \\ 
+           & Peltonen 2011 \cite{peltonen2011}  &  &\\ %Peltonen2011, p. 80
+           & Yli-Jyrä 2011 \cite{yli-jyra2011cg_engine}  & & \\ 
+           & Hulden 2011 \cite{hulden2011cg_engine} & & \\ \hline
+\textbf{Parallel}
+           & \satcgOrd       & \satcgMax          & \noncg{Lager 1998 \cite{lager98}} \\ 
+           &                 & \noncg{FSIG (Voutilainen) \cite{voutilainen1994designing}} 
+                                                  & \noncg{FSIG (Koskenniemi) \cite{koskenniemi90}} \\
+           &                 & \noncg{Voting constraints \cite{oflazer97votingconstraints}}  \\
+
+
+  \end{tabular}
+  \caption{Combinations of rule ordering and execution strategy.}
+  \label{table:nelikentta}
+\end{table}
 
 \paragraph{Strict vs. heuristic}
 
@@ -505,7 +548,10 @@ An alternative solution to a strict order is to use a \emph{heuristic order}: wh
 There are also methods that use explicit weights to favour certain rules, such as \cite{pirinen2015} for CG, and \cite{voutilainen1994designing,oflazer97votingconstraints,silfverberg2009conflict} for related formalisms. 
 					
 Both methods have their strengths and weaknesses. A strict order is more predictable, but it also means that the grammar writers need to pay more thought to rule interaction. A heuristic order frees the grammar writer from finding an optimal order, but it can give unexpected results, which are harder to debug.
-As for major CG implementations, \cite{karlsson1990cgp} and \cite{vislcg3} follow the strict scheme, whereas \cite{tapanainen1996} is heuristic.
+As for major CG implementations, CG-1 \cite{karlsson1990cgp} and VISL CG-3 \cite{vislcg3} follow the strict scheme, whereas CG-2 \cite{tapanainen1996} is heuristic\footnote{Note that CG-2 is heuristic \emph{within sections}: the rules in a given section are executed heuristically, but all of them will be applied before any rule in a later section.}.
+
+
+
 
 
 \paragraph{Sequential vs. parallel}
@@ -575,38 +621,6 @@ CG and FSIG respectively, is explained with further detail in \cite{lager_nivre0
 % Perhaps unsurprisingly, nearly all of the existing CG implementations are sequential.
 % There are other, parallel formalisms, such as FSIG \cite{koskenniemi90} and the system of voting constraints \cite{oflazer97votingconstraints}; however, for pure CG, all mainstream implementations follow the sequential scheme.
 % The CG engine presented in \cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} in this thesis is parallel, as well as the ``CG-like'' system in \cite{lager98}, but both of these systems are mostly proof of concept.
-
-
-
-\def\satcgMax{SAT-CG\textsubscript{Max}}
-\def\satcgOrd{SAT-CG\textsubscript{Ord}}
-\def\noncg#1{{\em \color{gray} #1}}
-
-\begin{table}[h!]
-\centering
-
-  \begin{tabular}{r | p{2.5cm} | p{3.5 cm} | p{3.5cm}}
-           & \textbf{Strict} & \textbf{Heuristic} & \textbf{Unordered} \\ \hline
-\textbf{Sequential}
-           & CG-1 \cite{karlsson1990cgp}   
-                             & CG-2 \cite{tapanainen1996} % (Tapanainen1996, p. 34
-                                                  & --           \\ 
-           & VISL CG-3 \cite{vislcg3}      
-                             & Weighted CG-3 \cite{pirinen2015} & \\ 
-           & Peltonen2011 \cite{peltonen2011}  &  &\\ %Peltonen2011, p. 80
-           & Yli-Jyrä2011 \cite{yli-jyra2011cg_engine}  & & \\ 
-           & Hulden2011 \cite{hulden2011cg_engine} \\ \hline
-\textbf{Parallel}
-           & \satcgOrd       & \satcgMax          & \noncg{Lager 1998 \cite{lager98}} \\ 
-           &                 & \noncg{FSIG (Voutilainen) \cite{voutilainen1994designing}} 
-                                                  & \noncg{FSIG (Koskenniemi) \cite{koskenniemi90}} \\
-           &                 & \noncg{Voting constraints \cite{oflazer97votingconstraints}}  \\
-
-
-  \end{tabular}
-  \label{table:nelikentta}
-  \caption{Combinations of rule ordering and execution strategy.}
-\end{table}
 
 
 Table~\ref{table:nelikentta} shows different systems of the constraint rule family, 
@@ -681,23 +695,42 @@ Traditional CG implementations are shown in a normal font; other, related system
 % • It does not use productions, and
 % • It does not derive the sentences with syntactic inferences.
 
-\todo{Restructure this bit:
-\begin{enumerate}
-\item General motivation: why is expressivity interesting in the first place? 
-\item Previous approaches to defining expressivity of CG/CG-like systems
-\item Wild speculation how the work in this thesis could have a possible secondary use, in helping define expressivity.
-\end{enumerate}}
 
-As we have learnt, CG is not a generative grammar---
-there are no production rules nor phrase structure,
-CG just needs a list of alternatives and finds the correct ones among them.
-More precisely, a grammar in CG describes a \emph{relation} between an input language 
-and an output language. %: say, $I = \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}, \text{"bear" }\t{ verb}]\}$ and the output is$O =  \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}]\}$. 
+% \item General motivation: why is expressivity interesting in the first place? 
+% \item Previous approaches to defining expressivity of CG/CG-like systems
+% \item Wild speculation how the work in this thesis could have a possible secondary use, in helping define expressivity.
+
+So far, we have approached CG from a practical and language-oriented point of view. 
+But grammar formalisms are interesting also from a computational perspective. 
+For the theoretically inclined, making a description of a formalism more precise 
+is an end of its own. 
+However, even a practically oriented reader should appreciate the applications: 
+better understanding of a formalism may lead to novel uses and implementation techniques. 
+
+The standard measure of formal languages is the Chomsky hierarchy \todo{cite}, with its four classes of grammars and languages, in order from most expressive to least expressive: \emph{recursively enumerable} (Type 0), \emph{context-sensitive} (Type 1), \emph{context-free} (Type 2), and \emph{regular} (Type 3). 
+The notion of \emph{expressive power}, ``which constructs can we express in the language'' is coupled with \emph{parsing complexity}, ``how much time and memory do we need to parse sentences in the language''; more expressive power corresponds to greater parsing complexity. 
+
+
+% Intuitively, we can approach expressivity as follows:
+% For the purposes of practically oriented language parsing, we may define expressivity as such:
+
+% "it's just that your regex doesn't work as intended. 
+% You cannot specify exacly enough, within the limitations of
+% regexes, all the conditions when you want a match and when you don't."
+\todo{return to this}
+Chomsky hierarchy is defined for generative grammar formalisms, hence it makes difficult to place CG directly onto it. 
 The question ``what can CG express?'' is ill-defined as such: 
-just to start with, there are different variants and implementations of CG, as we have seen in the previous section.
+just to start with, there are different variants and implementations of CG, as we have seen in the previous section. 
 Taking that into account, even ``what can sequential and heuristic CG-2 express'' is not specific enough: 
-the answer depends on what is present in the input language, and is different for each grammar.
+the answer depends on what is present in the input language, and is different for each grammar (Yli-Jyrä 2016, personal communication).
+% As we have learnt, CG is not a generative formalism---there are 
+% no production rules nor phrase structure,
+% CG just needs a list of alternatives and finds the correct ones among them.
+More precisely, a given grammar in CG describes a \emph{relation} between an input language 
+and an output language. %: say, $I = \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}, \text{"bear" }\t{ verb}]\}$ and the output is$O =  \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}]\}$.
 
+
+Even if CG is not a generative formalism, the concepts around Chomsky hierarchy play an important role, for instance, when defining what a single rule can express. 
 In the following, we look at existing approaches to define the expressivity of reductionist formalisms, 
 and suggest a way to emulate generation within (a variant of) CG.
 
@@ -713,12 +746,41 @@ and suggest a way to emulate generation within (a variant of) CG.
 %\end{inparaenum}
 
 
+\def\wwf{~~~~\t{"<w>"}}
+\def\alm{\t{"a"}~~~~~~}
+\def\blm{\t{"b"}~~~~~~}
+
+\begin{figure}[t]
+\centering
+
+%\begin{tabular}{cl @{\hspace{2cm}} rl}
+\begin{tabular}{cl |  rl}
+\multicolumn{2}{c|}{\textbf{Input}} & \multicolumn{2}{c}{\textbf{Output}} \\ \hline
+
+\wwf  &        &  \wwf &        \\
+         & \alm  &          & \alm  \\
+         & \blm  &          &        \\
+\wwf  &        &  \wwf &        \\
+         & \alm  &          & \alm  \\
+         & \blm  &          &        \\
+\wwf  &        &  \wwf &        \\
+         & \alm  &          & \blm  \\
+         & \blm  &          &        \\
+\wwf  &        &  \wwf &        \\
+         & \alm  &          & \blm  \\
+         & \blm  &          &        \\ 
+\end{tabular}
+
+\caption{Recognising the context-free language $a^nb^n$ in CG.}
+\label{fig:anbn}
+\end{figure}
+
 \paragraph{Expressivity of a rule vs. expressivity of a grammar}
 
-As defined in \cite{tapanainen1999phd}, the rules in finite-state constraint languages may include ``contextual tests that are expressed in terms of regular languages''. 
+Pasi Tapanainen \cite{tapanainen1999phd} defines the notion \emph{finite-state constraint languages}: the grammar consists of individual rules, which may only contain contextual tests \emph{that are expressed in terms of regular languages}. 
 Indeed, we can verify that in all implementations of CG, 
 the contextual tests must be regular: we cannot write in a single rule ``remove verb if the previous segment contains only well-nested brackets''.
-Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations, such as $(\Sigma - N)*A(\Sigma - V)*N$\footnote{IF (*1 A BARRIER N LINK *1 N BARRIER V)}; in turn, CG-2 \cite{tapanainen1996} can express this, but not e.g. repeated patterns. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{bick2015} did not exist at the time, \cite{tapanainen1999phd} does not include it in the hierarchy of the constraint formalisms.
+Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations. According to Tapanainen \cite{tapanainen1999phd}, a contextual test such as $(\Sigma - N)*A(\Sigma - V)*N$\footnote{IF (*1 A BARRIER N LINK *1 N BARRIER V)} is not supported in CG-1; in turn, CG-2 \cite{tapanainen1996} can express it, but not e.g. repeated patterns, such as $(Det A N)+$. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{vislcg3,bick2015} did not exist at the time, \cite{tapanainen1999phd} does not include it in the hierarchy of the constraint formalisms.
 
 The expressivity of a single rule is well defined. However, the expressivity of the whole rule set is harder to define. 
 %
@@ -734,7 +796,7 @@ The expressivity of a single rule is well defined. However, the expressivity of 
 %That said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
 %
 %
-Closest to answering this question is 
+Closest to answering this question is Anssi Yli-Jyrä
 \cite{yli-jyra2003describing,yli-jyra2004fsig_dependency} \todo{cite all relevant Yli-Jyrä},
 who investigates the computational complexity of the related formalism FSIG.
 %\todo{\cite{yli-jyra2004fsig_dependency} shows that certain FSIGs are closely related to some mildly context-sensitive grammars.} 
@@ -742,7 +804,7 @@ In \cite{yli-jyra2005phd}, Yli-Jyrä defines the set of \emph{grammatical model 
 as those sentences which satisfy all the constraints in the grammar. In addition, Yli-Jyrä \cite{yli-jyra2005phd} defines the \emph{language} of each FSIG as the set of grammatical model strings; ignoring the input language of the relation, FSIGs become superficially comparable to generative grammars.
 % ``In this dissertation, the language of each FSIG will be uniquely the set of grammatical model strings, which makes FSIG superficially comparable to GES grammars.
 
-As for another related formalism, \cite{tapanainen1999phd} demonstrates the expressive power of Functional Dependency Grammar \cite{tapanainen97fdg}.
+As for another related formalism, Pasi Tapanainen \cite{tapanainen1999phd} demonstrates the expressive power of Functional Dependency Grammar \cite{tapanainen97fdg}.
 Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language,% which consists of only well-nested sequences of \t{[} and \t{]}, 
 and another grammar, which correctly parses the context-sensitive language $a^nb^nc^n$. 
 Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can 
@@ -757,44 +819,7 @@ will be made use of in Chapter~\ref{chapterCGana}---as a way of generating seque
 and better answering the question about expressivity.
 The hypothesis is that if the input language is always $\Sigma{}*$, then we may be able to reason more easily about the grammar itself.
 
-\begin{figure}[t]
-\centering
 
-%\begin{tabular}{cl @{\hspace{2cm}} rl}
-\begin{tabular}{cl @{\hspace{0.3cm}}|@{\hspace{0.3cm}} rl}
-
-% ``<w>''  &        &  ``<w>'' &        \\
-%          & ``a''  &          & ``a''  \\
-%          & ``b''  &          &        \\
-% ``<w>''  &        &  ``<w>'' &        \\
-%          & ``a''  &          & ``a''  \\
-%          & ``b''  &          &        \\
-% ``<w>''  &        &  ``<w>'' &        \\
-%          & ``a''  &          & ``b''  \\
-%          & ``b''  &          &        \\
-% ``<w>''  &        &  ``<w>'' &        \\
-%          & ``a''  &          & ``b''  \\
-%          & ``b''  &          &        \\
-
-\multicolumn{2}{c}{\textbf{Input}} & \multicolumn{2}{c}{\textbf{Output}} \\ \hline
-
-\t{"<w>"}  &        &  \t{"<w>"} &        \\
-         & \t{"a"}  &          & \t{"a"}  \\
-         & \t{"b"}  &          &        \\
-\t{"<w>"}  &        &  \t{"<w>"} &        \\
-         & \t{"a"}  &          & \t{"a"}  \\
-         & \t{"b"}  &          &        \\
-\t{"<w>"}  &        &  \t{"<w>"} &        \\
-         & \t{"a"}  &          & \t{"b"}  \\
-         & \t{"b"}  &          &        \\
-\t{"<w>"}  &        &  \t{"<w>"} &        \\
-         & \t{"a"}  &          & \t{"b"}  \\
-         & \t{"b"}  &          &        \\
-\end{tabular}
-
-\caption{Recognising the context-free language $a^nb^n$ in CG.}
-\label{fig:anbn}
-\end{figure}
 
 % We add the additional requirement that the output of the grammar may only contain readings in $\Sigma$.
 
