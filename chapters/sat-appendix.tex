@@ -82,7 +82,7 @@ The encoding in this appendix is independent of the implementation of the softwa
 The purpose of this appendix is to give a full description of the different rule types; the method is introduced with more pedagogical focus in Section~\ref{sec:CGSAT}. 
 %However, the examples in this appendix are self-contained; if you know my previous stuff and want to be bored, just read this!
 
-This appendix only describes the parallel scheme. There is another appendix after Chapter~\ref{chapterCGana}, which describes the necessary steps for modelling order.
+
 
 \section{SAT-encoding of sentences}
 
@@ -357,8 +357,8 @@ There is no word following \cientifica{}, hence its adjective reading is removed
 %
 \intertext{\cgrule{REMOVE adj IF (NOT -1* n BARRIER det)} Scanning up to a barrier. There must be no nouns before the target, up to a determiner.}
 %
-\neg ( (\sobreN \wedge \unaDet) \vee \aproximacionN) & \impl \neg{}\masAdj \notag \\
-\neg ( (\sobreN \wedge \unaDet) \vee \aproximacionN) & \impl \neg{}\cientificaAdj \\
+\neg ( (\sobreN \wedge \neg \unaDet) \vee \aproximacionN) & \impl \neg{}\masAdj \notag \\
+\neg ( (\sobreN \wedge \neg \unaDet) \vee \aproximacionN) & \impl \neg{}\cientificaAdj \\
 %
 %
 \intertext{\cgrule{REMOVE adj IF (NOT -1* n CBARRIER det)} Scanning up to a careful barrier. There must be no nouns before the target, up to an unambiguous determiner.}
@@ -378,12 +378,12 @@ Here we demonstrate a number of inverted rules, in which the contextual test doe
 
 \cgrule{REMOVE adj IF (NOT 10 adj)} Single inverted condition, out of scope.
 
-\cgrule{REMOVE adj IF (NOT 1 adj) (NOT -10 n)} Conjunction of inverted conditions, one out of scope.
+\cgrule{REMOVE adj IF (NOT 1 n) (NOT 10 n)} Conjunction of inverted conditions, one out of scope.
 
 \cgrule{REMOVE adj IF (NEGATE -3 pr LINK 1 punct)} Inversion of a conjunction of conditions, some not present in initial analysis.
 
 \begin{equation}
- \neg{}\masAdj 
+ \impl \neg{}\masAdj 
 \end{equation}
 
 
