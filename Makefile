@@ -1,6 +1,6 @@
 tex = lic
 
-all: pdf clean
+all: pdf 
 
 # Build the PDF
 
@@ -10,8 +10,6 @@ pdf:
 cite:
 	xelatex $(tex) ; bibtex $(tex) ; xelatex $(tex) ; xelatex $(tex)
 
-p:
-	xelatex $(tex)
 
 outline:
 	pandoc outline.md --chapters --toc --latex-engine=xelatex -o OutlineLicInari.pdf

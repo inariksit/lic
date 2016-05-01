@@ -20,7 +20,8 @@
 
 \def\defRule{``do not remove the last reading''}
 
-\def\ventero{\emph{El ventero, que, como está dicho, era un poco socarrón y ya tenía algunos
+\def\ventero{\emph{El ventero, que, como está dicho, 
+era un poco socarrón  y ya tenía algunos
 barruntos de la falta de juicio de su huésped, acabó de creerlo cuando
 acabó de oírle semejantes razones, y, por tener qué reír aquella noche,
 determinó de seguirle el humor; y así, le dijo que andaba muy acertado en
@@ -38,8 +39,8 @@ dándose a conocer por cuantas audiencias y tribunales hay casi en toda
 España; y que, a lo último, se había venido a recoger a aquel su castillo,
 donde vivía con su hacienda y con las ajenas, recogiendo en él a todos los
 caballeros andantes, de cualquiera calidad y condición que fuesen, sólo por
-la mucha afición que les tenía y porque partiesen con él de sus haberes, en
-pago de su buen deseo.}}
+la mucha afición que les tenía y porque partiesen con él de sus haberes,
+en pago de su buen deseo.}}
 
 
 \chapter{CG as a SAT-problem}
@@ -569,7 +570,7 @@ slightly outperforms even VISL CG-3 in terms of precision and recall.
 Conversely, the original SAT-CG scheme, where all variables are left unassigned,
 fares slightly worse for accuracy.
 Overall, the accuracy is very low with the tested grammars, thus it is hard to draw conclusions.
-As for execution time, all variants of SAT-CG perform an order of magnitude worse than VISL CG-3.
+As for execution time, all variants of SAT-CG perform significantly worse than VISL CG-3---depending on the sentence length and the number of rules, SAT-CG ranges from 10 times slower to 100 times slower.
 The results are presented in more detail in the following sections.
 
 
@@ -612,7 +613,7 @@ The results are presented in more detail in the following sections.
       \textbf{VISL CG-3}  & \multicolumn{2}{c}{81.52 \%}  & 0.39s
                                              & \multicolumn{2}{c}{78.83 \%} & 0.64s\\ 
   \end{tabular}
-\caption{F-scores and execution times for the subset of the Spanish grammar, tested on a gold standard corpus of 22,000 words.}
+\caption{F-scores and execution times for the subset of the Spanish grammar, tested on a gold standard corpus of 20,000 words.}
   \label{table:fscore}
 \end{table}
 
@@ -621,8 +622,9 @@ corpus\footnote{\url{https://svn.code.sf.net/p/apertium/svn/branches/apertium-sw
 containing approximately 22,000 words of Spanish news text, 
 and a small constraint grammar\footnote{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}} from the Apertium repository.
 We kept only \textsc{select} and \textsc{remove} rules, which left us 261 rules.
-With this setup, we produced an ambiguous version of the tagged
-corpus, and ran both SAT-CG and VISL CG-3 on it.
+In order to test the grammars, we produced an ambiguous version of the tagged
+corpus: we discarded the tags, and analysed the text again with the Apertium morphological analyser and the morphological dictionary for Spanish. Ideally, we should have used the same analyser, but since the gold standard was produced, there have been some changes in the dictionary. Due to these differences, we had to discard some 2000 words from the gold standard---in most cases, there was a change of just one word, but we excluded the whole sentence nevertheless. 
+With this setup, we ran both SAT-CG and VISL CG-3 on the newly ambiguous corpus. 
 In addition, we wrote a small grammar of 19 rules, optimised to be very compact and disambiguate effectively, taking advantage of the parallel execution. 
 Some of the rules were selected from the original grammar, and some were written by the author.
 
@@ -630,7 +632,7 @@ Some of the rules were selected from the original grammar, and some were written
 Table~\ref{table:fscore} shows F-scores and execution times for these two grammars. 
 \satcgMax{} is the parallel scheme with maximisation, and
 \satcgOrd{} is the parallel scheme where rule applications are introduced one by one.
-The original grammar performs very poorly, with an F-score between 78--79 \% for all three setups---even with an empty grammar, the F-score would be around 70 \%.
+The original grammar performs very poorly, with an F-score between 78--79 \% for all three setups---even with an empty grammar, the F-score would be around 70 \%. 
 Due to the unrepresentative example, we cannot draw many conclusions. 
 We had access to other grammars of the same size range, such as 
 Portuguese, Dutch and Russian; 
@@ -642,6 +644,8 @@ execution; it was heavily tuned to the gold standard corpus,
 and tested only with SAT-CG (leaving all variables unassigned) during development.
 To our surprise, this small grammar turned out to outperform the original, 
 261-rule grammar, even when run with VISL CG-3. 
+The rule ordering was not optimised by automatic means, and sections were not used; hence it is possible that with another order, the numbers could be even better for VISL CG-3 and the ordered scheme. 
+%We ranked the rules in the order of how much does an individual rule contribute to the whole disambiguation: first try all 19 rules to find the best, then try all 2-rule combinations with the best, then all 3-rule combinations with the two best.
 
 
 \subsection{Execution time}
@@ -663,7 +667,7 @@ To our surprise, this small grammar turned out to outperform the original,
 
 \paragraph{Number of rules vs. number of words}
 
-In addition to the 22,000-word corpus of news text,
+In addition to the 20,000-word corpus of news text,
 we tested the performance by parsing Don Quijote (384,155 words) with
 the same Spanish grammars as in the previous experiment. 
 %
@@ -674,7 +678,7 @@ the same Spanish grammars as in the previous experiment.
 %
 More importantly, we wanted to test a grammar of a realistic size, 
 so we took a Finnish grammar, originally written in 1995 for CG-1, 
-and updated into CG-3 by \cite{pirinen2015}.
+and updated into CG-3 by Tommi Pirinen \cite{pirinen2015}.
 We discarded rules and constructions that SAT-CG does not support, and ended up with
 1185 rules. Then, we parsed around 19,000 words of text from FinnTreeBank \cite{voutilainen2011finntreebank}.
 Table~\ref{table:time} shows the results for both Finnish and Spanish tests.
@@ -704,7 +708,8 @@ a rather naive implementation, written in Haskell and BNFC.
 
 \paragraph{Sentence length} 
 In addition, we explored the effect of sentence length further.
-When split by just full stops, the longest sentence in Don Quijote consists of 283 tokens\footnote{The longest sentence in Don Quijote: \ventero}, including punctuation. In Table~\ref{table:timeVentero}, we see this sentence parsed, on the right as a single unit, and on the left, we split it in four parts, at the semicolons. In Table~\ref{table:time}, it was already split at semicolons.
+When split by just full stops, the longest sentence in Don Quijote consists of 283 tokens, %\footnote{The longest sentence in Don Quijote: \ventero}
+including punctuation. In Table~\ref{table:timeVentero}, we see this sentence parsed, on the right as a single unit, and on the left, we split it in four parts, at the semicolons. In Table~\ref{table:time}, it was already split at semicolons.
 We tested the effect of sentence length also for the Finnish grammar.
 All the sentences in FinnTreeBank were very short, so we created an 251-token ``sentence'' 
 by pasting together 22 short sentences and replacing sentence boundaries with commas.
@@ -736,11 +741,15 @@ As another CG result from the late 1990s, \cite{tapanainen1999phd} reports an av
 Compared to the parsing times of sequential CG and FSIG nearly 20 years ago, 
 our results demonstrate a smaller difference, and much less steep curve in the execution time
 related to sentence length. 
-Of course, the FSIG grammar used in \cite{voutilainen1998} 
+Of course, this remark should be taken with caution: to start with, the described experiments were conducted on different systems and different centuries\footnote{Eckhard Bick (personal communication) points out that CG-2 run on a modern system is around 6 times faster than VISL CG-3.}.
+Importantly, the parallel participants in the experiments were using different grammars---the FSIG grammar used in \cite{voutilainen1998} 
 contains much more difficult operations, which makes the constraint problem larger. 
-Our expriments have just shown the lack of blowup for a small grammar.
-In order to properly contrast this experiment to 
-\cite{voutilainen1998}, we should try SAT-CG for parsing real FSIG grammars.
+Our experiments have just shown the lack of blowup for a small grammar. 
+Nevertheless, we feel that this experiment could be interesting to conduct properly: try a SAT-based approach for executing the FSIG grammars from the 1990s, and compare the results to the current state of the art.
+
+%In order to properly contrast this experiment to 
+%\cite{voutilainen1998}, we should try SAT-CG for parsing real FSIG grammars. 
+%Naturally, all the experiments should be conducted on the same computer
 %isolate the effect of the grammar and the effect of the execution strategy.
 
 
@@ -785,6 +794,19 @@ We tried also a second variant, where we would assign true to only those variabl
 neither targets nor conditions to any rule.
 Table~\ref{table:forceOrNot} shows in more detail what happens to the precision and recall with all the three variants, with the 19-rule grammar.
 
+
+
+We notice that the SAT-based solution loses severely in recall, 
+when all variables are left unassigned. This is understandable: given that
+the grammar is extremely small, only 19 rules, the majority of the tokens will 
+never appear in the clauses, neither as targets nor conditions. So the SAT-solver is free to 
+arbitrarily choose the readings of those free words, whereas VISL CG-3 does nothing to them. 
+There is no universal behaviour what to do if a variable is not included in any of the clauses; it is likely that many solvers would just assign false by default. In our case, we still require at least one reading of every cohort to be true; this applies even for cohorts which do not appear in the clauses. 
+Given the lack of other information, the SAT-solver is likely to just choose the first one in alphabetical order. It would not be difficult to modify the scheme based on another heuristic, such as the most likely unigram reading, or dispreference for analyses with many compound splits. However, we did not add any heuristics; the results just show the SAT-solver performing its default actions.
+
+%The selection of the SAT-solver does not 
+%f left on its own, the SAT-solver tends to assign many of them false. 
+
 %%%%
 \def\noAss{{\sc NoAss}}
 \def\noAff{{\sc NoAff}}
@@ -794,8 +816,8 @@ Table~\ref{table:forceOrNot} shows in more detail what happens to the precision 
 \centering
   \begin{tabular}{l|cc|cc|cc}
 
-                     & \multicolumn{2}{c}{\noAss} 
-                                    & \multicolumn{2}{c}{\noAff} 
+                     & \multicolumn{2}{c|}{\noAss} 
+                                    & \multicolumn{2}{c|}{\noAff} 
                                                      & \multicolumn{2}{c}{\noTar} \\ 
                      & Prec. & Rec.  & Prec. & Rec.  & Prec. & Rec. \\ \hline 
 \textbf{\satcgMax}   & 79.97 & 80.47 & 77.24 & 82.94 & 80.36 & 86.41 \\ 
@@ -808,15 +830,8 @@ Table~\ref{table:forceOrNot} shows in more detail what happens to the precision 
 \caption{Showing the effect of three variants on the 19-rule grammar: (\noAss) Leave all variables unassigned; (\noAff) Assign true to variables which do not appear in any rule; (\noTar) Assign true to variables which are not targeted by any rule.}
 \end{table}
 
-
-
-We notice that the SAT-based solution loses severely in recall, 
-when all variables are left unassigned. This is understandable: given that
-the grammar is extremely small, only 19 rules, the majority of the tokens will 
-never appear in the clauses, neither as targets nor conditions. So the SAT-solver is free to 
-arbitrarily decide the analyses for those free words, whereas VISL CG-3 does nothing to them.
-However, the precision in SAT-CG is better already in the unassigned scheme.
-The percentage is calculated by overall number of analyses, but even at the level of different words, the advantage is at SAT-CG. Out of the gold standard corpus, VISL CG-3 differs in the analyses of some 4,200 words, whereas SAT-CG, in the the unassigned variant, disagrees only on 3700-3900 words. 
+The precision in SAT-CG is better already in the unassigned scheme.
+The percentage is calculated by overall number of analyses, but even at the level of different words, the advantage is at SAT-CG. Out of the gold standard corpus, VISL CG-3 differs in the analyses of some 4,200 words, whereas SAT-CG, in the unassigned variant, disagrees only on 3700-3900 words. 
 Of course, the differences are still very small, and this effect could also be due to randomness: sometimes the SAT-solver happens to disambiguate correctly just by removing a random analysis.
 
 We move on to the second variant, where the completely unaffected variables are assigned true. 
@@ -831,7 +846,7 @@ But at the same time, this limits the power of rules: they may only disambiguate
 The most plausible explanation for this phenomenon, aside from mere chance, 
 is the particular features of the tested grammar. 
 When tested with the original 261-rule grammar, 
-shown in Figure~\ref{table:forceOrNotOrig}, the pattern does not repeat: 
+shown in Table~\ref{table:forceOrNotOrig}, the pattern does not repeat: 
 assigning more variables true just brings the performance closer to VISL CG-3.
 
 \begin{table}[h]
@@ -847,10 +862,24 @@ assigning more variables true just brings the performance closer to VISL CG-3.
 \textbf{VISL CG-3}   & 71.17 & 88.34 & 71.17 & 88.34 & 71.17 & 88.34  \\
 
   \end{tabular}
-
-\label{table:forceOrNotOrig}
 \caption{Evaluation of the three variants, for the original 261-rule grammar.}
+\label{table:forceOrNotOrig}
 \end{table}
+
+
+
+\begin{figure}[ht]
+\centering
+\begin{verbatim}
+# la casa (en que vivo)
+SELECT:i01_s_det Det IF (NOT 1C VerbFin) ;
+
+# (el sacerdote) la casa (con el novio)
+SELECT:i08_s_pro PrnIndep IF (1C VerbFin) ;
+\end{verbatim}
+\label{fig:rulesAreBiased}
+\caption{Excerpt from the 19-rule Spanish grammar.}
+\end{figure}
 
 Now, what are these features of the tiny grammar? 
 %Again, the grammar is extremely small, and obviously overfitted just to the data.
@@ -863,26 +892,13 @@ Thus, if a rule addresses some phenomenon, most of the readings in the target co
 are saved from the forced assignment.
 
 
-
-
 To conclude, this experiment has been very inconclusive, due to the extremely low coverage 
 of the tested grammars.
 A high-quality grammar would target significantly more individual words in the test corpus;
 this means less chances for the SAT-solver to randomly decide the values for untargeted readings. We would hope that the power of rules disambiguating their condition would help 
 such grammar to go that extra mile; however, based on the experiments so far, this is mostly speculation.
 
-\begin{figure}[ht]
-\centering
-\begin{verbatim}
-# la casa (en que vivo)
-SELECT:i01_s_det Det IF (NOT 1C VerbFin) ;  # TOP 1
 
-# (el sacerdote) la casa (con el novio)
-SELECT:i08_s_pro PrnIndep IF (1C VerbFin) ; # TOP 8    
-\end{verbatim}
-\label{fig:rulesAreBiased}
-\caption{Excerpt from the 19-rule Spanish grammar.}
-\end{figure}
 
 It would be interesting to repeat the experiment in writing a serious, large-scale grammar.
 Some questions to address would be 
@@ -970,7 +986,7 @@ Some questions to address would be
 
 \section{Summary}
 
-In this section, we started from the parallels between CG and logic:
+In this section, we started from the known parallels between CG and logic:
 the rules express what is true ({\sc select}) and false ({\sc remove}), under certain conditions ({\sc if}).
 Expressing this as a SAT-problem, we get a working CG implementation, which executes the rules in a parallel manner. 
 To alleviate the brittleness of PCG, we developed two approaches to discard conflicting rule applications.

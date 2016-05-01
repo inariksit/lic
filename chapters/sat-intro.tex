@@ -11,7 +11,7 @@
 
 Imagine you are in a pet shop with a selection of animals: \ant, {\em bat, cat, dog, emu} and \fox.
 
-These animals are very particular about each others' company. The dog has no teeth and needs the cat to chew its food. The cat, in turn, wants its best friend bat. 
+These animals are very particular about each others' company. The dog has no teeth and needs the cat to chew its food. The cat, in turn, wants to live with its best friend bat. 
 But the bat is very aggressive towards all herbivores, and the emu is afraid of anything lighter than 2 kilograms. The ant hates all four-legged creatures, and the fox can only handle one flatmate with wings. 
 
 You need to decide on a subset of pets to buy---you love all animals, but due to their restrictions, you cannot have them all. You start calculating in your head: ``If I take the ant, I cannot take cat, dog, nor fox. How about I take the dog, then I must take the cat and the bat as well.''
@@ -104,8 +104,8 @@ Some problems have a single solution, some problems have multiple solutions, and
 
 SAT-solving as a research area dates back to 1970s.
 Throughout its history, it has been of interest for both theoretical and practical purposes. 
-SAT is a well-known example of an NP-complete problem \cite{cook1971complexity}: for all such problems, a potential solution can be \emph{verified} in polynomial time, but there is no known algorithm that would \emph{find} such solution, in general case, in sub-exponential time.
-This means that we can express any NP-complete problem as a SAT-instance, and use a SAT-solver to solve it.
+SAT is a well-known example of an NP-complete problem \cite{cook1971complexity}: for all such problems, a potential solution can be \emph{verified} in polynomial time, but there is no known algorithm that would \emph{find} such solution, in general case, in sub-exponential time. 
+This equivalence means that we can express any NP-complete problem as a SAT-instance, and use a SAT-solver to solve it.
 The class includes problems which are much harder than the animal example;
 nevertheless, all of them can be reduced into the same representation, just like $\neg\bat \vee \neg\emu$.
 

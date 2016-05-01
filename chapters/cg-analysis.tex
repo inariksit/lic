@@ -46,7 +46,7 @@ ask the following questions.
 \item Could two or more rules be merged? (e.g. \texttt{SELECT Inf IF -1 Prep OR Vai OR Vbmod ...})
 \item What is the best order for the rules?
 \item Can the Finnish rule on the left be rewritten in the form shown on the right?
-\item Generate a sequence that triggers rule(s) $R$ but not rule(s) $R'$. 
+\item Generate an example sequence that triggers rule(s) $R$ but not rule(s) $R'$. 
 \end{itemize}
 
 %%%%%
@@ -85,11 +85,11 @@ However, since our work is aimed to aid the process of hand-crafting rules, we o
 
 \paragraph{Corpus-based methods in manual grammar development}
 
-Hand-annotated corpora are commonly used in the development of CGs, because they give immediate feedback whether a new rule increases or decreases accuracy \cite{voutilainen2004}.
+Hand-annotated corpora are commonly used in the development of CGs, because they give immediate feedback whether a new rule increases or decreases accuracy.
 % This helps the grammar writer to arrange the rules in appropriate sections, with safest and most effective rules coming first.
 % However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve.
-Voutilainen gives a detailed account about best practices of grammar writing and efficient use of corpora to aid the grammar development.
-For a language with no free or tagset-compatible corpus available, \cite{tyers_reynolds2015} describe a method where they apply their rules to unannotated Wikipedia texts and pick 100 examples at random for manual check.
+Atro Voutilainen \cite{voutilainen2004} gives a detailed account about best practices of grammar writing and efficient use of corpora to aid the grammar development.
+For a language with no free or tagset-compatible corpus available, Reynolds and Tyers \cite{tyers_reynolds2015} describe a method where they apply their rules to unannotated Wikipedia texts and pick 100 examples at random for manual check.
 
 CG rules are usually arranged in sections, and run in the following manner. 
 First apply rules from section 1, and repeat until nothing changes in the text. Then apply rules from sections 1--2, then 1--3 and so on, until the set includes all rules.
@@ -97,7 +97,7 @@ The best strategy is to place the safest and most effective rules in the first s
 so that they make way for the following, more heuristic and less safe rules to act on.
 A representative corpus is arguably the best way to get concrete numbers---how many times a rule applied and how often it was correct---and to arrange the rules in sections based on that feedback.
 
-\cite{voutilainen2004} state that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
+Voutilainen \cite{voutilainen2004} states that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
 This figure is nice and encouraging. It's very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms.
 However, this method will not notice a missed opportunity or a grammar-internal conflict, nor suggest ways to improve; neither does it guarantee a coherent whole of rules. 
 While the coverage information is easy to obtain from a corpus, there is no tool that would aid grammar writers in including wide coverage of different linguistic phenomena.
@@ -108,10 +108,9 @@ While the coverage information is easy to obtain from a corpus, there is no tool
 \paragraph{Automatic optimisation of hand-written grammars }
 
 The corpus-based method can tell the effect of each single rule at their place in the rule sequence, and leaves the grammar writer to make changes in the grammar.
-\cite{bick2013tuning} modifies the grammar automatically, by trying
+As a step further, Eckhard Bick \cite{bick2013tuning} modifies the grammar automatically, by trying
 out different rule orders and altering the contexts of the rules. 
 Bick reports error reduction of 7--15\% compared to the original grammars.
-
 This is a valuable tool, especially for grammars that are so big that it's hard to keep track manually. A program can try all combinations whereas trying to make sense out of a huge set of rules would be hard for humans.
 As a downside, the grammar writer will likely not know why exactly does the tuned grammar perform better.
 
@@ -190,7 +189,11 @@ showing that such sequence cannot be created.
 \label{sec:orderedScheme}
 
 In order to analyse real-life CGs, we need to model the semantics of sequential CG: 
-rule application takes effect immediately, is irreversible, and only allows changes in the target.
+rule application takes effect immediately, is irreversible\footnote{As pointed out by Eckhard Bick, VISL CG-3 allows reference to deleted readings. In principle, this would not be an obstacle for our implementation, because no variables are removed.}, and only allows changes in the target.
+We restrict ourselves to the operations on morphological disambiguation, and only {\sc select} and {\sc remove} rules. 
+The following encoding does not support dependency relations, nor rule types which add readings or cohorts. 
+%In order to support the full feature set of  most likely, we will have to modify our encoding to fully support the features of VISL CG-3.
+
 %There is no way around it: an analysis that treats \t{REMOVE~v ; REMOVE~v~IF~(-1~det)} the same as \t{REMOVE~v~IF~(-1~det) ; REMOVE~v} is worth nothing. The first one is a true conflict, because the first rule has a broader condition; it removes the verb in any possible case. The second rule order is possible: there can always be a sentence that has a verb, but is not preceded by a determiner, hence the first rule would not match, and the verb is saved for the second rule. 
 %
 %
@@ -206,7 +209,6 @@ Last time, we only used ordering as a way to choose the which rules to apply.
 But there was no state: all clauses operated in parallel, on the same variables. 
 Now, we need a new variable for a reading every time when it is targeted; 
 that is, when its state potentially changes.
-
 %But now, we assume that each variable starts off as true: 
 %all those readings are true at the ``first round'', and the goal is to make more and more readings false, as more rules are applied.
 As before, a sentence is a vector of cohorts, which is, in turn, a vector of variables representing the readings of the current cohort.
@@ -238,10 +240,10 @@ the sentence vector will look like the following.
 
 
 %\begin{figure}
-$$\begin{array}{l @{~\rightarrow~} l}
-1 & \{\laDet, \la{}'_\prn \} \\
-2 & \{\casa{}''_\v, \casaN \} \\
-3 & \{ \grandeAdj \} \\
+$$\begin{array}{r @{~\rightarrow~} l}
+\emph{la} & \{\laDet, \la{}'_\prn \} \\
+\emph{casa} & \{\casa{}''_\v, \casaN \} \\
+\emph{grande} & \{ \grandeAdj \} \\
 \end{array}$$
 %\label{fig:after3Rules}
 %\end{figure}
@@ -254,9 +256,11 @@ We saw how $\casa{}'_\v$ was created, based on the status of $\casaV$ and the co
 But what is the status of the variables in the beginning?
 %We have not specified yet what is the status of the variables in the beginning. 
 In fact, that decision makes a crucial difference. 
-If all variables start off as true, then we have, in effect, reimplemented the logical encoding in \cite{lager_nivre01}. 
-This encoding is not a SAT-problem: there is no search involved, it is simply a matter of manipulating Boolean expressions. 
+If all variables start off as true, then we have, in effect, reimplemented the logical encoding by Lager and Nivre \cite{lager_nivre01}. 
+This option would not make an interesting SAT-problem: 
+there is no search involved, just manipulation of Boolean expressions in a completely deterministic way.
 All the new variables, created from the rule applications, would get their value immediately: $\casa{}'_\v \Leftrightarrow \grandeAdj \wedge \neg (\casaV \wedge \neg \casaN)$ just translates into $\casa{}'_\v \Leftrightarrow \text{\em True} \wedge \neg (\text{\em True} \wedge \neg \text{\em True})$. 
+
 %There is nothing to decide, no search whatsoever; this problem is even simpler than the animal problem, where we at least had some choices to make.
 
 
@@ -277,7 +281,19 @@ Before we can do any analysis any of the rules, we need to find out what the set
 \paragraph{Width of a rule}
 Furthermore, when we analyse a rule $r$, we need to decide the {\em width} $w(r)$ of the rule $r$: How many different words should there be in a sentence that can trigger $r$? Most often, $w(r)$ can be easily determined by looking at how far away the rule context indexes in the sentence relative to the target. For example, in the rule \t{REMOVE v IF (-1 det)}, the width is 2.
 If the context contains a \t{*} (context word can be anywhere),
-we may need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis.
+we need to make an approximation of $w(r)$, which may result in false positives or negatives later on in the analysis; this indeed happened in the Finnish grammar in Section~\ref{sec:finnishEval}. %For the implementation, we tried for each \t{*} multiple variants of the sentence. 
+If the rule is \t{REMOVE~v~IF~(-1*~det)}, 
+we tried first a sentence of width 2; if there was a conflict, we tried width 3, and then 4. For a rule with multiple \t{*}s, we tried combinations of all the widths, such that \t{REMOVE~v~IF~(-1*~det)~(1*~det)} would be tested in a range of 3--7 symbolic words. 
+In addition to the width, we need to specify where the target is in the symbolic sentence. For the rule with two \t{*}s, we tried all the following combinations: 
+(C,T,C); 
+(C,C,T,C); 
+(C,T,C,C); 
+(C,C,T,C,C); 
+(C,C,C,T,C,C); 
+(C,C,T,C,C,C) and
+(C,C,C,T,C,C,C).
+
+
 %we create sentences that are up to 3 words wider than the context without \verb!*!, and try them all.
 
 \paragraph{Rule application}
@@ -477,15 +493,17 @@ With the previously mentioned approach, we would have to duplicate 1572 entries 
 
 The readings in a grammar can be underspecified: for example, the rule
 \texttt{REMOVE (verb sg) IF (-1 det)} gives us ``verb sg'' and ``det''.
+%Set and list definitions were unfolded; a rule such as
 In contrast, the lexicon only gives us fully specified readings, such
 as ``verb pres p2 sg''. We implemented a version where we took
 the tag combinations specified in the grammar directly as our
 readings, and we could insert them into the symbolic sentences as well.
 The shortcut works most of the time, but if we only take the readings
 from the grammar and ignore the lexicon, it is possible to
-miss some cases: e.g. the rule \texttt{SELECT Pron + Rel IF (0 Nom)} 
+miss some cases: e.g. the rule \texttt{SELECT (pron rel) IF (0 nom)} 
 may require ``pron rel nom'' in one reading, but this method only gives
 ``pron rel'' and ``nom'' separately. 
+
 
 In addition, we found that the tag lists in the grammars sometimes
 contain errors, such as using a nonexistent tag or using a wrong level
@@ -566,20 +584,22 @@ All the six rules in Figure~\ref{fig:infrules} have conditions in position -1; f
 A grammar writer might think that \t{IF (-1C Vbmod) (0C V)} and \t{IF (-1C Vbmod) (0 Ser)} are very similar, and could be merged into \t{SELECT Inf IF (-1C Vbmod) (0C V OR Ser)}. But could there be some unintended side effects in merging these two rules? Why is there a C in the first rule, but not in the second rule? 
 
 The procedure is similar to the previous one. We initialise two symbolic sentences; on one we run the original rules in a sequence, and on the other the merged rule. 
-Then, we can perform tests on the resulting symbolic sentences. Assuming that the ambiguity class constraints are in place, the result may show that C is not needed for the condition about {\em ser}, simply because {\em ser} is not ambiguous with anything else in the lexicon; hence the merged rule can safely have the condition \t{(0C V OR Ser)}. However, if {\em ser} can be ambiguous with something else, then this merged rule is stricter than the two original rules. If the grammar writer is still unsure whether there would be any meaningful sequences that would be missed, they can ask the SAT-solver to generate all those cases---this requires that the ambiguity classes are in place, \formulation{otherwise the number of solutions would be exponential on all possible readings in the lexicon.} 
+Then, we can perform tests on the resulting symbolic sentences. Assuming that the ambiguity class constraints are in place, the result may show that C is not needed for the condition about {\em ser}, simply because {\em ser} is not ambiguous with anything else in the lexicon; hence the merged rule can safely have the condition \t{(0C V OR Ser)}. However, if {\em ser} can be ambiguous with something else, then this merged rule is stricter than the two original rules. If the grammar writer is still unsure whether there would be any meaningful sequences that would be missed, they can ask the SAT-solver to generate all those cases---this requires that the ambiguity classes are implemented, \formulation{otherwise the number of solutions would be exponential on all possible readings in the lexicon.} 
 
 
 \paragraph{What is the best order for the rules?}
-We can generate variants of the rule order, and run all of them to an initial symbolic sentence. Then, for the resulting symbolic sentences, we can query which one is the most restricted, that is, has the least models.
-
+We can generate variants of the rule order, and run all of them to an initial symbolic sentence. Then, for the resulting symbolic sentences, we can query which one is the most restricted, that is, allows the least models.
 As a variant, we may be interested in the placement of just one rule in the sequence.
+
+\paragraph{Does a rewritten rule correspond to the original?}
+We can initialise two symbolic sentences, run the original rule and the rewritten rule, and check if they allow the same models. 
 
 \paragraph{Generate a sequence that triggers rule(s) $R$ but not rule(s) $R'$.}
 For any given rule, we can extract three requirements that would make it trigger. We illustrate them for the rule \t{REMOVE v IF (-1 det)}. In order to trigger the rule, the sequence must have
 \begin{itemize}
 \item target readings: at least one reading with the \emph{v} tag in the target position
-\item conditions: at least one reading with the \emph{det} tag in the cohort preceding the target
 \item ambiguity: at least one reading without the \emph{v} tag in the target position; if there are only \emph{v}-readings in the target, the would not fire.
+\item conditions: at least one reading with the \emph{det} tag in the cohort preceding the target.
 \end{itemize}
 
 We can extract these requirements from both the rules that must be triggered, and the rules that must be not triggered. Then, we can request a solution from the SAT-solver.
@@ -837,6 +857,7 @@ In fact, we are planning to change how we handle the lexical forms; with those c
 \end{table}
 
 \subsection{Finnish} 
+\label{sec:finnishEval}
 
 The results for the Finnish grammar are shown separately, in Table~\ref{table:resFin}. We encountered a number of difficulties and used a few shortcuts, which we did not need for the other grammars---most importantly, not using the ambiguity class constraints. Due to these complications, the results are not directly comparable, but we include Finnish in any case, 
 to give an idea how our method scales up: both to more rules, and more complex rules.
@@ -847,7 +868,7 @@ After weeding out the most uncommon combinations, we ended up with sets of 4000-
 
 The second challenge comes from the larger size of the grammar. Whereas the Spanish and Dutch had only tens of word forms or lemmas, the Finnish grammar specifies around 900 of them.
 Due to both of these factors, the procedure described in Section~\ref{sec:realistic_readings} would have exploded the number of readings, so we simply took the lemmas and word forms, and added them as single readings. 
-In cases where they were combined with another tag in the grammar, we took that reading directly: for instance, we included both \emph{aika} and ``\emph{aika} n'' from the rule \texttt{SELECT "aika" + N},
+In cases where they were combined with another tag in the grammar, we took that combination directly and made it into an underspecified reading: for instance, we included both \emph{aika} and ``\emph{aika} n'' from the rule \texttt{SELECT "aika" + N},
 but nothing from the rule \texttt{SELECT Pron + Sg}. This method gave us 1588 additional readings.
 
 Finally, we were not able to create ambiguity class constraints---expanding the Finnish morphological lexicon results in 100s of gigabytes of word forms, which is simply too big for our method to work. 
@@ -979,14 +1000,15 @@ are common sources of misinterpretation.
 Many of these issues concern the case where the conditions include 
 the target cohort---does \t{SELECT foo IF (0 bar)} mean that ``foo'' and ``bar'' 
 should be in the same reading or in different readings? 
-Lemmas and word forms are another source of confusion, which is easy to check automatically against the lexicon. Ideally, these checks should be included in a special ``paranoid mode'', to not clutter the analysis.
+Lemmas and word forms are another source of confusion, which is easy to check automatically against the lexicon. 
+Ideally, these checks should be included in a special ``paranoid mode'', to not clutter the analysis\footnote{As pointed out by Eckhard Bick, the program should act upon this only if the 0 relates to an existing ambiguity class.}.
 
 
-\paragraph{Full expressivity of CG-3}
-As for longer-term goals, we want to handle the full expressivity of CG-3,
-with \textsc{map}, \textsc{add},  \textsc{append} and
+\paragraph{More features of VISL CG-3}
+As for longer-term goals, we want to handle more of the features in VISL CG-3,
+such as \textsc{map}, \textsc{append} and
 \textsc{substitute} rules, as well as dependency structure. 
-This also means finding different kinds of conflicts.
+This also means finding different kinds of conflicts, such as dependency circularity.
 In order to implement rules that may add new readings, or new tags to
 existing readings, we need to modify our approach in the SAT-encoding.
 Even if the lexicon gives all readings that exist in the lexicon, the
@@ -1028,7 +1050,7 @@ However, if the rules are ordered as shown, and $y$ is not unambiguous from the 
 Lager \cite{lager01transformation} observed that the rule sequence learned by the $\mu$TBL system did not remove further ambiguities after its first run, and concluded that the sequence was ``optimal''. 
 It would be interesting to recreate the goals in \cite{lager01transformation} and \cite{bick2013tuning}, to see if this semantic analysis of rule dependencies could lead also to better ordering within a grammar.
 
-Of course, it remains to be seen if any of these improvements would make a difference in performance; VISL CG-3 is already very fast, when the grammars are run multiple times.
+Of course, it remains to be seen if any of these improvements would make a difference in speed; VISL CG-3 is already very fast, when the grammars are run multiple times.
 
 \paragraph{More cohesive grammar} \cite{voutilainen2004} state that the around 200 rules are probably enough to resolve 50--75 \% of ambiguities in the corpus used in the development. 
 This figure is nice and encouraging. It's very much thanks to Zipf's law: we can add rules that target the most frequent \emph{tokens}, thus disambiguating a high number of word forms. However, this does not guarantee a coherent whole of rules. 

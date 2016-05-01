@@ -563,7 +563,7 @@ The input sentence can be processed in sequential or parallel manner.
 In \emph{sequential execution}, the rules are applied to one word at a time, starting from the beginning of the sentence. The sentence is updated after each application. If the word \emph{what} gets successfully disambiguated as a pronoun, then the word \emph{question} will not match the rule \t{REMOVE v IF (-1 det)}.
 
 
-In contrast, a \emph{parallel execution} scheme disambiguates all the words at the same 
+In contrast, a \emph{parallel execution} strategy disambiguates all the words at the same 
 time, using their initial, ambiguous context. 
 %If we want to keep this variable orthogonal to the rule ordering, we may not assume anything about how the rules are ordered.
 To give a minimal example, assume we have a single rule, \texttt{REMOVE verb IF (-1 verb)}, and the three words \emph{can can can}, shown below. 
@@ -594,7 +594,7 @@ The only difference is the reason why not: ``context does not match'' in sequent
 and ``do not remove the last reading'' in parallel.
 
 However, usually parallel execution is combined with \emph{unordered} rules.
-In order to express the result of these two rules in such scheme, we need a concept 
+In order to express the result of these two rules in an unordered scheme, we need a concept 
 that has not been discussed so far, namely, disjunction:
 ``the allowed combinations are {\em det}+{\em n} or {\em pron}+{\em v}''. 
 If we wanted to keep the purely list-based ontology of CG, but combine it with a parallel 
@@ -627,7 +627,7 @@ Table~\ref{table:nelikentta} shows different systems of the constraint rule fami
 with rule order (strict vs. heuristic) on one axis, 
 and execution strategy (sequential vs. parallel) on other. 
 Traditional CG implementations are shown in a normal font; other, related systems in cursive font and lighter colour.
-\satcgMax and \satcgOrd refer to the systems by the author; they are presented in \cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} in this thesis.
+\satcgMax and \satcgOrd refer to the systems by the author; they are presented in \cite{listenmaa_claessen2015} and in Chapter~\ref{chapterCGSAT} of this thesis.
 
 % A notable exception is the system proposed in \cite{koskenniemi90}, known by the names 
 % Finite-State Intersection Grammar (FSIG) or Parallel Constraint Grammar (PCG) .
@@ -686,7 +686,7 @@ Traditional CG implementations are shown in a normal font; other, related system
 % the word \emph{what} is fully disambiguated as a determiner.
 
 
-\subsection{Expressivity}
+\subsection{Expressivity and complexity of CG}
 \label{sec:expressivity}
 
 % Anssin väikkäristä:
@@ -710,24 +710,52 @@ better understanding of a formalism may lead to novel uses and implementation te
 The standard measure of formal languages is the Chomsky hierarchy \todo{cite}, with its four classes of grammars and languages, in order from most expressive to least expressive: \emph{recursively enumerable} (Type 0), \emph{context-sensitive} (Type 1), \emph{context-free} (Type 2), and \emph{regular} (Type 3). 
 The notion of \emph{expressive power}, ``which constructs can we express in the language'' is coupled with \emph{parsing complexity}, ``how much time and memory do we need to parse sentences in the language''; more expressive power corresponds to greater parsing complexity. 
 
-
 % Intuitively, we can approach expressivity as follows:
 % For the purposes of practically oriented language parsing, we may define expressivity as such:
 
 % "it's just that your regex doesn't work as intended. 
 % You cannot specify exacly enough, within the limitations of
 % regexes, all the conditions when you want a match and when you don't."
-\todo{return to this}
-Chomsky hierarchy is defined for generative grammar formalisms, hence it makes difficult to place CG directly onto it. 
-The question ``what can CG express?'' is ill-defined as such: 
-just to start with, there are different variants and implementations of CG, as we have seen in the previous section. 
-Taking that into account, even ``what can sequential and heuristic CG-2 express'' is not specific enough: 
-the answer depends on what is present in the input language, and is different for each grammar (Yli-Jyrä 2016, personal communication).
+
+However, the Chomsky hierarchy is defined for generative grammar formalisms, hence it is difficult to place a reductionistic formalism such as CG into it. 
+Especially the question of expressivity is problematic in the context of CG. 
+A given grammar in CG does not describe a language, but a \emph{relation} between an input language and an output language. %: say, $I = \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}, \text{"bear" }\t{ verb}]\}$ and the output is$O =  \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}]\}$.
+In addition, we need to consider a number of implementation features: 
+as we have learnt, there are many variants of CG, 
+with a different take on rule ordering, execution strategy, 
+and supported operations. 
+Anssi Yli-Jyrä (personal communication) suggests that the 
+expressivity should be defined separately for each grammar, and not for the complete formalism. 
+
+In contrast, parsing complexity can be easily defined for a given variant and implementation of CG. 
+For instance, Pasi Tapanainen \cite{tapanainen1999phd} and Måns Huldén \cite{hulden2011cg_engine} analyse their CG-2 parser implementations 
+in terms of the sentence length $n$; 
+the number of rules in the grammar $G$; and the maximal number of different readings per cohort $k$. Tapanainen's parser has the worst-case complexity $O(Gn^3k^2)$, and Huldén's parser $O(Gn^2k^2)$;
+even though both systems can run the same CG-2 style grammars\footnote{We assume both systems give the same output for the same input---at least the opposite has not been reported.}, the complexities of the respective parsers are different, due to different implementation techniques. 
+
+
+% For instance, the CG-2 parser by Pasi Tapanainen \cite{tapanainen1996} 
+% and the finite-state parser by Måns Huldén \cite{hulden2011cg_engine} support the same 
+% grammars and operations. 
+% As for complexity, Tapanainen's CG-2 parser 
+% Pasi Tapanainen
+% Pasi Tapanainen \cite{tapanainen1999phd} gives a complexity analysis
+% for the CG-2 parser, in terms of the sentence length, $n$; 
+% the number of rules in the grammar, $G$; and the maximal number of different readings per cohort, $k$.
+% Tapanainen shows that the worst-case running time for CG-2 is $O(Gn^3k^2)$. 
+%  uses a different implementation technique, and
+% achieves the complexity $O(Gn^2k^2)$ for CG engine,
+%  which supports the same operations as Tapanainen's CG-2.
+
+
+% The question ``what can CG express?'' is ill-defined as such: 
+% just to start with, there are different variants and implementations of CG, as we have seen in the previous section. 
+% Taking that into account, even ``what can sequential and heuristic CG-2 express'' is not specific enough: 
+% the answer depends on what is present in the input language, and is different for each grammar (Yli-Jyrä 2016, personal communication).
+
 % As we have learnt, CG is not a generative formalism---there are 
 % no production rules nor phrase structure,
 % CG just needs a list of alternatives and finds the correct ones among them.
-More precisely, a given grammar in CG describes a \emph{relation} between an input language 
-and an output language. %: say, $I = \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}, \text{"bear" }\t{ verb}]\}$ and the output is$O =  \{[\text{"the" }\t{ det def}][\text{"bear" }\t{ noun}]\}$.
 
 
 Even if CG is not a generative formalism, the concepts around Chomsky hierarchy play an important role, for instance, when defining what a single rule can express. 
@@ -746,11 +774,67 @@ and suggest a way to emulate generation within (a variant of) CG.
 %\end{inparaenum}
 
 
+\paragraph{Expressivity of a rule}
+
+Tapanainen \cite{tapanainen1999phd} defines the notion \emph{finite-state constraint language}: a formalism for writing disambiguation rules, 
+where the contextual tests are expressed in terms of regular languages.
+Indeed, we can verify that in all implementations of CG, 
+the contextual tests must be regular: we cannot write a single rule such as 
+``remove verb if the previous segment contains only well-nested parentheses''.
+
+Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations, for instance the notion of barrier. According to Tapanainen \cite{tapanainen1999phd}, a contextual test such as $(\Sigma - N)*A(\Sigma - V)*N$\footnote{IF (*1 A BARRIER N LINK *1 N BARRIER V)} is not supported in CG-1; in turn, CG-2 \cite{tapanainen1996} can express it, but not e.g. repeated patterns, such as $(\text{\em Det} \  A \  N)+$. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages in the contextual tests.
+
+Since CG-3 \cite{vislcg3,bick2015} did not exist at the time, \cite{tapanainen1999phd} does not include it in the hierarchy of the constraint formalisms.
+The formalism has added some new constructions to the morphological disambiguation rules, 
+such as {\sc cbarrier} for requiring the barrier to be unambiguously tagged, or subreadings, for distinguishing different levels of tags within one reading. 
+It is unclear whether these additions make the {\sc remove} and {\sc select} rules of VISL CG-3 strictly more expressive than those of CG-2, or if they just provide syntactic convenience.
+\footnote{There are many new rule types in VISL CG-3, such as {\sc addcohort}, {\sc remcomort}, {\sc move}, {\sc jump}, which on the whole make the formalism uncomparable to CG-1 and CG-2. Same holds for the dependency features.}
+%However, it is clear that the morphological disambiguation rules of VISL CG-3 stay within the regular boundaries. As for the dependency rules
+%\todo{check if Bick 2015 or VISLCG3 manual mention something???}
+
+
+
+\paragraph{Expressivity of a grammar}
+
+
+The expressivity of a single rule is well defined. However, the expressivity of the whole grammar is harder to define. 
+%
+%A CG has much more lightweight task than a generative grammar: the initial tokens, or symbols, come already with a list of alternatives.
+%Returning to the question of central embedding,
+%Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''.%---this contextual test is regular without question. 
+%Now, this rule will perform the correct disambiguation for the pronoun, even if the relative clause is centrally embedded. 
+%If all the other rules are successful, then the grammar has chosen a correct analysis for a sentence, 
+%which exhibits non-regular phenomenon. 
+%Still, all of the rules have only regular contextual tests.
+%none of the rules needs to address anything but a regular phenomenon.
+%The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or a relative pronoun. Furthermore, it does not need to generate only the correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
+%That said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
+%
+%
+To our knowledge, there is no work that tries to answer the latter question for CG; however, the question has been explored for other reductionist formalisms.
+
+Anssi Yli-Jyrä \cite{yli-jyra2005phd} investigates the computational complexity of the related formalism FSIG; similarly to CG, it describes a relation rather than a language. 
+%Similarly to CG, FSIG describes a relation from an input to an output; however, in order to have a superficial comparison to generative grammars, Yli-Jyrä defines the \emph{language} of a FSIG 
+%as the set of the sentences which satisfy all the constraints in the grammar.
+%
+% Yli-Jyrä defines the set of \emph{grammatical model strings} 
+% as those sentences which satisfy all the constraints in the grammar. In addition, Yli-Jyrä \cite{yli-jyra2005phd} defines the \emph{language} of each FSIG as the set of grammatical model strings; ignoring the input language of the relation, FSIGs become superficially comparable to generative grammars.
+%
+The main results are twofold: on the level of output, Yli-Jyrä shows that an individual FSIG grammar can approximate 
+context-free grammars \cite{yli-jyra2003fsig_approx_cfg} 
+and dependency grammars \cite{yli-jyra2004fsig_dependency}. 
+On the level of input, \cite{yli-jyra2003describing} shows that all the contextual tests for the English FSIG grammar \cite{voutilainen1994designing} can be converted into \emph{star-free regular expressions}; a more restricted set within the class of regular languages.
+
+% ``In this dissertation, the language of each FSIG will be uniquely the set of grammatical model strings, which makes FSIG superficially comparable to GES grammars.
+ 
+
+
+
 \def\wwf{~~~~\t{"<w>"}}
 \def\alm{\t{"a"}~~~~~~}
 \def\blm{\t{"b"}~~~~~~}
 
-\begin{figure}[t]
+\begin{figure}[ht]
 \centering
 
 %\begin{tabular}{cl @{\hspace{2cm}} rl}
@@ -775,49 +859,27 @@ and suggest a way to emulate generation within (a variant of) CG.
 \label{fig:anbn}
 \end{figure}
 
-\paragraph{Expressivity of a rule vs. expressivity of a grammar}
-
-Pasi Tapanainen \cite{tapanainen1999phd} defines the notion \emph{finite-state constraint languages}: the grammar consists of individual rules, which may only contain contextual tests \emph{that are expressed in terms of regular languages}. 
-Indeed, we can verify that in all implementations of CG, 
-the contextual tests must be regular: we cannot write in a single rule ``remove verb if the previous segment contains only well-nested brackets''.
-Tapanainen gives a hierarchy of four different constraint languages, in order of the expressivity in a single rule: Taggit \cite{taggit} only allows rules to look at 1-2 tokens before or after the target; CG-1 \cite{karlsson1990cgp} allows unlimited context within the window (usually one sentence) and adds operators such as the Kleene star and complement, but it does not allow all combinations. According to Tapanainen \cite{tapanainen1999phd}, a contextual test such as $(\Sigma - N)*A(\Sigma - V)*N$\footnote{IF (*1 A BARRIER N LINK *1 N BARRIER V)} is not supported in CG-1; in turn, CG-2 \cite{tapanainen1996} can express it, but not e.g. repeated patterns, such as $(Det A N)+$. Finally, FSIG \cite{koskenniemi90} allows the full expressivity of regular languages. Since CG-3 \cite{vislcg3,bick2015} did not exist at the time, \cite{tapanainen1999phd} does not include it in the hierarchy of the constraint formalisms.
-
-The expressivity of a single rule is well defined. However, the expressivity of the whole rule set is harder to define. 
-%
-%A CG has much more lightweight task than a generative grammar: the initial tokens, or symbols, come already with a list of alternatives.
-%Returning to the question of central embedding,
-%Assume we have a rule to disambiguate the word form \emph{who} as a relative pronoun instead of interrogative in the context ``N who V''.%---this contextual test is regular without question. 
-%Now, this rule will perform the correct disambiguation for the pronoun, even if the relative clause is centrally embedded. 
-%If all the other rules are successful, then the grammar has chosen a correct analysis for a sentence, 
-%which exhibits non-regular phenomenon. 
-%Still, all of the rules have only regular contextual tests.
-%none of the rules needs to address anything but a regular phenomenon.
-%The aforementioned task is easy partly because the input already contains so much information. The CG rules do not need to choose from arbitrary number of tags; it is safe to assume that \emph{who} will only be analysed as an interrogative or a relative pronoun. Furthermore, it does not need to generate only the correct embeddings: as defined in Section~\ref{reductionist-vs.licencing}, CG is aimed to provide analysis even for incorrect input.
-%That said, CG is still a grammar formalism. For a moment, we ignore the practical needs of natural language analysis, and ask the question: ``Can it express languages beyond regular?'' 
-%
-%
-Closest to answering this question is Anssi Yli-Jyrä
-\cite{yli-jyra2003describing,yli-jyra2004fsig_dependency} \todo{cite all relevant Yli-Jyrä},
-who investigates the computational complexity of the related formalism FSIG.
-%\todo{\cite{yli-jyra2004fsig_dependency} shows that certain FSIGs are closely related to some mildly context-sensitive grammars.} 
-In \cite{yli-jyra2005phd}, Yli-Jyrä defines the set of \emph{grammatical model strings} 
-as those sentences which satisfy all the constraints in the grammar. In addition, Yli-Jyrä \cite{yli-jyra2005phd} defines the \emph{language} of each FSIG as the set of grammatical model strings; ignoring the input language of the relation, FSIGs become superficially comparable to generative grammars.
-% ``In this dissertation, the language of each FSIG will be uniquely the set of grammatical model strings, which makes FSIG superficially comparable to GES grammars.
 
 As for another related formalism, Pasi Tapanainen \cite{tapanainen1999phd} demonstrates the expressive power of Functional Dependency Grammar \cite{tapanainen97fdg}.
-Instead of applying rules only to natural language texts, Tapanainen shows a FDG grammar which can successfully create a dependency structure for the context-free bracketing language,% which consists of only well-nested sequences of \t{[} and \t{]}, 
-and another grammar, which correctly parses the context-sensitive language $a^nb^nc^n$. 
-Unfortunately, \cite{tapanainen1999phd} does not present a similar method for CG, but we can 
-conceive of such grammar quite easily. In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading. We call the set of readings $\Sigma$. 
+Instead of applying rules only to natural language texts, Tapanainen shows 
+two examples of FDG grammars that can express structures beyond regular: 
+the first grammar can successfully create a dependency structure for the context-free language of balanced parentheses, %bracketing language, which consists of only well-nested sequences of \t{[} and \t{]}, 
+and the second grammar correctly parses the context-sensitive language $a^nb^nc^n$.
+
+We can sketch some requirements for a similar experiment for CGs.
+In order to do this, we introduce the concept of \emph{maximally ambiguous sentence}: a finite sequence of cohorts, where every cohort starts off with every possible reading in the alphabet $\Sigma$. 
 % In addition, we may need some helper labels $\Sigma'$, such as $\{even, odd, start, end\}$, which may not be present in the final analysis.
 Figure~\ref{fig:anbn} shows the input and output of a hypothetical CG, which takes cohorts
-of $\Sigma = \{a, b\}$ as an input, and removes $b$ from the first $n$ words, and $a$ from the last $n$ words. For strings of uneven length, the grammar would either leave it ambiguous, which would be interpreted as a sign of rejection, or use the {\sc remcohort} operation of VISL CG-3, and make the whole string empty.
+of $\Sigma = \{a, b\}$ as an input, and removes $b$ from the first $n$ words, and $a$ from the last $n$ words. 
+For strings of uneven length, the grammar would either leave it ambiguous, which would be interpreted as a sign of rejection, or use the {\sc remcohort} operation of VISL CG-3, and make the whole string empty.
 
 Writing such grammars, or proving they cannot be written, is out of scope of this thesis.
 However, we wish to bring to attention the concept \emph{maximally ambiguous sentence}---which 
 will be made use of in Chapter~\ref{chapterCGana}---as a way of generating sequences with CG,
 and better answering the question about expressivity.
-The hypothesis is that if the input language is always $\Sigma{}*$, then we may be able to reason more easily about the grammar itself.
+The hypothesis is that if the input language is always $\Sigma{}*$, then we may be able to reason more easily about the grammar itself. 
+If we can achieve more precise definition what CG grammars can express, 
+it may open new possibilities: for instance, automatically deriving CGs from other grammar formalisms. 
 
 
 

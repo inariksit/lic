@@ -122,7 +122,7 @@ It has the virtue of being ambiguous in nearly every word: for instance, \emph{s
 
 CG rules may not remove the last reading, even if the conditions hold otherwise.
 To ensure that each cohort contains at least one true variable, we add the clauses in \ref{eq:atleastOneTrue}; later referred to as the ``default rule''. 
-The word \emph{aproximación} is already unambiguous, thus the clause $\aproximacionN$ is a unit clause, and the respective variable is trivially assigned $True$. 
+The word \emph{aproximación} is already unambiguous, thus the clause $\aproximacionN$ is a unit clause, and the respective variable is trivially assigned true. 
 The final assignment of the other variables depends on the constraint rules.
 
 
@@ -313,7 +313,7 @@ $\sobreN$ is a valid condition only if it is the only reading in its cohort ($\s
 \subsection{Inverted conditions}
 
 In the following, we demonstrate the effect of two inversion operators. 
-The keyword {\sc not} inverts a single contextual test, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}. The keyword {\sc negate} inverts a whole conjunction of contextual tests, which may have any polarity: \cgrule{IF (NEGATE -2 det LINK NOT 1 noun)} means ``there may not be a determiner followed by a not-noun''; thus, ``det noun'' would be fine, or ``prn adj'', but not ``det adj''. %a sequence which matches the whole``
+The keyword {\sc not} inverts a single contextual test, such as \cgrule{IF (NOT 1 noun)}, as well as linked conditions, such as \cgrule{IF (-2 det LINK NOT *1 noun)}. The keyword {\sc negate} inverts a whole conjunction of contextual tests, which may have any polarity: \cgrule{IF (NEGATE -2 det LINK NOT 1 noun)} means ``there may not be a determiner followed by a not-noun''; thus, \emph{det noun} would be allowed, as well as \emph{prn adj}, but not \emph{det adj}. %a sequence which matches the whole``
 Inversion cannot be applied to a {\sc barrier} condition. If one wants to express \cgrule{IF (*1 foo BARRIER $\neg$bar)}, that is, ``try to find a \emph{foo} until you see the first item that is not \emph{bar}'', a set complement operator must be used: \cgrule{(*) - bar}.
 
 There is a crucial difference between matching positive and inverted conditions.
