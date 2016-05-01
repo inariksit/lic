@@ -71,8 +71,8 @@ This explicitly reductionistic approach does not seem to have any obvious counte
 Throughout its history, CG has been very practically oriented, with 
 few studies on its formal properties, or attempts to relate it to existing
 frameworks.
-Notable exceptions are \cite{lager_nivre01}, who model CG in logic, and 
-\cite{tapanainen1999phd}, who define the expressivity of rules.
+Notable exceptions are Torbjörn Lager and Joakim Nivre \cite{lager_nivre01}, who model CG in logic, and Pasi Tapanainen
+\cite{tapanainen1999phd}, who defines the expressivity of rules.
 %\cite{nemeskey14}, who evaluate different finite-state based implementations.
 %\todo{find "Hulden (2011) showed that if the rules are compiled to transducers ..." -- what kind of scheme was that? is there an ordered FST-based CG engine?}
 This brings us to the yet unmentioned part of the title.
@@ -132,7 +132,7 @@ implementation on grammar analysis, as well as evaluation on real grammars.
 
 \section{Structure of this thesis}
 
-The core of this thesis is an extension of two articles: \cite{listenmaa_claessen2015} and \cite{listenmaa_claessen2016}. Some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
+The core of this thesis is an extension of two articles: ``Constraint Grammar as a SAT problem'' \cite{listenmaa_claessen2015} and ``Analysing Constraint Grammars with a SAT-solver'' \cite{listenmaa_claessen2016}. Some of the content has been updated since the initial publication; in addition, the implementation is described in much more detail. The thesis is structured as a stand-alone read; however, a reader who is familiar with the background, may well skip Chapter 2.
 
 Chapter 2 presents a general introduction to both CG and SAT, aimed for a reader who is unfamiliar with the topics.
 Chapter 3 discusses previous logical representations of CG, and describes our SAT-encoding in detail, complete with an appendix of different rule types as SAT-clauses.
@@ -143,13 +143,14 @@ Chapter 5 concludes the thesis.
 \section{Contributions of the author}
 
 Both articles \cite{listenmaa_claessen2015} and \cite{listenmaa_claessen2016}
-are co-written with my supervisor Koen Claessen. In general, the ideas behind the work were joint effort.
-For the first article, all of the implementation of SAT-CG is by me,
+are co-written by the author and Koen Claessen. In general, the ideas behind the publications were joint effort.
+For the first article, all of the implementation of SAT-CG is by the author,
 and all of the library SAT+ by Koen Claessen.
-I was mainly responsible of writing the article. The version appearing in this monograph, Chapter~\ref{chapterCGSAT}, is thoroughly rewritten since the initial publication.
+%I was mainly responsible of writing the article. 
+The version appearing in this monograph, Chapter~\ref{chapterCGSAT}, is thoroughly rewritten since the initial publication.
 
-For the second article, I was the sole author of the implementation, 
-except for the ambiguity class constraints, which was written by Koen Claessen. 
-Writing the article was joint effort of both authors. The version appearing in Chapter~\ref{chapterCGana} is to large extent the same as the original article, with added detail and examples throughout the chapter.
+For the second article, the author of this work was in charge of all the implementation, except for the ambiguity class constraints, which were written by Koen Claessen. 
+%Writing the article was joint effort of both authors. 
+The version appearing in Chapter~\ref{chapterCGana} is to large extent the same as the original article, with added detail and examples throughout the chapter.
 
 

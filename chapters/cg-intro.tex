@@ -788,7 +788,7 @@ Since CG-3 \cite{vislcg3,bick2015} did not exist at the time, \cite{tapanainen19
 The formalism has added some new constructions to the morphological disambiguation rules, 
 such as {\sc cbarrier} for requiring the barrier to be unambiguously tagged, or subreadings, for distinguishing different levels of tags within one reading. 
 It is unclear whether these additions make the {\sc remove} and {\sc select} rules of VISL CG-3 strictly more expressive than those of CG-2, or if they just provide syntactic convenience.
-\footnote{There are many new rule types in VISL CG-3, such as {\sc addcohort}, {\sc remcomort}, {\sc move}, {\sc jump}, which on the whole make the formalism uncomparable to CG-1 and CG-2. Same holds for the dependency features.}
+\footnote{There are many new rule types in VISL CG-3, such as {\sc addcohort}, {\sc remcohort}, {\sc move}, {\sc jump}, which on the whole make the formalism uncomparable to CG-1 and CG-2. Same holds for the dependency features.}
 %However, it is clear that the morphological disambiguation rules of VISL CG-3 stay within the regular boundaries. As for the dependency rules
 %\todo{check if Bick 2015 or VISLCG3 manual mention something???}
 
@@ -874,7 +874,7 @@ of $\Sigma = \{a, b\}$ as an input, and removes $b$ from the first $n$ words, an
 For strings of uneven length, the grammar would either leave it ambiguous, which would be interpreted as a sign of rejection, or use the {\sc remcohort} operation of VISL CG-3, and make the whole string empty.
 
 Writing such grammars, or proving they cannot be written, is out of scope of this thesis.
-However, we wish to bring to attention the concept \emph{maximally ambiguous sentence}---which 
+However, we wish to bring to attention the concept maximally ambiguous sentence---which 
 will be made use of in Chapter~\ref{chapterCGana}---as a way of generating sequences with CG,
 and better answering the question about expressivity.
 The hypothesis is that if the input language is always $\Sigma{}*$, then we may be able to reason more easily about the grammar itself. 
