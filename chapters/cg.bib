@@ -6,11 +6,21 @@
 
 %%%% LREC
 
+@String{lrec2010 = "7th edition of the Language Resources and Evaluation Conference (LREC 2010)"}
+2012 = 8th
+2014 = 9th
+@String{lrec2016 = "10th edition of the Language Resources and Evaluation Conference (LREC 2016)"}
 
+%% ANLP
+
+@String{anlp1992 = "3rd Conference on Applied Natural Language Processing"}
+@String{anlp1997 = "5th Conference on Applied Natural Language Processing"}
 
 %%%% NODALIDA
 
 @String{nodalida1998 = "11th Nordic Conference on Computational Linguistics (NODALIDA 1998)"}
+@String{nodalida2001 = "13th Nordic Conference on Computational Linguistics (NODALIDA 2001)"}
+
 @String{nodalida2009 = "17th Nordic Conference of Computational Linguistics (NODALIDA 2009)"}
 @String{nodalida2009cg = "Constraint Grammar workshop at the " # nodalida2009}
 
@@ -74,7 +84,7 @@
   author = {Bick, Eckhard and Didriksen, Tino},
   year = {2015}, 
   title = {{CG-3 -- Beyond Classical Constraint Grammar}},
-  booktitle = "Proceedings of " # nodalida2015,
+  booktitle = "Proceedings of the " # nodalida2015,
   location = {{Vilnius, Lithuania}},
   url={http://www.ep.liu.se/ecp/109/007/ecp15109007.pdf}
 }
@@ -83,7 +93,7 @@
 @inproceedings{yli-jyra2011cg_engine,
   title={An efficient constraint grammar parser based on inward deterministic automata},
   author={Yli-Jyr{\"a}, Anssi},
-  booktitle = "Proceedings of " # nodalida2011cg,
+  booktitle =  nodalida2011cg,
   location={{Riga, Latvia}},
   pages={50--60},
   year={2011}
@@ -248,7 +258,7 @@
 @InProceedings{nemeskey14,
   author    = {Nemeskey, D\'{a}vid M\'{a}rk  and  Tyers, Francis  and  Hulden, Mans},
   title     = {Why Implementation Matters: Evaluation of an Open-source Constraint Grammar Parser},
-  booktitle = "Proceedings of " # coling2014,
+  booktitle = "Proceedings of the " # coling2014,
   pages     = {772--780},
   month     = {August},
   year      = {2014},
@@ -260,7 +270,7 @@
 
 @InProceedings{lager98,
   author =  {Torbj{\"{o}}rn Lager },
-  booktitle = "Proceedings of " # nodalida1998,
+  booktitle = "Proceedings of the " # nodalida1998,
   title =  {{Logic for Part of Speech Tagging and Shallow Parsing}},
   year =   {1998},
   location = {Copenhagen, Denmark}
@@ -305,7 +315,7 @@
 @inproceedings{bick_barebones,
   title={A Bare-bones Constraint Grammar},
   author={Bick, Eckhard},
-  booktitle={{Proceedings of 25th Pacific Asia Conference on Language, Information and 
+  booktitle={{Proceedings of the 25th Pacific Asia Conference on Language, Information and 
   Computation (PACLIC 2011)}},
   pages={226--235},
   year={2011}
@@ -315,7 +325,7 @@
   title = {Reusing grammatical resources for new languages},
   author={Antonsen, Lene and Wiechetek, Linda and Trosterud, Trond},
   year = {2010},
-  booktitle = {{Proceedings of the International conference on Language Resources and Evaluation (LREC 2010)}},
+  booktitle = "Proceedings of the " # lrec2010,
   url = {http://www.lrec-conf.org/proceedings/lrec2010/pdf/254_Paper.pdf}
 }
 
@@ -329,7 +339,7 @@
 @inproceedings{bick2003hybridCG_PSG,
   title={A CG \& PSG hybrid approach to automatic corpus annotation},
   author={Bick, Eckhard},
-  booktitle= {{Proceedings of The Shallow Processing of Large Corpora Workshop (SProLaC 2003)}},
+  booktitle= {{Proceedings of the Shallow Processing of Large Corpora Workshop (SProLaC 2003)}},
   pages={1--12},
   year={2003}
 }
@@ -347,7 +357,8 @@
   author = "Eckhard Bick",
   year = "2011",
   title = "Constraint grammar applications",
-  booktitle = "Proceedings of the " # nodalida2011cg,
+  pages = {iv}
+  booktitle =  nodalida2011cg,
   location={{Riga, Latvia}}
 }
 % page iv
@@ -356,7 +367,7 @@
 @inproceedings{pirinen2015,
   author = {Tommi Pirinen},
   title = {{Using weighted finite state morphology with VISL CG-3---Some experiments with free open source Finnish resources}},
-  booktitle = "Proceedings of the " # nodalida2015cg,
+  booktitle = nodalida2015cg,
   year = {2015},
   location={Vilnius, Lithuania}
 }
@@ -364,7 +375,7 @@
 @inproceedings{tyers_reynolds2015,
   author = {Robert Reynolds and Francis Tyers},
   title = {A preliminary constraint grammar for {R}ussian},
-  booktitle = "Proceedings of the " # nodalida2015cg,
+  booktitle = nodalida2015cg,
   year = {2015},
   location={{Vilnius, Lithuania}}
 }
@@ -374,7 +385,7 @@
 @inproceedings{puolakainen2015anaphora,
   title={Anaphora resolution experiment with CG rules},
   author={Puolakainen, Tiina},
-  booktitle = "Proceedings of the " # nodalida2015cg, 
+  booktitle = nodalida2015cg, 
   year={2015},
   location={Vilnius, Lithuania}
 }
@@ -408,12 +419,13 @@ pages={146--155}
 %isbn={978-3-540-61778-5}
 
 @incollection{lindberg_eineborg98ilp, 
+  title={Induction of Constraint Grammar-rules using Progol},
   year={1998},
   booktitle={Inductive Logic Programming},
   volume={1446},
   series={Lecture Notes in Computer Science},
   editor={Page, David},
-  title={Induction of Constraint Grammar-rules using Progol},
+
   publisher={Springer Berlin Heidelberg},
   author={Eineborg, Martin and Lindberg, Nikolaj},
   pages={116-124}
@@ -423,14 +435,14 @@ pages={146--155}
 @inproceedings{lager01transformation,
   title={Transformation-based learning of rules for constraint grammar tagging},
   author={Lager, Torbj{\"o}rn},
-  booktitle={Proceedings of the 13th Nordic Conference on Computational Linguistics (NODALIDA 2001)},
+  booktitle="Proceedings of the " # nodalida2001,
   year={2001},
-  pages={21--22}
+  location={Uppsala, Sweden}
 }
 
 @MastersThesis{asfrent14,
     author   = {Andrei Sfrent},
-    title    = {{Machine Learning of Rules for Part of Speech Tagging}},
+    title    = {Machine Learning of Rules for Part of Speech Tagging},
     school   = {{Imperial College London}},
     address  = {{United Kingdom}},
     year     = {2014},
@@ -443,14 +455,11 @@ pages={146--155}
   title     = {Learning {Constraint Grammar}-style Disambiguation Rules using Inductive
                Logic Programming},
   booktitle = {36th Annual Meeting of the Association for Computational Linguistics
-               and 17th International Conference on Computational Linguistics, {COLING-ACL}
-               '98},
+               and 17th International Conference on Computational Linguistics ({COLING-ACL}
+               1998)},
   year      = {1998},
-  crossref  = {DBLP:conf/acl/1998},
   url       = {http://aclweb.org/anthology/P/P98/P98-2128.pdf},
-  timestamp = {Wed, 06 Mar 2013 17:08:57 +0100},
   biburl    = {http://dblp.uni-trier.de/rec/bib/conf/acl/LindbergE98},
-  bibsource = {dblp computer science bibliography, http://dblp.org},
   pages     = {775--779}
 }
 
@@ -458,9 +467,9 @@ pages={146--155}
   author = "Bick, Eckhard",
   year = "2013", 
   title = {{ML-Tuned Constraint Grammars}},
-  booktitle = {Proceedings of the 27th Pacific Asia Conference on Language, Information and Computation},
+  booktitle = {{Proceedings of the 27th Pacific Asia Conference on Language, Information and Computation (PACLIC 2013)}},
   pages = {440--449},
-  location = {Taipei: Department of English, National Chengchi University},
+  location = {Taipei},
   url={http://visl.sdu.dk/~eckhard/pdf/PACLIC2013_grammar_tuning2.pdf}
 }
 %
@@ -472,7 +481,7 @@ pages={146--155}
 @inproceedings{listenmaa_claessen2016,
   author = {Inari Listenmaa and Koen Claessen},
   title = {{Analysing Constraint Grammars with a SAT-solver}},
-  booktitle={{Proceedings of the 10th edition of the Language Resources and Evaluation Conference}},
+  booktitle="Proceedings of the " # lrec2016,
   year = {2016},
   location={Portorož, Slovenia}
 }
@@ -482,7 +491,7 @@ pages={146--155}
 @inproceedings{listenmaa_claessen2015,
   author = {Inari Listenmaa and Koen Claessen},
   title = {{Constraint Grammar as a SAT problem}},
-  booktitle = "Proceedings of the " # nodalida2015cg,
+  booktitle = nodalida2015cg,
   year={2015},
   location={Vilnius, Lithuania}
 }
@@ -552,7 +561,7 @@ doi="10.1007/3-540-49519-3_7",
 url="http://dx.doi.org/10.1007/3-540-49519-3_7"
 }
 
-@Inbook{biere1999modelchecking,
+@InProceedings{biere1999modelchecking,
 author="Biere, Armin
 and Cimatti, Alessandro
 and Clarke, Edmund
@@ -569,12 +578,14 @@ doi="10.1007/3-540-49059-0_14",
 url="http://dx.doi.org/10.1007/3-540-49059-0_14"
 }
 
-@Inbook{bradley2011modelchecking,
+@InProceedings{bradley2011modelchecking,
 author="Bradley, Aaron R.",
 editor="Jhala, Ranjit
 and Schmidt, David",
-chapter="SAT-Based Model Checking without Unrolling",
-title="Verification, Model Checking, and Abstract Interpretation: 12th International Conference, VMCAI 2011, Austin, TX, USA, January 23-25, 2011. Proceedings",
+title="SAT-Based Model Checking without Unrolling",
+booktitle={{Proceedings of the 12th International Conference on Verification, Model Checking, and Abstract Interpretation (VMCAI 2011)}},
+location = {Austin, TX, USA},
+month={January}, 
 year="2011",
 publisher="Springer Berlin Heidelberg",
 address="Berlin, Heidelberg",
@@ -583,7 +594,7 @@ isbn="978-3-642-18275-4",
 doi="10.1007/978-3-642-18275-4_7",
 url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 }
-
+% January 23-25, 2011
 
 @INPROCEEDINGS{marques-silva08practicalapplications,
     author = {Joao Marques-silva},
@@ -635,17 +646,18 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Misc
 @inproceedings{cutting_etal92,
-  author    = {Douglas R. Cutting and
-               Julian Kupiec and
-               Jan O. Pedersen and
-               Penelope Sibun},
-  title     = {A Practical Part-of-Speech Tagger},
-  booktitle = {{ANLP}},
-  pages     = {133--140},
-  year      = {1992},
-  url       = {http://aclweb.org/anthology-new/A/A92/A92-1018.pdf},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/anlp/CuttingKPS92}
-}
+ author = {Cutting, Doug and Kupiec, Julian and Pedersen, Jan and Sibun, Penelope},
+ title = {A Practical Part-of-speech Tagger},
+ booktitle = "Proceedings of " # anlp1992,
+ year = {1992},
+ location = {Trento, Italy},
+ pages = {133--140},
+ numpages = {8},
+ url = {http://dx.doi.org/10.3115/974499.974523},
+ doi = {10.3115/974499.974523},
+ publisher = {Association for Computational Linguistics},
+ address = {Stroudsburg, PA, USA},
+} 
 
 @Book{ranta2010gfbook,
   author = {Aarne Ranta},
@@ -667,7 +679,7 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 @article{brill1995,
   title={Transformation-based error-driven learning and natural language processing: A case study in part-of-speech tagging},
   author={Brill, Eric},
-  journal={Computational linguistics},
+  journal={Computational Linguistics},
   volume={21},
   number={4},
   pages={543--565},
@@ -679,19 +691,20 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
  title={A non-projective dependency parser},
  author={Tapanainen, Pasi and J\"{a}rvinen, Timo},
  year = {1997},
- booktitle={{Proceedings of the 5th Conference on Applied Natural Language Processing}},
+ booktitle = "Proceedings of " # anlp1997,
  pages={64–-71},
+ location={{Washington, D.C.}},
  publisher={{Association for Computational Linguistics}},
- location={{Washington, D.C.}}
+ address = {Stroudsburg, PA, USA}
 }
 
 @inproceedings{voutilainen2011finntreebank,
   title={{FinnTreeBank: Creating a research resource and service for language researchers with Constraint Grammar}},
   author={Voutilainen, Atro},
   booktitle = "Proceedings of the " # nodalida2011cg,
+  pages={41--49},
   year={2011}
 }
-%  pages={41--49},
 
 
 
@@ -763,10 +776,11 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 
 @inproceedings{silfverberg2009conflict,
   title={Conflict resolution using weighted rules in {HFST-TWOLC}},
-  author={Silfverberg, Miikka and Lind{\'e}n, Krister and others},
-  booktitle="Proceedings of the " # nodalida2009,
+  author={Silfverberg, Miikka and Lind{\'e}n, Krister},
+  booktitle="Proceedings of " # nodalida2009,
   pages={174--181},
-  year={2009}
+  year={2009},
+  location={Odense, Denmark}
 }
 
 @inproceedings{padro1996csp,
