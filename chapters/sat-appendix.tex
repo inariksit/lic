@@ -318,7 +318,7 @@ Inversion cannot be applied to a {\sc barrier} condition. If one wants to expres
 
 There is a crucial difference between matching positive and inverted conditions.
 If a positive condition is out of scope or the tag is not present in the initial analysis, the rule simply does not match, and no clauses are created. For instance, the conditions `10 adj' or `-1 punct', matched against our example passage, would not result in any action.
-In contrast, when an inverted condition is out of scope or unapplicable, 
+In contrast, when an inverted condition is out of scope or inapplicable, 
 that makes the action happen unconditionally.
 As per VISL CG-3, the condition \cgrule{NOT 10 adj} applies to all sentences where there is no 10th word from target that is adjective; including the case where there is no 10th word at all.
 If we need to actually have a 10th word to the right, but that word may not be an adjective, we can, again, use the set complement: \cgrule{IF (10 (*) - adj)}.
