@@ -1,3 +1,15 @@
+@String{nodalida2009 = "17th Nordic Conference of Computational Linguistics (NODALIDA 2009)"}
+@String{nodalida2009cg = "Constraint Grammar workshop at the " # nodalida2009}
+
+@String{nodalida2011 = "18th Nordic Conference of Computational Linguistics (NODALIDA 2011)"}
+@String{nodalida2011cg = "Constraint Grammar workshop at the " # nodalida2011}
+
+@String{nodalida2013 = "19th Nordic Conference of Computational Linguistics (NODALIDA 2013)"}
+@String{nodalida2013cg = "Constraint Grammar workshop at the " # nodalida2013}
+
+@String{nodalida2015 = "20th Nordic Conference of Computational Linguistics (NODALIDA 2015)"}
+@String{nodalida2015cg = "Constraint Grammar workshop at the " # nodalida2015}
+
 %%%% CG parsers
 
 @inproceedings{karlsson1990cgp,
@@ -119,12 +131,15 @@
   year={1997}
 }
 
-
-@misc{piitulainen1995,
- title={TODO the article where piitulainen suggested the name {FSIG}},
- year={1995},
- author={Jussi Piitulainen}
+@inproceedings{piitulainen1995,
+  title={Locally tree-shaped sentence automata and resolution of ambiguity},
+  author={Piitulainen, Jussi},
+  booktitle={Proceedings of the 10th Nordic Conference of Computational Linguistics},
+  number={26},
+  pages={50--58},
+  year={1995}
 }
+
 
 @book{voutilainen1994designing,
   title={Designing a parsing grammar},
@@ -159,35 +174,46 @@
    title={{Structural Correspondence between Finite-State Intersection Grammar and Constraint Satisfaction Problem}},
    author={{Yli-Jyr{\"{a}}, Anssi}},
    year={2001},
-   booktitle={{TODO CHECK: Proceedings of FSMNLP 2001}}
+   booktitle={{Finite State Methods in Natural Language Processing 2001 (FSMNLP 2001), ESSLLI Workshop}}
 }
 
 @inproceedings{yli-jyra2003describing,
   title={Describing syntax with star-free regular expressions},
   author={Yli-Jyr{\"a}, Anssi},
-  booktitle={Proceedings of the tenth conference on European chapter of the Association for Computational Linguistics-Volume 1},
+  booktitle={Proceedings of the tenth conference on European chapter of the Association for Computational Linguistics},
+  volume={1},
   pages={379--386},
   year={2003},
   organization={Association for Computational Linguistics}
 }
 
-@misc{yli-jyra2003fsig_approx_cfg,
+@inproceedings{yli-jyra2003fsig_approx_cfg,
   author={Yli-Jyr{\"a}, Anssi},
   year={2003}, 
-  title={Regular approximations through labeled bracketing, {TODO}}
-
+  title={Regular approximations through labeled bracketing},
+  editor = {G. Jäger, P. Monachesi, G. Penn, and S. Wintner}, 
+  booktitle={Proceedings of the 8th conference on Formal Grammar (FGVienna 2003)}, 
+  pages={189–-201}
 }
 
-@misc{yli-jyra2004fsig_dependency,
+@inproceedings{yli-jyra2004fsig_dependency,
+  title={Axiomatization of restricted non-projective dependency trees through finite-state constraints that analyse crossing bracketings},
   author={Yli-Jyr{\"a}, Anssi},
-  year={2004}, 
-  title={Axiomatization of restricted non-projective dependency trees through finite-state constraints that analyse crossing bracketings, {TODO}}
+  editor={G.-J. M. Kruijff and D. Duchier},
+  booktitle={Workshop of Recent Advances in Dependency Grammar},
+  year={2004},
+  pages={33--40},
+  location={Geneva, Switzerland}
 }
-@misc{yli-jyra2005phd,
+
+
+@PhdThesis{yli-jyra2005phd,
+  title={Contributions to the theory of finite-state based grammars},
   author={Yli-Jyr{\"a}, Anssi},
   year={2005},
-  title={{TODO anssi's phd thesis}}
+  school={{University of Helsinki}}
 }
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CG theory
@@ -242,7 +268,7 @@
  title={{Next to nothing -- a cheap South Saami disambiguator}},
  author={Antonsen, Lene and Trosterud, Trond},
  year={2011},
- booktitle = {{Proceedings of the Constraint Grammar workshop at NODALIDA, the 18th Nordic Conference of Computational Linguistics}},
+ booktitle = nodalida2011cg,
  location={{Riga, Latvia}},
  url={https://dspace.utlib.ee/dspace/bitstream/handle/10062/19296/antonsen_trosterud.pdf}
 }
@@ -251,7 +277,7 @@
 @inproceedings{antonsen2009dialogue,
   title={{Constraint Grammar in Dialogue Systems}},
   author={Antonsen, Lene and Huhmarniemi, Saara and Trosterud, Trond},
-  booktitle={Proceedings of the 17th Nordic Conference of Computational Linguistics. NEALT Proceeding Series. Volum},
+  booktitle = nodalida2009cg,
   volume={8},
   pages={13--21},
   year={2009}
@@ -270,7 +296,7 @@
   title = {Reusing grammatical resources for new languages},
   author={Antonsen, Lene and Wiechetek, Linda and Trosterud, Trond},
   year = {2010},
-  booktitle = {{Proceedings of the International conference on Language Resources and Evaluation LREC2010}},
+  booktitle = {{Proceedings of the International conference on Language Resources and Evaluation (LREC 2010)}},
   url = {http://www.lrec-conf.org/proceedings/lrec2010/pdf/254_Paper.pdf}
 }
 
@@ -278,13 +304,13 @@
   title={{The parsing system ``Palavras''. Automatic Grammatical Analysis of Portuguese in a Constraint Grammar Framework}},
   author={Bick, Eckhard},
   year={2000},
-  publisher={University of Arhus}
+  school={University of Århus}
 }
 
 @inproceedings{bick2003hybridCG_PSG,
   title={A CG \& PSG hybrid approach to automatic corpus annotation},
   author={Bick, Eckhard},
-  booktitle={Proceedings of SProLaC2003},
+  booktitle= {{Proceedings of The Shallow Processing of Large Corpora Workshop (SProLaC 2003)}},
   pages={1--12},
   year={2003}
 }
@@ -293,7 +319,7 @@
   author = "Bick, Eckhard",
   year = "2006",
   title = {{A Constraint Grammar Parser for Spanish}},
-  booktitle = {{Proceedings of TIL 2006 - 4th Workshop on Information and Human Language Technology}},
+  booktitle = {{Proceedings of TIL 2006 -- 4th Workshop on Information and Human Language Technology}},
   url = {http://visl.sdu.dk/~eckhard/pdf/TIL2006.pdf}
 }
 
@@ -302,8 +328,8 @@
   author = "Eckhard Bick",
   year = "2011",
   title = "Constraint grammar applications",
-  booktitle = {{Proceedings of the Constraint Grammar workshop at NODALIDA, the 18th Nordic Conference of Computational Linguistics}},
- location={{Riga, Latvia}}
+  booktitle = "Proceedings of the " # nodalida2011cg,
+  location={{Riga, Latvia}}
 }
 % page iv
 
@@ -311,15 +337,15 @@
 @inproceedings{pirinen2015,
   author = {Tommi Pirinen},
   title = {{Using weighted finite state morphology with VISL CG-3---Some experiments with free open source Finnish resources}},
-  booktitle = {{Proceedings of the Constraint Grammar workshop at NODALIDA, the 20th Nordic Conference of Computational Linguistics}},
+  booktitle = "Proceedings of the " # nodalida2015cg,
   year = {2015},
-  location={{Vilnius, Lithuania}}
+  location={Vilnius, Lithuania}
 }
 
 @inproceedings{tyers_reynolds2015,
   author = {Robert Reynolds and Francis Tyers},
   title = {A preliminary constraint grammar for {R}ussian},
-  booktitle = {{Proceedings of the Constraint Grammar workshop at NODALIDA, the 20th Nordic Conference of Computational Linguistics}},
+  booktitle = "Proceedings of the " # nodalida2015cg,
   year = {2015},
   location={{Vilnius, Lithuania}}
 }
@@ -329,9 +355,9 @@
 @inproceedings{puolakainen2015anaphora,
   title={Anaphora resolution experiment with CG rules},
   author={Puolakainen, Tiina},
-  booktitle = {{Proceedings of the Constraint Grammar workshop at NODALIDA, the 20th Nordic Conference of Computational Linguistics}},
+  booktitle = "Proceedings of the " # nodalida2015cg, 
   year={2015},
-  location={{Vilnius, Lithuania}}
+  location={Vilnius, Lithuania}
 }
 
 
@@ -378,7 +404,7 @@ pages={146--155}
 @inproceedings{lager01transformation,
   title={Transformation-based learning of rules for constraint grammar tagging},
   author={Lager, Torbj{\"o}rn},
-  booktitle={Proceedings of the 13th Nordic Conference on Computational Linguistics},
+  booktitle={Proceedings of the 13th Nordic Conference on Computational Linguistics (NODALIDA 2001)},
   year={2001},
   pages={21--22}
 }
@@ -437,7 +463,7 @@ pages={146--155}
 @inproceedings{listenmaa_claessen2015,
   author = {Inari Listenmaa and Koen Claessen},
   title = {{Constraint Grammar as a SAT problem}},
-  booktitle = {{Proceedings of the Constraint Grammar workshop at NODALIDA, the 20th Nordic Conference of Computational Linguistics}},
+  booktitle = "Proceedings of the " # nodalida2015cg,
   year={2015},
   location={Vilnius, Lithuania}
 }
@@ -473,11 +499,11 @@ url="http://dx.doi.org/10.1007/s10626-009-0081-8"
 }
 
 @inbook{claessen2013compbioSAT,
-author="Claessen, Koen
+author={Claessen, Koen
 and Fisher, Jasmin
 and Ishtiaq, Samin
 and Piterman, Nir
-and Wang, Qinsi",
+and Wang, Qinsi},
 editor="Sharygina, Natasha
 and Veith, Helmut",
 chapter="Model-Checking Signal Transduction Networks through Decreasing Reachability Sets",
@@ -543,9 +569,9 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 @INPROCEEDINGS{marques-silva08practicalapplications,
     author = {Joao Marques-silva},
     title = {Practical applications of boolean satisfiability},
-    booktitle = {{In Workshop on Discrete Event Systems (WODES)}},
+    booktitle = {{Proceedings of the workshop on Discrete Event Systems (WODES)}},
     year = {2008},
-    publisher = {IEEE Press}
+    publisher = {{IEEE Press}}
 }
 
 @incollection{een04sat,
@@ -643,10 +669,10 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 @inproceedings{voutilainen2011finntreebank,
   title={{FinnTreeBank: Creating a research resource and service for language researchers with Constraint Grammar}},
   author={Voutilainen, Atro},
-  booktitle={Proceedings of the NODALIDA 2011 workshop {Constraint Grammar Applications}},
-  pages={41--49},
+  booktitle = "Proceedings of the " # nodalida2011cg,
   year={2011}
 }
+%  pages={41--49},
 
 
 
@@ -683,7 +709,7 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 @INPROCEEDINGS{oflazer97votingconstraints,
     author = {Kemal Oflazer and Gökhan Tür},
     title = {Morphological disambiguation by voting constraints},
-    booktitle = {{Proceedings of the 8th Conference of the European Chapter of the Association for Computational Linguistics (EACL)}},
+    booktitle = {{Proceedings of the 8th Conference of the European Chapter of the Association for Computational Linguistics (EACL 1997)}},
     year = {1997},
     pages = {222--229}
 }
@@ -703,7 +729,7 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 @inproceedings{herz1991local,
   title={Local syntactic constraints},
   author={Herz, Jacky and Rimon, Mori},
-  booktitle={Proc. of the Second International Workshop on Parsing Technologies},
+  booktitle={Proceedings of the Second International Workshop on Parsing Technologies},
   pages={200--209},
   year={1991}
 }
@@ -719,7 +745,7 @@ url="http://dx.doi.org/10.1007/978-3-642-18275-4_7"
 @inproceedings{silfverberg2009conflict,
   title={Conflict resolution using weighted rules in {HFST-TWOLC}},
   author={Silfverberg, Miikka and Lind{\'e}n, Krister and others},
-  booktitle={Proceedings of the 17th Nordic Conference of Computational Linguistics NODALIDA},
+  booktitle="Proceedings of the " # nodalida2009,
   pages={174--181},
   year={2009}
 }
