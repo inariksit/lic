@@ -138,7 +138,7 @@ Some examples of conflicts follow:
 tag combination, or contradictory requirements for a context word
 \end{itemize}
 
-This definition is very similar to the concept \emph{bleeding order} in generative phonology \todo{cite Kiparsky}; however, since we are talking about an explicit list of 
+This definition is very similar to the concept \emph{bleeding order} in generative phonology \cite{kiparsky1968}; however, since we are talking about an explicit list of 
 human-written rules, we include also rule-internal conflicts in our classification.
 The conflicting (or ``bleeding'') $R$ can be a single rule or a list of rules: for instance, if one rule removes a verb in
 context $C$, and another in context $\neg C$, together these rules
@@ -973,8 +973,6 @@ Future work can be divided in roughly three categories:
 
 \subsection{General improvement}
 
-The following is a list of improvements to the current features; we have found 
-
 \paragraph{Combining morphological and lexical tags}
 
 Our solution to hardcode the tag combinations in the readings is
@@ -1004,7 +1002,7 @@ Lemmas and word forms are another source of confusion, which is easy to check au
 Ideally, these checks should be included in a special ``paranoid mode'', to not clutter the analysis\footnote{As pointed out by Eckhard Bick, the program should act upon this only if the 0 relates to an existing ambiguity class.}.
 
 
-\paragraph{More features of VISL CG-3}
+\paragraph{Support for more features of VISL CG-3}
 As for longer-term goals, we want to handle more of the features in VISL CG-3,
 such as \textsc{map}, \textsc{append} and
 \textsc{substitute} rules, as well as dependency structure. 
@@ -1060,7 +1058,7 @@ While the coverage information is easy to obtain from a corpus, our SAT-based to
 
 In order to attract the attention of the CG community, it would be desirable to incorporate the tools as a part of existing CG software. 
 Currently, the described software consists of just under 3000 lines of Haskell code, including both the CG engine and the grammar analysis tool.
-The grammar used for parsing the original CG files is written in BNFC \todo{cite}, and it is missing many constructs in CG-3. 
+The grammar used for parsing the original CG files is written in BNFC \cite{bnfc}, and it is missing many constructs in CG-3. 
 Given these factors, the preferred option would be a full reimplementation and integration as a part of VISL CG-3, or any other CG development framework. We believe this would make the tools easier to use, more cohesive and syncronised with the main CG engine, and likely much faster. Of course, it is up to the community and the developers to decide if these tools are of interest.
 
 
