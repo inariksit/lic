@@ -1,3 +1,16 @@
+%%%% COLING
+
+@String{coling1990 = "13th International Conference on Computational Linguistics (COLING 1990)"}
+@String{coling1992 = "14th International Conference on Computational Linguistics (COLING 1992)"}
+@String{coling2014 = "25th International Conference on Computational Linguistics (COLING 2014)"}
+
+%%%% LREC
+
+
+
+%%%% NODALIDA
+
+@String{nodalida1998 = "11th Nordic Conference on Computational Linguistics (NODALIDA 1998)"}
 @String{nodalida2009 = "17th Nordic Conference of Computational Linguistics (NODALIDA 2009)"}
 @String{nodalida2009cg = "Constraint Grammar workshop at the " # nodalida2009}
 
@@ -15,8 +28,8 @@
 @inproceedings{karlsson1990cgp,
  author = {Karlsson, Fred},
  title = {Constraint Grammar as a Framework for Parsing Running Text},
- booktitle = {Proceedings of the 13th Conference on Computational Linguistics - Volume 3},
- series = {COLING '90},
+ booktitle = "Proceedings of " # coling1990,
+ volume={3},
  year = {1990},
  isbn = {952-90-2028-7},
  location = {Helsinki, Finland},
@@ -37,10 +50,11 @@
   publisher={Walter de Gruyter}
 }
 
-@article{tapanainen1996,
+@book{tapanainen1996,
   author = "Tapanainen, Pasi",
   title = {{The Constraint Grammar Parser CG-2}},
-  booktitle = {{No 27, Publications of the Department of General Linguistics, University of Helsinki}},
+  volume={27},
+  series={Publications of the Department of General Linguistics, University of Helsinki},
   publisher={Yliopistopaino, Helsinki},
   year = {1996} 
 }
@@ -60,7 +74,7 @@
   author = {Bick, Eckhard and Didriksen, Tino},
   year = {2015}, 
   title = {{CG-3 -- Beyond Classical Constraint Grammar}},
-  booktitle = {{Proceedings of NODALIDA, the 20th Nordic Conference of Computational Linguistics}},
+  booktitle = "Proceedings of " # nodalida2015,
   location = {{Vilnius, Lithuania}},
   url={http://www.ep.liu.se/ecp/109/007/ecp15109007.pdf}
 }
@@ -69,8 +83,9 @@
 @inproceedings{yli-jyra2011cg_engine,
   title={An efficient constraint grammar parser based on inward deterministic automata},
   author={Yli-Jyr{\"a}, Anssi},
-  booktitle={{Proceedings of the Constraint Grammar workshop at NODALIDA, the 18th Nordic Conference of Computational Linguistics}},
+  booktitle = "Proceedings of " # nodalida2011cg,
   location={{Riga, Latvia}},
+  pages={50--60},
   year={2011}
 }
 
@@ -78,7 +93,7 @@
 @inproceedings{hulden2011cg_engine,
   title={Constraint Grammar parsing with left and right sequential finite transducers},
   author={Hulden, Mans},
-  booktitle={{Proceedings of the 9th International Workshop on Finite State Methods and Natural Language Processing}},
+  booktitle={{Proceedings of 9th International Workshop on Finite State Methods and Natural Language Processing}},
   pages={39--47},
   year={2011},
   organization={Association for Computational Linguistics}
@@ -97,13 +112,14 @@
 @inproceedings{koskenniemi90,
  author = {Koskenniemi, Kimmo},
  title = {Finite-state Parsing and Disambiguation},
- booktitle = {Proceedings of the 13th Conference on Computational Linguistics - Volume 2},
- series = {COLING '90},
+ booktitle = "Proceedings of " # coling1990,
+ volume={2},
  year = {1990},
  location = {Helsinki, Finland},
  pages = {229--232},
  numpages = {4},
- publisher = {Association for Computational Linguistics}
+ publisher = {Association for Computational Linguistics},
+ address = {Stroudsburg, PA, USA}
 } 
 
 
@@ -112,15 +128,14 @@
                Pasi Tapanainen and
                Atro Voutilainen},
   title     = {Compiling and Using Finite-State Syntactic Rules},
-  booktitle = {14th International Conference on Computational Linguistics, {COLING}},
+  booktitle = "Proceedings of " # coling1992,
   pages     = {156--162},
   location  = {Nantes, France},
   month     = {August},
   year      = {1992},
-  url       = {http://aclweb.org/anthology/C92-1027},
-  timestamp = {Wed, 06 Mar 2013 17:08:57 +0100},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/coling/KoskenniemiTV92}
+  url       = {http://aclweb.org/anthology/C92-1027}
 }
+% biburl    = {http://dblp.uni-trier.de/rec/bib/conf/coling/KoskenniemiTV92}
  
 
 @article{koskenniemi97,
@@ -162,9 +177,9 @@
 }
 
 @inproceedings{voutilainen1998,
-  title={Does tagging help parsing?: a case study on finite state parsing},
+  title={{Does tagging help parsing? A case study on finite state parsing}},
   author={Voutilainen, Atro},
-  booktitle={Proceedings of the International Workshop on Finite State Methods in Natural Language Processing},
+  booktitle={Proceedings of the International Workshop on Finite State Methods in Natural Language Processing ({FSMNLP} 1998)},
   pages={25--36},
   year={1998},
   organization={Association for Computational Linguistics}
@@ -174,6 +189,7 @@
    title={{Structural Correspondence between Finite-State Intersection Grammar and Constraint Satisfaction Problem}},
    author={{Yli-Jyr{\"{a}}, Anssi}},
    year={2001},
+   pages={1--4},
    booktitle={{Finite State Methods in Natural Language Processing 2001 (FSMNLP 2001), ESSLLI Workshop}}
 }
 
@@ -232,7 +248,7 @@
 @InProceedings{nemeskey14,
   author    = {Nemeskey, D\'{a}vid M\'{a}rk  and  Tyers, Francis  and  Hulden, Mans},
   title     = {Why Implementation Matters: Evaluation of an Open-source Constraint Grammar Parser},
-  booktitle = {Proceedings of COLING 2014, the 25th International Conference on Computational Linguistics},
+  booktitle = "Proceedings of " # coling2014,
   pages     = {772--780},
   month     = {August},
   year      = {2014},
@@ -244,9 +260,10 @@
 
 @InProceedings{lager98,
   author =  {Torbj{\"{o}}rn Lager },
-  booktitle =  { Proceedings of the 11th Nordic Conference on Computational Linguistics},
-  title =  {{Logic for part of speech tagging and shallow parsing}},
-  year =   {1998}
+  booktitle = "Proceedings of " # nodalida1998,
+  title =  {{Logic for Part of Speech Tagging and Shallow Parsing}},
+  year =   {1998},
+  location = {Copenhagen, Denmark}
 }
 
 
@@ -254,11 +271,11 @@
   author    = {Torbj{\"{o}}rn Lager and
                Joakim Nivre},
   title     = {{Part of speech tagging from a logical point of view}},
-  booktitle = {Proceedings of {LACL}, Logical Aspects of Computational Linguistics},
-  year      = {2001}
+  booktitle = {{Logical Aspects of Computational Linguistics, 4th International Conference (LACL 2001)}},
+  pages     = {212--227},
+  year      = {2001},
+  location  = {Le Croisic, France}
 }
-%  pages     = {212--227}}
-% 4th International Conference, 2001, Le Croisic, France, June 27-29, 2001, Proceedings},
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -270,6 +287,7 @@
  year={2011},
  booktitle = nodalida2011cg,
  location={{Riga, Latvia}},
+ pages={1--7}
  url={https://dspace.utlib.ee/dspace/bitstream/handle/10062/19296/antonsen_trosterud.pdf}
 }
 
@@ -285,11 +303,12 @@
 
 
 @inproceedings{bick_barebones,
-  title = {{A Bare-bones Constraint Grammar}},
-  author = {Bick, Eckhard},
-  year = {????},
-  booktitle = {???},
-  url = {????}
+  title={A Bare-bones Constraint Grammar},
+  author={Bick, Eckhard},
+  booktitle={{Proceedings of 25th Pacific Asia Conference on Language, Information and 
+  Computation (PACLIC 2011)}},
+  pages={226--235},
+  year={2011}
 }
 
 @inproceedings{lene_trond_linda2010,
