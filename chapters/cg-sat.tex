@@ -600,16 +600,24 @@ The results are presented in more detail in the following sections.
 % \textbf{\satcgMax}
 %       & 79.2 \% & 39.7s & ??? \% &1m 34s & ??? \% & 2m 54s \\ 
 \centering
-\begin{tabular}{l | c c c | p{1.1cm} p{1.1cm}  c}
+\begin{tabular}{l | c c c | p{1.3cm} p{1.3cm}  c}
  
 %           & \multicolumn{3}{c}{\textbf{Spanish: 19 rules}} &  \multicolumn{3}{c}{\textbf{Spanish: 261 rules}} \\
-           & \multicolumn{2}{r}{\textbf{19~rules}} & &  \multicolumn{3}{c}{\textbf{261 rules}} \\
+\multicolumn{1}{r|}{} & \multicolumn{3}{c|}{\textbf{19~rules}} &  \multicolumn{3}{c}{\textbf{261 rules}} \\
                           & \multicolumn{2}{c}{F-score} 
-                                               & Time   & \multicolumn{2}{c}{F-score} & Time \\
-                          & force    & unass.      &  & force     & unass. &  \\ \hline
+                                               & Time   & \multicolumn{2}{c}{F-score} & Time \\ \hline
+%                          & force    & unass.      &  & force     & unass. &  \\ \hline
 
-      \textbf{\satcgMax}  & 83.28 \% & 80.22 \%  & 4s  & 79.03 \% & 78.15 \% & 8s \\ 
-      \textbf{\satcgOrd}  & 83.12 \% & 81.14 \%  & 4s  & 79.17 \% & 79.03 \% & 8s \\ 
+      \textbf{\satcgMax}  & 80.22$^{\textsc{u}}$ \%  & 83.28$^{\textsc{f}}$ \%
+                          & 4s
+                          & 78.15$^{\textsc{u}}$ \%  & 79.03$^{\textsc{f}}$ \% 
+                          & 8s \\ 
+
+      \textbf{\satcgOrd}  & 81.14$^{\textsc{u}}$ \% & 83.12$^{\textsc{f}}$ \%
+                          & 4s  
+                          & 79.03$^{\textsc{u}}$ \% & 79.17$^{\textsc{f}}$ \% 
+                          & 8s \\ 
+
       \textbf{VISL CG-3}  & \multicolumn{2}{c}{81.52 \%}  & 0.39s
                                              & \multicolumn{2}{c}{78.83 \%} & 0.64s\\ 
   \end{tabular}
@@ -631,7 +639,7 @@ Some of the rules were selected from the original grammar, and some were written
 
 Table~\ref{table:fscore} shows F-scores and execution times for these two grammars. 
 \satcgMax{} is the parallel scheme with maximisation, and
-\satcgOrd{} is the parallel scheme where rule applications are introduced one by one.
+\satcgOrd{} is the parallel scheme where rule applications are introduced one by one; superscript {\sc u} refers to the unassigned variant and {\sc f} to the version where we force non-targeted literals true.
 The original grammar performs very poorly, with an F-score between 78--79 \% for all three setups---even with an empty grammar, the F-score would be around 70 \%. 
 Due to the unrepresentative example, we cannot draw many conclusions. 
 We had access to other grammars of the same size range, such as 
@@ -654,7 +662,7 @@ The rule ordering was not optimised by automatic means, and sections were not us
 \begin{table}[h]
   \centering
   \begin{tabular}{ r | c c | c }
-        &  \multicolumn{2}{c}{Spanish (380k words)} & Finnish (19k words)  \\
+        &  \multicolumn{2}{c|}{Spanish (380k words)} & Finnish (19k words)  \\
            & \textbf{19 rules}  & \textbf{261 rules} & \textbf{1185 rules}\\ \hline
       \textbf{\satcgMax} & 25s  & 1m 5s  & 4m 56s  \\ 
       \textbf{\satcgOrd} & 19s  & 1m 2s  & 4m 17s  \\ 
@@ -718,9 +726,9 @@ by pasting together 22 short sentences and replacing sentence boundaries with co
 \begin{table}[t]
   \centering
 \begin{tabular}{ l | c c | c c }
-       & \multicolumn{2}{c}{Spanish (261 rules)} & \multicolumn{2}{c}{Finnish (1185 rules)}  \\
-       & \textbf{283 tokens} &  \textbf{Split} %51 + 38 + 126 + 68 tokens}  
-                                           & \textbf{251 tokens} & \textbf{Split} \\ \hline
+       & \multicolumn{2}{c|}{\textbf{261 rules} } & \multicolumn{2}{c}{\textbf{1185 rules} }  \\
+       & 283 tokens &  Split %51 + 38 + 126 + 68 tokens}  
+                                           & 251 tokens & Split \\ \hline
 \textbf{\satcgMax}   & 2.26s   & 2.06s   & 5.34s & 2.36s\\ 
 \textbf{\satcgOrd}   & 2.20s   & 1.99s   & 4.70s & 2.36s \\ 
 \textbf{VISL CG-3}   & 0.05s   & 0.03s   & 0.04s & 0.04s \\ 
