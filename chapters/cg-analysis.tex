@@ -608,12 +608,12 @@ We can extract these requirements from both the rules that must be triggered, an
 \label{sec:eval}
 
 We tested three grammars to find conflicting rules: 
-Dutch\footnote{\scriptsize{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}}},
+Dutch\footnote{\scriptsize{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-nld/apertium-nld.nld.rlx}, revision number r65111}},
 with 59 rules; 
-Spanish\footnote{\scriptsize{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}}},
+Spanish\footnote{\scriptsize{\url{https://svn.code.sf.net/p/apertium/svn/languages/apertium-spa/apertium-spa.spa.rlx}}, revision number r66938},
 with 279 rules; and 
 Finnish\footnote{\scriptsize{\url{https://github.com/flammie/apertium-fin/raw/master/apertium-fin.fin.rlx}}},
-with 1185 rules. We left out \textsc{add}, \textsc{map} and other rule
+with 1185 rules. We left out \textsc{map}, \textsc{substitute} and other rule
 types introduced in CG-3, and only tested \textsc{remove} and \textsc{select} rules.
 The results for Dutch and Spanish are shown in Table~\ref{table:res},
 and the results for Finnish in Table~\ref{table:resFin}.
@@ -825,34 +825,49 @@ In fact, we are planning to change how we handle the lexical forms; with those c
 
 
 
-
+\def\oneClLG{{\sc 1 cl + lemmas}}
+\def\twoClLG{{\sc 2 cl + lemmas}}
+\def\oneClRG{{\sc 1 cl + readings}}
+\def\allRG{{\sc readings}}
 
 \begin{table}[h]
 \centering
 %\begin{tabular}{|p{3.15cm}|p{2.55cm}|p{2.55cm}|p{2.7cm}|p{2.1cm}|}
-\begin{tabular}{|p{3.05cm}|p{2.55cm}|p{2.55cm}|p{2.7cm}|p{2.1cm}|}
+%\begin{tabular}{|p{3.05cm}|p{2.55cm}|p{2.55cm}|p{2.7cm}|p{1.8cm}|}
+\begin{tabular}{| c @{~+~} c | c@{~+~}c | c@{~+~}c | c@{~+~}c | c@{~+~}c |}
 
 \hline
-              & 1 clitic + 
-                lemmas from 
-                 grammar & 2 clitics 
-                           + lemmas from 
-                              grammar & 1 clitic +
-                                          all readings 
-                                          from grammar    & all readings from grammar \\ \hline
-\# readings   & 5851 (4263~+~1588)
-                       & 9494
-                       (7906~+~1588) & 6657 (4263~+~2394) & 2394  \\ \hline
-\#~conflicts  & 214    & 214         & 22                 & 22 \\
-\small{(internal + 
- interaction)} & (211~+~3) & (211~+~3) & (19~+~3)        &  (19~+~3)  \\ \hline
+\multicolumn{2}{|c|}{} & \multicolumn{2}{c|}{\oneClLG}
+                              & \multicolumn{2}{c|}{\twoClLG}
+                                              & \multicolumn{2}{c|}{\oneClRG}      				   & \multicolumn{2}{c|}{\allRG} \\ \hline
+\multicolumn{2}{|l|}{\# readings}
+              & \multicolumn{2}{c|}{5851}         
+              				  & \multicolumn{2}{c|}{9494} 
+              				  				  & \multicolumn{2}{c|}{6657}                & \multicolumn{2}{c|}{2394} \\
+lexicon &
+grammar   & 4263 & 1588 &  7906 & 1588  & 4263 & 2394  & 0 & 2394  \\ \hline
+\multicolumn{2}{|l|}{\#~conflicts}
+              & \multicolumn{2}{c|}{214}   
+              				  & \multicolumn{2}{c|}{214}
+              				                  & \multicolumn{2}{c|}{22}
+              				                                  & \multicolumn{2}{c|}{22} \\
+internal & 
+ interaction & 211 & 3  & 211 & 3  & 19 & 3   &  19 & 3   \\ \hline
 
-\clock{} all 
-       rules (approx.) & \~{}4h 30min     & \~{}9h 30min    & \~{}7h 45min &  \~{}2h 30min \\ \hline
+\multicolumn{2}{|l|}{\clock{} all 
+       rules (approx.)}
+             & \multicolumn{2}{c|}{\~{}4h 30min}
+             		          & \multicolumn{2}{c|}{\~{}9h 30min}
+             		          			     & \multicolumn{2}{c|}{\~{}7h 45min} 
+             		          			     				&  \multicolumn{2}{c|}{\~{}2h 30min} \\ \hline
 
 
 \end{tabular}
-\caption{Results for Finnish (1185 rules).}
+\caption{Results for Finnish (1185 rules). 
+(\oneClLG) 1 clitic + lemmas from the grammar; 
+(\twoClLG) 2 clitics + lemmas from the grammar;  
+(\oneClRG) 1 clitic + all readings from the grammar;
+(\allRG) all readings from the grammar. }
 \label{table:resFin}
 \end{table}
 
