@@ -50,7 +50,7 @@ conflict handling in the parallel scheme.
 Secondly, we implement a SAT-based tool for analysing sequential CGs.
 Sequential CG is the most commonly used variant: rules are applied in order, 
 and actions are irreversible.
-We apply \formulation{a common technique from software verification}, 
+We apply symbolic evaluation, a common technique in software verification, 
 and model the state of all possible sentences after applying each rule;
 this enables grammar writers to see whether some rule or rule set prevents
 others from applying, or request example sequences that trigger a given rule.

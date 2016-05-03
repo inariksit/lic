@@ -825,16 +825,19 @@ In fact, we are planning to change how we handle the lexical forms; with those c
 
 
 
-\def\oneClLG{{\sc 1 cl + lemmas}}
-\def\twoClLG{{\sc 2 cl + lemmas}}
-\def\oneClRG{{\sc 1 cl + readings}}
-\def\allRG{{\sc readings}}
+\def\oneClLG{{\sc 1 cl + lem}}
+\def\twoClLG{{\sc 2 cl + lem}}
+\def\oneClRG{{\sc 1 cl + rds}}
+\def\allRG{{\sc only rds}}
+
+\def\wH{1.1cm}
+\def\wdt{0.7cm}
 
 \begin{table}[h]
 \centering
-%\begin{tabular}{|p{3.15cm}|p{2.55cm}|p{2.55cm}|p{2.7cm}|p{2.1cm}|}
-%\begin{tabular}{|p{3.05cm}|p{2.55cm}|p{2.55cm}|p{2.7cm}|p{1.8cm}|}
-\begin{tabular}{| c @{~+~} c | c@{~+~}c | c@{~+~}c | c@{~+~}c | c@{~+~}c |}
+\begin{tabular}{| p{\wH} @{~+~} p{\wH}  | r @{~+~} l  | l @{~+~}p{\wdt}  | p{\wdt} @{~+~}p{\wdt}  | p{\wdt} @{~+~}p{\wdt}  |}
+
+%\begin{tabular}{| p{\wH} @{~+~} p{\wH}  | p{\wdt} @{~+~}p{\wdt}  | p{\wdt} @{~+~}p{\wdt}  | p{\wdt} @{~+~}p{\wdt}  | p{\wdt} @{~+~}p{\wdt}  |}
 
 \hline
 \multicolumn{2}{|c|}{} & \multicolumn{2}{c|}{\oneClLG}
