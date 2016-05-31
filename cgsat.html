@@ -152,15 +152,15 @@ COL3: Disambiguated sentence
    <h2><strong class="hl">Analysing</strong> __ with ___	</h2>
 
 <ul>
-  <li>CG rules don't need to make sense
-    <pre class="fragment">
+  <li class="fragment">CG rules don't need to make sense
+    <pre >
     	
-    		REMOVE verb IF (-1 det) ;
-    		SELECT verb IF (-1 det) ;
+	   REMOVE verb IF (-1 det) ;
+	   SELECT verb IF (-1 det) ;
 	</pre>
   </li>
-<li> 
-	<span class="fragment">Use SAT-based <em>symbolic evaluation</em> to detect rule conflicts</span>
+<li class="fragment"> 
+	<span >Use SAT-based <em>symbolic evaluation</em> to detect rule conflicts</span>
 	<span class="fragment">+ other interesting things about the grammar!</span>
 </li>
   </section>
@@ -246,7 +246,7 @@ COL3: Disambiguated sentence
      <ul class="fragment"><li class="fragment shrink">Two schemes to emulate ordering</li></ul>
     <li class="fragment">Careful context irrelevant</li>
     <li class="fragment">Rules disambiguate more</li>
-     <ul class="fragment"><li class="fragment shrink"><code>REMOVE v IF (-1 det)</code> may remove <code>det</code> instead</li></ul>
+     <ul class="fragment"><li class="fragment shrink"><code>REMOVE v IF (-1 det)</code> may remove <code>det</code></li></ul>
   </section>
 
   <section id="SAT-CG-eval">
@@ -257,7 +257,11 @@ COL3: Disambiguated sentence
    <ul>
    	<li class="fragment">Traditional grammars written with order in mind</li>
    	<ul class="fragment"><li class="fragment shrink">Traditional CG-engines do better with those grammars</li></ul>
-    <li class="fragment">SAT-CG around 10-100 times slower than state of the art</li>
+    <li class="fragment">SAT-CG 10 to 100 times slower than state of the art</li>
+    <li class="fragment">Potential for smaller grammars?</li>
+    <aside class="notes">
+
+    </aside>
   </section>
 
 <!-- Chapter 4: Analysing CG with SAT -->
@@ -271,78 +275,59 @@ COL3: Disambiguated sentence
    <script type="text/template">
    ## CG analysis
 
-   * Apply rules to a sentence
-   * All rules apply in parallel
+   * High-quality CGs have 1000s of rules 
+   * Conflicting rules, ineffective rule order  
+    ➡ Need for automated grammar analysis!
    </script>
   </section>
 
-<!-- CGSAT presentation end here 
-    
-    <section>
-     <h2>Point of View</h2>
-     <p>
-      Press <strong>ESC</strong> to enter the slide overview.
-     </p>
-     <p>
-      Hold down alt and click on any element to zoom in on it using <a href="http://lab.hakim.se/zoom-js">zoom.js</a>. Alt + click anywhere to zoom back out.
-     </p>
+  <section>
+    <section id="conflict-ex">
+     <h2>Examples of conflicts</h2>
+     <img src="conflicts.png"/>
     </section>
 
+    <section id="conflict-def">
+    	<h2>Rules <em class="hl">R</em> and <em class="hl">r</em> conflict, if </h2>
+    	<ul>
+    		<li class="fragment">after applying <em class="hl">R</em>, it is impossible to apply <em class="hl">r</em>, <strong>regardless of input</strong></li>
 
-    <section data-markdown>
-     <script type="text/template">
-      ## Markdown support
-
-      Write content using inline or external Markdown.
-      Instructions and more info available in the [readme](https://github.com/hakimel/reveal.js#markdown).
-
-      ```
-      <section data-markdown>
-        ## Markdown support
-
-        Write content using inline or external Markdown.
-        Instructions and more info available in the [readme](https://github.com/hakimel/reveal.js#markdown).
-      </section>
-      ```
-     </script>
+			<li class="fragment"><em class="hl">R</em> can also be a list of rules.</li>
+    	</ul>
     </section>
 
-    <section>
-     <section id="fragments">
-      <h2>Fragments</h2>
-      <p>Hit the next arrow...</p>
-      <p class="fragment">... to step through ...</p>
-      <p><span class="fragment">... a</span> <span class="fragment">fragmented</span> <span class="fragment">slide.</span></p>
+    <section id="conflict-sol">
+      <h2><em>...regardless of input</em></h2>
 
-      <aside class="notes">
-       This slide has fragments which are also stepped through in the notes window.
-      </aside>
-     </section>
-     <section>
-      <h2>Fragment Styles</h2>
-      <p>There's different types of fragments, like:</p>
-      <p class="fragment grow">grow</p>
-      <p class="fragment shrink">shrink</p>
-      <p class="fragment fade-out">fade-out</p>
-      <p class="fragment fade-up">fade-up (also down, left and right!)</p>
-      <p class="fragment current-visible">current-visible</p>
-      <p>Highlight <span class="fragment highlight-red">red</span> <span class="fragment highlight-blue">blue</span> <span class="fragment highlight-green">green</span></p>
-     </section>
+ 	<tt>No conflict:</tt> <!-- If <em class="hl">R</em> and <em class="hl">r</em> are <strong>not</strong> in conflict, 
+ 		 -->
+ 		 <tr>There is a sequence where <em class="hl">r</em> can remove something, after <em class="hl">R</em>.</tr>
+
+
+
+ 	<tt>Conflict:</tt> <tr>No such sequence can be constructed.</tr>
+
+    <p class="fragment">Can we <em>generate</em> sequences?</p>
+     <p class="fragment">With SAT!</p>
     </section>
 
-    <section id="transitions">
-     <h2>Transition Styles</h2>
-     <p>
-      You can select from different transitions, like: <br>
-      <a href="?transition=none#/transitions">None</a> -
-      <a href="?transition=fade#/transitions">Fade</a> -
-      <a href="?transition=slide#/transitions">Slide</a> -
-      <a href="?transition=convex#/transitions">Convex</a> -
-      <a href="?transition=concave#/transitions">Concave</a> -
-      <a href="?transition=zoom#/transitions">Zoom</a>
-     </p>
-    </section>
+  </section>
 
+  <section id="generation">
+  	<h2>From disambiguation to generation</h2>
+
+  	<ul>
+  		<li class="fragment">Apply rules to a <strong class="hl">symbolic sentence</strong></li>
+  		<ul class="fragment shrink"><li class="fragment">Every cohort contains every reading</li>
+  			<li class="fragment">We get the readings from morphological lexicon
+  			</li></ul>
+  		<li class="fragment">Model <strong class="hl">state</strong> after each rule</li>
+  		<li class="fragment">SAT-problem becomes <q>&ldquo;Which readings were <em class="hl">originally</em> true&rdquo;</q> 
+<!-- Our new encoding gives us
+	* state
+ --> 
+  </section>
+<!-- CGSAT presentation end here
 
     <section>
      <h2>Take a Moment</h2>
