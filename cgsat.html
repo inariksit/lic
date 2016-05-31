@@ -74,7 +74,7 @@
   </section>
 
   <section id="CG">
-     <h2>Constraint Grammar (CG)</h2>
+     <h2>Constraint Grammar (<strong class="hl">CG</strong>)</h2>
 
 
      <img src="cg-pic.png" />
@@ -124,7 +124,7 @@ COL3: Disambiguated sentence
  <section>
 
     <section id="SAT-def" data-transition="fade"> 
-      <h2>Boolean Satisfiability (SAT)</h2>
+      <h2>Boolean Satisfiability (<strong class="hl">SAT</strong>)</h2>
       Is there a set of values for the variables <em>x</em>, <em>y</em> and <em>z</em> that satisfies the given formulas?
 
       <!-- VARIABLES
@@ -135,8 +135,8 @@ COL3: Disambiguated sentence
     </section>
 
     <section id="SAT-why" data-transition="fade">
-      <h2>Boolean Satisfiability (SAT)</h2>
-      <ol>
+    	      <h2>Boolean Satisfiability (SAT)</h2>
+      <ol class="olhl">
       	<li>Got a search problem
       	</li><li>Model it in SAT
         </li><li>???
@@ -149,27 +149,31 @@ COL3: Disambiguated sentence
 
 
   <section id="motivation">
-   <h2>Analysing __ with __</h2>
+   <h2><strong class="hl">Analysing</strong> __ with ___	</h2>
 
 <ul>
-   <li class="fragment"> 1000s of rules</li>
-
-  <li class="fragment">No internal mechanism to ensure consistency</li>
+  <li>CG rules don't need to make sense
     <pre class="fragment">
     	
     		REMOVE verb IF (-1 det) ;
     		SELECT verb IF (-1 det) ;
 	</pre>
-
-<p> 
-	<span class="fragment">Use SAT-based <em class="hl">symbolic evaluation</em> to detect rule conflicts</span>
+  </li>
+<li> 
+	<span class="fragment">Use SAT-based <em>symbolic evaluation</em> to detect rule conflicts</span>
 	<span class="fragment">+ other interesting things about the grammar!</span>
-</p>
+</li>
   </section>
 
+<!-- Chapter 3: CG as a SAT-problem -->
+  
+  <section>
+  	<h1>SAT-encoding of CG</h1>
+  </section>
+
+<!-- -->
 
   <section >
-
  	<aside class="notes">
  		Before applications, we first show how to translate CG into a SAT problem.
     </aside>
@@ -209,30 +213,63 @@ COL3: Disambiguated sentence
  
     <section data-transition="fade">
    	  <h2>SAT-encoding of CG</h2>
-      Model = disambiguation
+      <p>Model = disambiguation</p>
+
+      <p><ul>
+      	<li>We can use SAT-solver as a CG-engine!</li>
+      </ul></p>
     </section>
 
   </section>
 
-  <section data-markdown id="SAT-CG">
 
-   <script type="text/template">
-   ## What did we just do?
+<!-- DEMO TIME!
 
-   * Use SAT-solver as a CG engine
-   * Save the world
-   </script>
-  </section>
-
+     Show the small Spanish CG 
+     Show some ambiguous text
+     Show VISL CG-3 and SAT-CG to the same input 
+     Add to Apertium pipeline -->
   <section id="SAT-CG-demo">
   <h1>Demo</h1>
   </section>
 
 
+
+<!-- Demo over, explain about parallel -->
+
+  <section id="SAT-CG-prop">
+
+   <h2>Properties of SAT-CG</h2>
+
+   <ul>
+    <li class="fragment">Rules apply in parallel</li>
+     <ul class="fragment"><li class="fragment shrink">Two schemes to emulate ordering</li></ul>
+    <li class="fragment">Careful context irrelevant</li>
+    <li class="fragment">Rules disambiguate more</li>
+     <ul class="fragment"><li class="fragment shrink"><code>REMOVE v IF (-1 det)</code> may remove <code>det</code> instead</li></ul>
+  </section>
+
+  <section id="SAT-CG-eval">
+
+   <h2>Evaluation</h2>
+
+
+   <ul>
+   	<li class="fragment">Traditional grammars written with order in mind</li>
+   	<ul class="fragment"><li class="fragment shrink">Traditional CG-engines do better with those grammars</li></ul>
+    <li class="fragment">SAT-CG around 10-100 times slower than state of the art</li>
+  </section>
+
+<!-- Chapter 4: Analysing CG with SAT -->
+
+  <section>
+  	<h1>Analysing CG with SAT</h1>
+  </section>
+
   <section data-markdown id="CG-ana">
 
    <script type="text/template">
-   ## Previous solution
+   ## CG analysis
 
    * Apply rules to a sentence
    * All rules apply in parallel
