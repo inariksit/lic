@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+
+ <head>
+  <meta charset="utf-8">
+
+  <title>Analysing Constraint Grammar with SAT</title>
+
+  <meta name="description" content="Licentiate presentation">
+  <meta name="author" content="Inari Listenmaa">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/theme/futura.css" id="theme">
+
+  <!-- Theme used for syntax highlighting of code -->
+  <link rel="stylesheet" href="lib/css/zenburn.css">
+
+  <!-- Printing and PDF exports -->
+  <script>
+   var link = document.createElement( 'link' );
+   link.rel = 'stylesheet';
+   link.type = 'text/css';
+   link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+   document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+
+  <!--[if lt IE 9]>
+  <script src="lib/js/html5shiv.js"></script>
+  <![endif]-->
+ </head>
+
+<body>
+
+ <div class="reveal">
+
+   <!-- Any section element inside of this container is displayed as a slide -->
+ <div class="slides">
+   <section>
+     <img src="title.png" class="plain" alt="Analysing Constraint Grammar with SAT" />
+     <h5>Inari Listenmaa</h5>
+     <h5>3 June 2016, Göteborg</h5>
+<!--     <p>
+      <small>Created by <a href="http://hakim.se">Hakim El Hattab</a> / <a href="http://twitter.com/hakimel">@hakimel</a></small>
+     </p> -->
+  </section>
+
+  <section data-transition="fade">
+
+    <section id="wishawish" data-transition="fade">
+      <h1>I wish a wish</h1>
+    </section>
+
+    <section id="statistics" data-transition="fade">
+      <h3>I wish a wish</h3>
+       <img src="statistics.png" />
+    </section>
+
+    <section id="generative" data-transition="fade">
+      <h3>I wish a wish</h3>
+      <img src="generative-grammar.png" />
+    </section>
+
+    <section id="lookup-disam" data-transition="fade">
+      <h3>I wish a wish</h3>
+      <img src="lookup-disambiguation.png" />
+    </section>
+
+
+  </section>
+
+  <section id="CG">
+     <h2>Constraint Grammar (CG)</h2>
+
+
+     <img src="cg-pic.png" />
+  </section>
+
+<!--TODO: fancy tables with text
+
+     <section id="ambiguous-sentence">
+COL1:Initially ambiguous sentence  
+"<I>"
+   "I" pron
+
+"<wish>"
+   "wish" noun
+   "wish" verb
+
+"<a>"
+   "a" det
+
+"<wish>"
+   "wish" noun
+   "wish" verb
+
+COL2: Disambiguation rules
+REMOVE verb
+  IF (-1C det) ;
+
+REMOVE noun
+  IF (-1 pron)
+     (1* verb) ;
+
+COL3: Disambiguated sentence
+"<I>"
+   "I" pron
+
+"<wish>"
+   "wish" verb
+
+"<a>"
+   "a" det
+
+"<wish>"
+   "wish" noun
+
+-->
+ 
+ <section>
+
+    <section id="SAT-def" data-transition="fade"> 
+      <h2>Boolean Satisfiability (SAT)</h2>
+      Is there a set of values for the variables <em>x</em>, <em>y</em> and <em>z</em> that satisfies the given formulas?
+
+      <!-- VARIABLES
+           CLAUSES
+           ASSIGNMENT
+  		-->
+      <img width="500" height="500" src="TODO.png"/>
+    </section>
+
+    <section id="SAT-why" data-transition="fade">
+      <h2>Boolean Satisfiability (SAT)</h2>
+      <ol>
+      	<li>Got a search problem
+      	</li><li>Model it in SAT
+        </li><li>???
+        </li><li>Profit
+        </li>
+      </ol>
+    </section>
+
+  </section>
+
+
+  <section id="motivation">
+   <h2>Analysing __ with __</h2>
+
+<ul>
+   <li class="fragment"> 1000s of rules</li>
+
+  <li class="fragment">No internal mechanism to ensure consistency</li>
+    <pre class="fragment">
+    	
+    		REMOVE verb IF (-1 det) ;
+    		SELECT verb IF (-1 det) ;
+	</pre>
+
+<p> 
+	<span class="fragment">Use SAT-based <em class="hl">symbolic evaluation</em> to detect rule conflicts</span>
+	<span class="fragment">+ other interesting things about the grammar!</span>
+</p>
+  </section>
+
+
+  <section >
+
+ 	<aside class="notes">
+ 		Before applications, we first show how to translate CG into a SAT problem.
+    </aside>
+
+    <section id="SAT-encoding-CG" data-transition="fade">
+   	  <h2>SAT-encoding of CG</h2>
+   	  <p>Analyses = variables</p>
+
+      <p>TODO make into a table</p>
+
+    	<p><ul>
+    	 <li><em>the</em> is determiner</li>
+    	 <li><em>wish</em> is noun</li>
+     	<li><em>wish</em> is verb</li>
+ 	    </ul></p>
+
+    	<p><ul>
+    	 <li>the_det</li>
+    	 <li>wish_noun</li>
+     	<li>wish_verb</li>
+ 	    </ul></p>
+    </section>
+
+    <section data-transition="fade">
+   	  <h2>SAT-encoding of CG</h2>
+      <p>Rules = clauses</p>
+
+      <p><ul>
+      	<li>Default rule: every word must have some analysis</li>
+        <li>Constraint rule: if <em>the</em> is determiner, <em>wish</em> cannot be verb</li>
+
+    	<p><ul>
+    	 <li>wish_noun ∨ wish_verb</li>
+    	 <li>the_det ⇒ ¬wish_verb</li>
+	       </ul></p>
+    </section>
+ 
+    <section data-transition="fade">
+   	  <h2>SAT-encoding of CG</h2>
+      Model = disambiguation
+    </section>
+
+  </section>
+
+  <section data-markdown id="SAT-CG">
+
+   <script type="text/template">
+   ## What did we just do?
+
+   * Use SAT-solver as a CG engine
+   * Save the world
+   </script>
+  </section>
+
+  <section id="SAT-CG-demo">
+  <h1>Demo</h1>
+  </section>
+
+
+  <section data-markdown id="CG-ana">
+
+   <script type="text/template">
+   ## Previous solution
+
+   * Apply rules to a sentence
+   * All rules apply in parallel
+   </script>
+  </section>
+
+<!-- CGSAT presentation end here 
+    
+    <section>
+     <h2>Point of View</h2>
+     <p>
+      Press <strong>ESC</strong> to enter the slide overview.
+     </p>
+     <p>
+      Hold down alt and click on any element to zoom in on it using <a href="http://lab.hakim.se/zoom-js">zoom.js</a>. Alt + click anywhere to zoom back out.
+     </p>
+    </section>
+
+
+    <section data-markdown>
+     <script type="text/template">
+      ## Markdown support
+
+      Write content using inline or external Markdown.
+      Instructions and more info available in the [readme](https://github.com/hakimel/reveal.js#markdown).
+
+      ```
+      <section data-markdown>
+        ## Markdown support
+
+        Write content using inline or external Markdown.
+        Instructions and more info available in the [readme](https://github.com/hakimel/reveal.js#markdown).
+      </section>
+      ```
+     </script>
+    </section>
+
+    <section>
+     <section id="fragments">
+      <h2>Fragments</h2>
+      <p>Hit the next arrow...</p>
+      <p class="fragment">... to step through ...</p>
+      <p><span class="fragment">... a</span> <span class="fragment">fragmented</span> <span class="fragment">slide.</span></p>
+
+      <aside class="notes">
+       This slide has fragments which are also stepped through in the notes window.
+      </aside>
+     </section>
+     <section>
+      <h2>Fragment Styles</h2>
+      <p>There's different types of fragments, like:</p>
+      <p class="fragment grow">grow</p>
+      <p class="fragment shrink">shrink</p>
+      <p class="fragment fade-out">fade-out</p>
+      <p class="fragment fade-up">fade-up (also down, left and right!)</p>
+      <p class="fragment current-visible">current-visible</p>
+      <p>Highlight <span class="fragment highlight-red">red</span> <span class="fragment highlight-blue">blue</span> <span class="fragment highlight-green">green</span></p>
+     </section>
+    </section>
+
+    <section id="transitions">
+     <h2>Transition Styles</h2>
+     <p>
+      You can select from different transitions, like: <br>
+      <a href="?transition=none#/transitions">None</a> -
+      <a href="?transition=fade#/transitions">Fade</a> -
+      <a href="?transition=slide#/transitions">Slide</a> -
+      <a href="?transition=convex#/transitions">Convex</a> -
+      <a href="?transition=concave#/transitions">Concave</a> -
+      <a href="?transition=zoom#/transitions">Zoom</a>
+     </p>
+    </section>
+
+
+    <section>
+     <h2>Take a Moment</h2>
+     <p>
+      Press B or . on your keyboard to pause the presentation. This is helpful when you're on stage and want to take distracting slides off the screen.
+     </p>
+    </section>
+
+
+-->
+   </div>
+
+  </div>
+
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.js"></script>
+
+  <script>
+
+   // More info https://github.com/hakimel/reveal.js#configuration
+   Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+
+    transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+    // More info https://github.com/hakimel/reveal.js#dependencies
+    dependencies: [
+     { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+     { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+     { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+     { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+     { src: 'plugin/zoom-js/zoom.js', async: true },
+     { src: 'plugin/notes/notes.js', async: true }
+    ]
+   });
+
+  </script>
+
+ </body>
+</html>
