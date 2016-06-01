@@ -182,33 +182,40 @@ COL3: Disambiguated sentence
    	  <h2>SAT-encoding of CG</h2>
    	  <p>Analyses = variables</p>
 
-      <p>TODO make into a table</p>
-
-    	<p><ul>
+      <div id="cg">
+       <ul>
     	 <li><em>the</em> is determiner</li>
     	 <li><em>wish</em> is noun</li>
      	<li><em>wish</em> is verb</li>
- 	    </ul></p>
+ 	    </ul></div>
 
-    	<p><ul>
+      <div id="sat">
+    	<ul>
     	 <li>the<sub>det</sub></li>
     	 <li>wish<sub>noun</sub></li>
      	<li>wish<sub>verb</sub></li>
- 	    </ul></p>
+ 	    </ul>
+ 	  </div>
+
     </section>
 
     <section data-transition="fade">
    	  <h2>SAT-encoding of CG</h2>
       <p>Rules = clauses</p>
 
-      <p><ul>
-      	<li>Default rule: every word must have some analysis</li>
-        <li>Constraint rule: if <em>the</em> is determiner, <em>wish</em> cannot be verb</li>
-
-    	<p><ul>
+      <div id="cg">
+      	<ul>
+          <li>Default rule: every word must have some analysis</li>
+          <li>Constraint rule: if <em>the</em> is determiner,
+              <em>wish</em> cannot be verb</li>
+       </ul>
+      </div>
+      <div id="sat">
+      	<ul>
     	 <li>wish<sub>noun</sub> ∨ wish<sub>verb</sub></li>
     	 <li>the<sub>det</sub> ⇒ ¬wish<sub>verb</sub></li>
-	       </ul></p>
+	    </ul>
+	  </div>
     </section>
  
     <section data-transition="fade">
@@ -334,6 +341,31 @@ COL3: Disambiguated sentence
 
   <section id="CG-ana-demo">
   	<h1>Demo</h1>
+  </section>
+
+  <section>
+  	<h2>Other questions we can ask</h2>
+  	<p>Portuguese and Finnish examples from Chapter 4</p>
+
+  	<p>Aid for grammar writer</p>
+  </section>
+
+  <section>
+  	<h2>Evaluation</h2>
+  	<p>Tried it with 3 grammars</p>
+  	<p>Finds conflicts, runs slow</p>
+
+  </section>
+
+  <section>
+  	<h2>Conclusions / Future work</h2>
+    Symbolic sentence -> actual generation of text?
+
+    Expressivity?
+  </section>
+
+  <section>
+  	<h1>Thank you!</h1>
   </section>
 <!-- CGSAT presentation end here
 
