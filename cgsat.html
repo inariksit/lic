@@ -191,9 +191,9 @@ COL3: Disambiguated sentence
  	    </ul></p>
 
     	<p><ul>
-    	 <li>the_det</li>
-    	 <li>wish_noun</li>
-     	<li>wish_verb</li>
+    	 <li>the<sub>det</sub></li>
+    	 <li>wish<sub>noun</sub></li>
+     	<li>wish<sub>verb</sub></li>
  	    </ul></p>
     </section>
 
@@ -206,8 +206,8 @@ COL3: Disambiguated sentence
         <li>Constraint rule: if <em>the</em> is determiner, <em>wish</em> cannot be verb</li>
 
     	<p><ul>
-    	 <li>wish_noun ∨ wish_verb</li>
-    	 <li>the_det ⇒ ¬wish_verb</li>
+    	 <li>wish<sub>noun</sub> ∨ wish<sub>verb</sub></li>
+    	 <li>the<sub>det</sub> ⇒ ¬wish<sub>verb</sub></li>
 	       </ul></p>
     </section>
  
@@ -299,13 +299,13 @@ COL3: Disambiguated sentence
     <section id="conflict-sol">
       <h2><em>...regardless of input</em></h2>
 
- 	<tt>No conflict:</tt> <!-- If <em class="hl">R</em> and <em class="hl">r</em> are <strong>not</strong> in conflict, 
+ 	<dt>No conflict:</dt> <!-- If <em class="hl">R</em> and <em class="hl">r</em> are <strong>not</strong> in conflict, 
  		 -->
- 		 <tr>There is a sequence where <em class="hl">r</em> can remove something, after <em class="hl">R</em>.</tr>
+ 		 <dd>There is a sequence where <em class="hl">r</em> can remove something, after <em class="hl">R</em>.</dd>
 
 
 
- 	<tt>Conflict:</tt> <tr>No such sequence can be constructed.</tr>
+ 	<dt>Conflict:</dt> <dd>No such sequence can be constructed.</dd>
 
     <p class="fragment">Can we <em>generate</em> sequences?</p>
      <p class="fragment">With SAT!</p>
@@ -324,8 +324,16 @@ COL3: Disambiguated sentence
   		<li class="fragment">Model <strong class="hl">state</strong> after each rule</li>
   		<li class="fragment">SAT-problem becomes <q>&ldquo;Which readings were <em class="hl">originally</em> true&rdquo;</q> 
 <!-- Our new encoding gives us
-	* state
+	* state: we create new variables for each targeted reading after each rule
+
+	Draw symbolic sentence on blackboard
+
  --> 
+  </section>
+
+
+  <section id="CG-ana-demo">
+  	<h1>Demo</h1>
   </section>
 <!-- CGSAT presentation end here
 
