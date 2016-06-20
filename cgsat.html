@@ -42,8 +42,12 @@
  <div class="slides">
    <section>
      <img src="title.png" class="plain" alt="Analysing Constraint Grammar with SAT" />
-     <h5>Inari Listenmaa</h5>
-     <h5>3 June 2016, Göteborg</h5>
+     <h4>Inari Listenmaa</h4>
+     <h4>3 June 2016, Göteborg</h4>
+
+     <p> <br/>
+
+     <a href="http://listenmaa.fi/lic.pdf">listenmaa.fi/lic.pdf</a></p>
 <!--     <p>
       <small>Created by <a href="http://hakim.se">Hakim El Hattab</a> / <a href="http://twitter.com/hakimel">@hakimel</a></small>
      </p> -->
@@ -56,28 +60,70 @@
     </section>
 
     <section id="statistics" data-transition="fade">
-      <h3>I wish a wish</h3>
-       <img src="statistics.png" />
+      <h3>Statistical classifier</h3>
+       
+       	<div class="bord">
+       	<p>I <strong class="hl">wish</strong> that ...</p>
+       	<p>... her only <strong class="hl">wish</strong> was ... </p>
+       	<p>You get three <strong class="hl">wishes</strong> ... </p>
+       	<p>We <strong class="hl">wish</strong> you a merry ...</p>
+       </div>
     </section>
 
     <section id="generative" data-transition="fade">
-      <h3>I wish a wish</h3>
-      <img src="generative-grammar.png" />
-    </section>
+      <h3>Generative grammar</h3>
+      <div class="bord">
+      	<pre class="nobord">
+      	S    → NP VP
+      	VP   → V NP
+      	NP   → Det N | Pron
+      	Det  → "a"
+      	Pron → "I"
+      	N    → "wish"
+      	V    → "wish"
+      </pre>
+  </div>
+<!--       <img src="generative-grammar.png" />
+ -->    </section>
 
     <section id="lookup-disam" data-transition="fade">
-      <h3>I wish a wish</h3>
-      <img src="lookup-disambiguation.png" />
+      <h3>Lookup &amp; Disambiguation</h3>
+      <div class="bord">
+      	<pre class="nott">
+    "a"                      
+        article                        "Usually, verbs 
+    "wish"                          don't follow articles"
+        noun singular
+        verb present
+        verb infinitive
+      	</pre>
+      </div>
     </section>
 
 
   </section>
 
-  <section id="CG">
-     <h2>Constraint Grammar (<strong class="hl">CG</strong>)</h2>
+  <section data-transition="fade">
+    <section id="CG-1" data-transition="fade">
+       <h2>Constraint Grammar (<strong class="hl">CG</strong>)</h2>
+  
+       <img src="cg-pic.png" />
 
+    </section>
 
-     <img src="cg-pic.png" />
+    <section id="CG-def" data-transition="fade">
+       <h2>Constraint Grammar (<strong class="hl">CG</strong>)</h2>
+  
+       <img src="cg-pic-cohort-hilight.png" />
+
+<!--       Highlight cohorts and readings-->
+    </section>
+
+    <section id="CG-fin" data-transition="fade">
+    <!--  <h2>Constraint Grammar (<strong class="hl">CG</strong>)</h2>
+     -->   <img class="plain" src="finnish-cg.png" />
+    </section>
+
   </section>
 
 <!--TODO: fancy tables with text
@@ -131,7 +177,7 @@ COL3: Disambiguated sentence
            CLAUSES
            ASSIGNMENT
   		-->
-      <img width="500" height="500" src="TODO.png"/>
+      <img src="sat-def.png"/>
     </section>
 
     <section id="SAT-why" data-transition="fade">
@@ -153,7 +199,7 @@ COL3: Disambiguated sentence
 
 <ul>
   <li class="fragment">CG rules don't need to make sense
-    <pre >
+    <pre class="bord">
     	
 	   REMOVE verb IF (-1 det) ;
 	   SELECT verb IF (-1 det) ;
@@ -178,24 +224,54 @@ COL3: Disambiguated sentence
  		Before applications, we first show how to translate CG into a SAT problem.
     </aside>
 
+    <section>
+    	<h2>Example</h2>
+
+<p>&ldquo;La casa grande&rdquo;</p>
+<div class="cg"><pre class="nobord">
+"&lt;la&gt;"
+    "el" det def f sg
+    "lo" prn p3 f sg
+"&lt;casa&gt;"
+    "casa" n f sg
+    "casar" v pri p3 sg
+"&lt;grande&gt;"
+    "grande" adj mf sg
+</div>
+
+<div class="sat"><pre class="nobord">
+REMOVE v IF (-1 det) ;
+REMOVE n IF (-1 prn) ;</pre>
+</div>
+    </section>
+
     <section id="SAT-encoding-CG" data-transition="fade">
    	  <h2>SAT-encoding of CG</h2>
    	  <p>Analyses = variables</p>
 
-      <div id="cg">
-       <ul>
-    	 <li><em>the</em> is determiner</li>
-    	 <li><em>wish</em> is noun</li>
-     	<li><em>wish</em> is verb</li>
- 	    </ul></div>
+   	  <img src="sat-encoding-la-casa.png" />
+<!-- <pre class="nott"><em class="hl">La casa grande</em>
+"&lt;la&gt;"
+    "el" det def f sg
+    "lo" prn p3 f sg
+"&lt;casa&gt;"
+    "casa" n f sg
+    "casar" v pri p3 sg
+"&lt;grande&gt;"
+    "grande" adj mf sg</pre>
+
 
       <div id="sat">
-    	<ul>
-    	 <li>the<sub>det</sub></li>
-    	 <li>wish<sub>noun</sub></li>
-     	<li>wish<sub>verb</sub></li>
- 	    </ul>
+      <pre class="nott">&nbsp;  
+  <em>la</em><sub>det</sub>
+  <em>la</em><sub>prn</sub>
+&nbsp; 
+  <em>casa</em><sub>noun</sub>
+  <em>casa</em><sub>prn</sub>
+&nbsp;
+  <em>grande</em><sub>adj</sub></pre>
  	  </div>
+ -->
 
     </section>
 
@@ -203,28 +279,49 @@ COL3: Disambiguated sentence
    	  <h2>SAT-encoding of CG</h2>
       <p>Rules = clauses</p>
 
-      <div id="cg">
-      	<ul>
-          <li>Default rule: every word must have some analysis</li>
-          <li>Constraint rule: if <em>the</em> is determiner,
-              <em>wish</em> cannot be verb</li>
-       </ul>
-      </div>
-      <div id="sat">
-      	<ul>
-    	 <li>wish<sub>noun</sub> ∨ wish<sub>verb</sub></li>
-    	 <li>the<sub>det</sub> ⇒ ¬wish<sub>verb</sub></li>
-	    </ul>
+
+<table>
+  <tr>
+
+  </tr>
+  <tr>
+  	    <td><code class="small">REMOVE v IF (-1 det) <br/>
+    	REMOVE n IF (-1 prn)</code></td>
+	<td> <code class="formula">la<sub>Det</sub> ⇒ ¬casa<sub>V</sub><br/>
+       la<sub>Prn</sub> ⇒ ¬casa<sub>N</sub></code></td>
+  </tr>
+</table>
+
+<!--       <div id="cg">
+      	<pre class="nobord">
+REMOVE v IF (-1 det) ;
+REMOVE n IF (-1 prn) ;
+      	</pre>
 	  </div>
-    </section>
+
+      <div id="sat">
+la<sub>Det</sub> ⇒ ¬casa<sub>V</sub>
+la<sub>Prn</sub> ⇒ ¬casa<sub>N</sub>
+      	</pre>
+	  </div>
+ -->    </section>
  
     <section data-transition="fade">
    	  <h2>SAT-encoding of CG</h2>
-      <p>Model = disambiguation</p>
+      <p>Disambiguation = model</p>
+      <div class="fragment">
+    	  <img class="plain" src="five-models.png" />
 
-      <p><ul>
-      	<li>We can use SAT-solver as a CG-engine!</li>
-      </ul></p>
+	  </div>
+	</section>
+
+    <section data-transition="fade">
+   	  <h2>SAT-encoding of CG</h2>
+      <p>Disambiguation = model</p>
+      <img class="plain" src="two-models.png" />
+      <p>
+      	We can use SAT-solver as a CG-engine!</li>
+      </p>
     </section>
 
   </section>
@@ -243,29 +340,41 @@ COL3: Disambiguated sentence
 
 
 <!-- Demo over, explain about parallel -->
+  <section>
 
-  <section id="SAT-CG-prop">
+    <section id="SAT-CG-prop">
 
-   <h2>Properties of SAT-CG</h2>
+     <h2>Properties of SAT-CG</h2>
+     <p>Rules apply in parallel</p>
+     <p class="fragment">Two schemes to solve conflicts
+        <ol>
+       	  <li class="fragment">Choose clauses based on order</li>
+           <li class="fragment">Maximisation</li>
+   	    </ol>
+       </p>
+    </section>
 
-   <ul>
-    <li class="fragment">Rules apply in parallel</li>
-     <ul class="fragment"><li class="fragment shrink">Two schemes to emulate ordering</li></ul>
-    <li class="fragment">Careful context irrelevant</li>
-    <li class="fragment">Rules disambiguate more</li>
-     <ul class="fragment"><li class="fragment shrink"><code>REMOVE v IF (-1 det)</code> may remove <code>det</code></li></ul>
+    <section>
+      <h2>Properties of SAT-CG</h2>
+      <p class="fragment">Rules disambiguate more</p>
+       <ul class="fragment"><li class="fragment shrink"><code>REMOVE v IF (-1 det)</code> may remove <code>det</code></li></ul>
+       <p class="fragment">Careful context irrelevant</p>
+              <ul class="fragment"><li class="fragment shrink"><code>REMOVE v IF (-1C det)</code></li></ul>
+
+    </section>
   </section>
-
   <section id="SAT-CG-eval">
 
    <h2>Evaluation</h2>
-
 
    <ul>
    	<li class="fragment">Traditional grammars written with order in mind</li>
    	<ul class="fragment"><li class="fragment shrink">Traditional CG-engines do better with those grammars</li></ul>
     <li class="fragment">SAT-CG 10 to 100 times slower than state of the art</li>
-    <li class="fragment">Potential for smaller grammars?</li>
+    <li class="fragment">More expressivity: disjunction; no order; smaller grammars</li>
+
+<!--     <li class="fragment">Potential for smaller grammars / without order</li>
+ -->
     <aside class="notes">
 
     </aside>
@@ -277,15 +386,18 @@ COL3: Disambiguated sentence
   	<h1>Analysing CG with SAT</h1>
   </section>
 
-  <section data-markdown id="CG-ana">
+  <section id="CG-ana">
+  	<section>
+  		<h2>Motivation</h2>
+		<p>High-quality CGs have 1000s of rules</p>
 
-   <script type="text/template">
-   ## CG analysis
+		<p>Conflicting rules, ineffective rule order</p>
 
-   * High-quality CGs have 1000s of rules 
-   * Conflicting rules, ineffective rule order  
-    ➡ Need for automated grammar analysis!
-   </script>
+		<p>➡ Need automated grammar analysis!</p>
+	</section>
+	<section>
+		<img class="plain" src="finnish-cg.png" />
+     </section>
   </section>
 
   <section>
@@ -295,41 +407,78 @@ COL3: Disambiguated sentence
     </section>
 
     <section id="conflict-def">
-    	<h2>Rules <em class="hl">R</em> and <em class="hl">r</em> conflict, if </h2>
+    	<h2>Rules <em class="hl">q</em> and <em class="hl">r</em> conflict, if </h2>
     	<ul>
-    		<li class="fragment">after applying <em class="hl">R</em>, it is impossible to apply <em class="hl">r</em>, <strong>regardless of input</strong></li>
+    		<li class="fragment">after applying <em class="hl">q</em>, it is impossible to apply <em class="hl">r</em>, <strong>regardless of input</strong></li>
 
-			<li class="fragment"><em class="hl">R</em> can also be a list of rules.</li>
+			<li class="fragment"><em class="hl">q</em> can also be a list of rules.</li>
     	</ul>
     </section>
 
     <section id="conflict-sol">
       <h2><em>...regardless of input</em></h2>
 
- 	<dt>No conflict:</dt> <!-- If <em class="hl">R</em> and <em class="hl">r</em> are <strong>not</strong> in conflict, 
+ 	<p class="fragment"><strong>No conflict:</strong> <!-- If <em class="hl">R</em> and <em class="hl">r</em> are <strong>not</strong> in conflict, 
  		 -->
- 		 <dd>There is a sequence where <em class="hl">r</em> can remove something, after <em class="hl">R</em>.</dd>
+ 		 There is a sequence where <em class="hl">r</em> can remove something, after <em class="hl">q</em>.</p>
+ 		<!-- </div> -->
 
 
+    <div class="fragment">
+<pre class="nobord">
+q = REMOVE verb IF ( 1 noun) ;
+r = REMOVE verb IF (-1 noun) ;
 
- 	<dt>Conflict:</dt> <dd>No such sequence can be constructed.</dd>
+    "&lt;w1&gt;"             "&lt;w2&gt;"              "&lt;w3&gt;"
+       "w1" det def        "w2" noun sg        "w3" verb sg
+       "w1" verb pl                            "w3" noun pl
+</pre>
+</div>
+
+ 	<p class="fragment"><strong>Conflict:</strong> No such sequence can be constructed.</p>
 
     <p class="fragment">Can we <em>generate</em> sequences?</p>
-     <p class="fragment">With SAT!</p>
     </section>
 
   </section>
 
   <section id="generation">
-  	<h2>From disambiguation to generation</h2>
+  	<section>
+    	<h3>From disambiguation to generation</h3>
 
-  	<ul>
-  		<li class="fragment">Apply rules to a <strong class="hl">symbolic sentence</strong></li>
-  		<ul class="fragment shrink"><li class="fragment">Every cohort contains every reading</li>
-  			<li class="fragment">We get the readings from morphological lexicon
-  			</li></ul>
-  		<li class="fragment">Model <strong class="hl">state</strong> after each rule</li>
-  		<li class="fragment">SAT-problem becomes <q>&ldquo;Which readings were <em class="hl">originally</em> true&rdquo;</q> 
+
+  		<p>Apply rules to a <strong class="hl">symbolic sentence</strong>
+  	    </p>
+
+  	    <div class="fragment">
+<pre class="nobord">
+    "&lt;w1&gt;"             "&lt;w2&gt;"              "&lt;w3&gt;"
+       "w1" det def        "w2" det def        "w3" det def
+       "w1" noun sg        "w2" noun sg        "w3" noun sg
+       "w1" noun pl        "w2" noun pl        "w3" noun pl
+       "w1" verb sg        "w2" verb sg        "w3" verb sg
+       "w1" verb pl        "w2" verb pl        "w3" verb pl
+</pre>
+</div>
+<ul class="fragment"><li>Every cohort contains every reading</li>
+  	<li>We get the readings from morphological lexicon
+</li></ul>
+    </section>
+    <section>
+      	<h3>From disambiguation to generation</h3>  	    
+  		<p>Model <strong class="hl">state</strong> after each rule application</p>
+
+<div class="fragment"><pre class="nobord">REMOVE verb IF (-1 det) ;</pre></div>
+  		<pre class="nobord">
+    "&lt;w1&gt;"             "&lt;w2&gt;"              "&lt;w3&gt;"
+       "w1" det def        "w2" det def        "w3" det def
+       "w1" noun sg        "w2" noun sg        "w3" noun sg
+       "w1" noun pl        "w2" noun pl        "w3" noun pl
+       "w1" verb sg        <span class="fragment highlight-orange">"w2" verb sg        "w3" verb sg</span>
+       "w1" verb pl        <span class="fragment highlight-orange">"w2" verb pl        "w3" verb pl</span></pre>
+	    
+  		<p class="fragment">SAT-problem becomes <q>&ldquo;Which readings were <em class="hl">originally</em> true&rdquo;</q> </p>
+    </section>
 <!-- Our new encoding gives us
 	* state: we create new variables for each targeted reading after each rule
 
@@ -338,30 +487,46 @@ COL3: Disambiguated sentence
  --> 
   </section>
 
+  <section>
+    <section id="CG-ana-demo1">
+    	<h1>Demo 1: Conflicts</h1>
+    </section>
 
-  <section id="CG-ana-demo">
-  	<h1>Demo</h1>
+    <section id="CG-ana-demo2">
+     	<h1>Demo 2: Ambiguity classes</h1>
+    </section>
   </section>
 
-  <section>
-  	<h2>Other questions we can ask</h2>
-  	<p>Portuguese and Finnish examples from Chapter 4</p>
+  <section data-transition="fade">
+  	<section id="portuguese-inf" data-transition="fade">
+    	<h2>Aid for grammar writer</h2>
+     	<img src="portuguese-sel-inf.png" />
+    </section>
+  	<section id="finnish-rewrite" data-transition="fade">
+    	<h2>Aid for grammar writer</h2>
+     	<img src="finnish-rewrite.png" />
+    </section>
 
-  	<p>Aid for grammar writer</p>
   </section>
 
   <section>
   	<h2>Evaluation</h2>
-  	<p>Tried it with 3 grammars</p>
-  	<p>Finds conflicts, runs slow</p>
-
+  	<p class="fragment">Tried it with 3 grammars: Dutch, Spanish, Finnish</p>
+  	<p class="fragment">Finds conflicts in all</p>
+  	<p class="fragment">Running time: seconds to hours</p>
+ <!--  	
+  	<p>Runs slow (but not because of SAT)</p>
+ -->
   </section>
 
   <section>
-  	<h2>Conclusions / Future work</h2>
-    Symbolic sentence -> actual generation of text?
+  	<h2>Conclusions</h2>
+  	<p class="fragment">"Why don't we just use corpus"
 
-    Expressivity?
+  	vs. "Why don't you just test your program"</p>
+  	<p class="fragment">Language technology + Software verification = &lt;3</p>
+  	<aside class="notes">we know there's no conflicts *fundamentally* vs. not just in this corpus
+  	</aside>
   </section>
 
   <section>
