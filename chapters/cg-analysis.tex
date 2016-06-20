@@ -481,10 +481,10 @@ This hints that there is something special about the verb \emph{zijn}, compared 
 
 \begin{itemize}
  \item[] 
-\begin{verbatim}zijn:zijn<det~pos~mfn~pl>
-zijn:zijn<det~pos~mfn~sg>
-zijn:zijn<vbser~inf>
-zijn:zijn<vbser~pres~pl>
+\begin{verbatim}zijn:zijn<det><pos><mfn><pl>
+zijn:zijn<det><pos><mfn><sg>
+zijn:zijn<vbser><inf>
+zijn:zijn<vbser><pres><pl>
 \end{verbatim}
 \end{itemize}
 
@@ -766,7 +766,7 @@ As an example of internal conflict, there are two rules that use \texttt{SET Cog
 One of the conflicts that was only caught by the ambiguity class constraints had the condition \texttt{IF (1 Comma) (..) (1 CnjCoo)}. The additional constraints correctly prevent commas from being ambiguous with anything else.
 
 As for the 25 interaction conflicts, there were only 9 distinct rules that rendered 25 other rules ineffective.
-In fact, we can reduce these 9 rules further into 3 different groups: 4 + 4 + 1, where the groups of 4 rules are variants of otherwise identical rule, each with different gender and number.
+In fact, we can reduce these 9 rules further into 3 different groups: 4~+~4~+~1, where the groups of 4 rules are variants of otherwise identical rule, each with different gender and number.
 An example of such conflict is below (gender and number omitted for readability):
 
 \begin{itemize}
@@ -931,7 +931,7 @@ Some examples of true positives are shown in the following.
 
 Both of these are internal conflicts, which may not be trivial to see.
 The first rule requires the target to be genitive and unambiguously nominative; however, these two tags cannot combine in the same reading.
-As for the second rule, the definition of \texttt{PP} includes \texttt{adv} among others---with the sets expanded, this rule becomes \texttt{SELECT adv IF (NOT 0 pp|adv|adp|po|pr) (...)}.
+As for the second rule, the definition of \texttt{PP} includes \texttt{adv} among others---with the sets unfolded, this rule becomes \texttt{SELECT~adv~IF~(NOT~0~pp|adv|adp|po|pr)~(..)}.
 
 The following two examples are interaction conflicts:
 
